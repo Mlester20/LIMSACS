@@ -1,0 +1,324 @@
+@charset "UTF-8";
+
+/* ─── Body / Background ─────────────────────────────────────── */
+body {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)),
+                    url('../../../img/backgrounds/bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+  margin: 0;
+}
+
+/* ─── Wrapper ────────────────────────────────────────────────── */
+.authentication-wrapper {
+  display: flex;
+  flex-basis: 100%;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.authentication-wrapper .authentication-inner {
+  width: 100%;
+}
+
+.authentication-wrapper.authentication-basic {
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.authentication-wrapper.authentication-basic .authentication-inner {
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Card ──────────────────────────────────────────────────── */
+.authentication-wrapper.authentication-basic .authentication-inner .card {
+  background: rgba(15, 25, 15, 0.35);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 24px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.30),
+    0 0 1px rgba(108, 163, 108, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.authentication-wrapper.authentication-basic .authentication-inner .card .card-body {
+  padding: 2rem 2rem 1.75rem;
+}
+
+/* ─── Brand / Logo ──────────────────────────────────────────── */
+.app-brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.brand-icon-wrap {
+  width: 75px;
+  height: 75px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: none;
+}
+
+.brand-icon-wrap:hover {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  transform: translateY(-3px);
+}
+
+.brand-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(108, 163, 108, 0.20));
+  transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+.brand-icon-wrap:hover .brand-logo {
+  filter: drop-shadow(0 6px 20px rgba(108, 163, 108, 0.35));
+  transform: scale(1.05);
+}
+
+.brand-icon-wrap i {
+  font-size: 40px;
+  color: #6ca36c;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.brand-icon-wrap:hover i {
+  text-shadow: 0 6px 20px rgba(108, 163, 108, 0.30);
+  transform: scale(1.08);
+}
+
+/* ─── Typography ────────────────────────────────────────────── */
+.auth-title {
+  text-align: center;
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px;
+  letter-spacing: 0.3px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.auth-school {
+  text-align: center;
+  font-size: 0.68rem;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: white;
+  margin: 0 0 1.2rem;
+}
+
+.auth-divider {
+  border: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  margin: 0 0 1.2rem;
+}
+
+.auth-desc {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.70);
+  line-height: 1.5;
+  margin: 0 0 1.25rem;
+}
+
+/* ─── Labels ────────────────────────────────────────────────── */
+.auth-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 6px;
+}
+
+/* ─── Input Icons ───────────────────────────────────────────── */
+.input-icon-wrap {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 18px;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  z-index: 5;
+  transition: color 0.2s ease;
+}
+
+.input-icon-right {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  z-index: 5;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.input-icon-right:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ─── Inputs ────────────────────────────────────────────────── */
+.auth-input.form-control {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
+  border-radius: 10px !important;
+  color: #ffffff !important;
+  font-size: 0.875rem;
+  padding: 11px 40px 11px 38px !important;
+  transition: all 0.2s ease;
+}
+
+.auth-input.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.auth-input.form-control:focus {
+  border-color: rgba(108, 163, 108, 0.80) !important;
+  box-shadow: 0 0 0 3px rgba(108, 163, 108, 0.18) !important;
+  background: rgba(255, 255, 255, 0.10) !important;
+  outline: none;
+}
+
+/* ─── Autofill ──────────────────────────────────────────────── */
+.auth-input.form-control:-webkit-autofill,
+.auth-input.form-control:-webkit-autofill:hover,
+.auth-input.form-control:-webkit-autofill:focus,
+.auth-input.form-control:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 60px rgba(20, 38, 20, 0.85) inset !important;
+  box-shadow: 0 0 0 60px rgba(20, 38, 20, 0.85) inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* ─── Checkbox ──────────────────────────────────────────────── */
+.auth-check .form-check-input {
+  background-color: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.30);
+  transition: all 0.2s ease;
+}
+
+.auth-check .form-check-input:checked {
+  background-color: #6ca36c;
+  border-color: #5a9e5a;
+  box-shadow: 0 0 0 3px rgba(108, 163, 108, 0.20);
+}
+
+.auth-check .form-check-label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ─── Button ────────────────────────────────────────────────── */
+.auth-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+  border: none !important;
+  border-radius: 10px !important;
+  color: #ffffff !important;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  padding: 12px !important;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(108, 163, 108, 0.25);
+}
+
+.auth-btn:hover {
+  background: linear-gradient(135deg, #5a9e5a 0%, #4e8f4e 100%) !important;
+  box-shadow: 0 6px 24px rgba(108, 163, 108, 0.35);
+  transform: translateY(-2px);
+  text-decoration: underline;
+}
+
+.auth-btn:active {
+  transform: translateY(0);
+  background: linear-gradient(135deg, #437843 0%, #3a6d3a 100%) !important;
+  box-shadow: 0 2px 8px rgba(108, 163, 108, 0.20);
+}
+
+/* ─── Footer ────────────────────────────────────────────────── */
+.auth-footer-text {
+  text-align: center;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0;
+}
+
+/* ─── OTP Input ─────────────────────────────────────────────── */
+.authentication-wrapper .auth-input-wrapper .auth-input {
+  max-width: 50px;
+  padding-left: 0.4rem;
+  padding-right: 0.4rem;
+  font-size: 150%;
+}
+
+/* ─── Responsive ────────────────────────────────────────────── */
+@media (max-width: 575.98px) {
+  .authentication-wrapper .auth-input-wrapper .auth-input {
+    font-size: 1.125rem;
+  }
+
+  .brand-icon-wrap {
+    width: 80px;
+    height: 80px;
+  }
+
+  .brand-logo {
+    width: 60px;
+    height: 60px;
+  }
+
+  .brand-icon-wrap i {
+    font-size: 40px;
+  }
+
+  .authentication-wrapper.authentication-basic .authentication-inner {
+    max-width: 100%;
+    padding: 1rem;
+  }
+
+  .authentication-wrapper.authentication-basic .authentication-inner .card {
+    border-radius: 20px;
+  }
+
+  .authentication-wrapper.authentication-basic .authentication-inner .card .card-body {
+    padding: 2rem 1.75rem 1.75rem;
+  }
+
+  .auth-title {
+    font-size: 1.5rem;
+  }
+}
