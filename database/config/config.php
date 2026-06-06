@@ -1,6 +1,6 @@
 <?php
 
-    //defined the base url
+    //defined the base url for production later on
     define('BASE_URL', "/LIMSACS");
     
     class Database{

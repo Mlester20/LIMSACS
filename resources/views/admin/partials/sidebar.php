@@ -1,3 +1,7 @@
+<?php
+$currentPage = basename($_SERVER['PHP_SELF']);
+?>
+
 <!-- Layout wrapper -->
 <div class="layout-wrapper layout-content-navbar">
   <div class="layout-container">
@@ -19,7 +23,7 @@
       <div class="menu-inner-shadow"></div>
 
       <ul class="menu-inner py-1">
-        <li class="menu-item">
+        <li class="menu-item <?php echo ($currentPage === 'dashboard.php') ? 'active' : ''; ?>">
           <a href="dashboard.php" class="menu-link">
             <i class="menu-icon tf-icons bx bx-home-circle"></i>
             <div data-i18n="Analytics">Dashboard</div>
@@ -28,7 +32,7 @@
         <li class="menu-header small text-uppercase">
           <span class="menu-header-text">Pages</span>
         </li>
-        <li class="menu-item">
+        <li class="menu-item <?php echo ($currentPage === 'student-records.php') ? 'active' : ''; ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
             <i class="menu-icon tf-icons bx bx-user"></i>
             <div data-i18n="Account Settings">Enroll Students</div>
@@ -37,25 +41,22 @@
             <li class="menu-item"><a href="student-records.php" class="menu-link"><div data-i18n="Account">Students Information</div></a></li>
           </ul>
         </li>
-        <li class="menu-item">
+        <li class="menu-item <?php echo ($currentPage === 'school-year.php') ? 'active' : ''; ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-lock-open-alt"></i>
-            <div data-i18n="Authentications">Authentications</div>
+            <i class="menu-icon tf-icons bx bx-book-open"></i>
+            <div data-i18n="School Year">School Year</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="auth-login-basic.html" class="menu-link" target="_blank"><div data-i18n="Basic">Login</div></a></li>
-            <li class="menu-item"><a href="auth-register-basic.html" class="menu-link" target="_blank"><div data-i18n="Basic">Register</div></a></li>
-            <li class="menu-item"><a href="auth-forgot-password-basic.html" class="menu-link" target="_blank"><div data-i18n="Basic">Forgot Password</div></a></li>
+            <li class="menu-item"><a href="school-year.php" class="menu-link"><div data-i18n="Basic">School Year</div></a></li>
           </ul>
         </li>
-        <li class="menu-item">
+        <li class="menu-item <?php echo ($currentPage === 'users.php') ? 'active' : ''; ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-cube-alt"></i>
-            <div data-i18n="Misc">Misc</div>
+            <i class="menu-icon tf-icons bx bx-user"></i>
+            <div data-i18n="Misc">Users</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="pages-misc-error.html" class="menu-link"><div data-i18n="Error">Error</div></a></li>
-            <li class="menu-item"><a href="pages-misc-under-maintenance.html" class="menu-link"><div data-i18n="Under Maintenance">Under Maintenance</div></a></li>
+            <li class="menu-item"><a href="users.php" class="menu-link"><div data-i18n="Users">Users</div></a></li>
           </ul>
         </li>
       </ul>

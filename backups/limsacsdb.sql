@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 05, 2026 at 05:43 PM
+-- Generation Time: Jun 06, 2026 at 06:23 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,49 @@ SET time_zone = "+00:00";
 --
 -- Database: `limsacsdb`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `audit_logs`
+--
+
+CREATE TABLE `audit_logs` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `role` varchar(50) NOT NULL,
+  `action` varchar(50) NOT NULL,
+  `module` varchar(100) NOT NULL,
+  `reference_id` int(10) UNSIGNED DEFAULT NULL,
+  `reference_table` varchar(100) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `status` enum('success','failed') NOT NULL DEFAULT 'success',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `school_year`
+--
+
+CREATE TABLE `school_year` (
+  `id` int(11) NOT NULL,
+  `school_year` varchar(20) NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date NOT NULL,
+  `status` enum('active','inactive','archived') DEFAULT 'inactive',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `school_year`
+--
+
+INSERT INTO `school_year` (`id`, `school_year`, `start_date`, `end_date`, `status`, `created_at`, `updated_at`) VALUES
+(3, '2026-2027', '2026-06-08', '2027-04-05', 'active', '2026-06-06 15:01:38', '2026-06-06 15:48:43');
 
 -- --------------------------------------------------------
 
@@ -89,6 +132,12 @@ INSERT INTO `users` (`id`, `full_name`, `email`, `password`, `role`, `profile_pi
 --
 
 --
+-- Indexes for table `school_year`
+--
+ALTER TABLE `school_year`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `students`
 --
 ALTER TABLE `students`
@@ -103,6 +152,12 @@ ALTER TABLE `users`
 --
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `school_year`
+--
+ALTER TABLE `school_year`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `students`
