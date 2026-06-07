@@ -53,6 +53,42 @@ function populateStudentModal(student) {
     }
 }
 
+/**
+ * Edit a student - populates the edit modal with student data
+ * @param {Object} student - Student data object
+ */
+function editStudent(student) {
+    // Populate hidden student ID
+    document.getElementById('editStudentId').value = student.id || '';
+
+    // Student Identity
+    document.getElementById('editLrn').value = student.lrn || '';
+    document.getElementById('editEnrollmentStatus').value = student.enrollment_status || '';
+
+    // Personal Information
+    document.getElementById('editFirstName').value = student.first_name || '';
+    document.getElementById('editMiddleName').value = student.middle_name || '';
+    document.getElementById('editLastName').value = student.last_name || '';
+    document.getElementById('editSuffix').value = student.suffix || '';
+
+    // Academic & Gender
+    document.getElementById('editGradeLevel').value = student.grade_level || '';
+    document.getElementById('editGender').value = student.gender || '';
+
+    // Birth Information
+    document.getElementById('editBirthDate').value = student.birth_date || '';
+    document.getElementById('editAge').value = student.age || '';
+    document.getElementById('editPlaceOfBirth').value = student.place_of_birth || '';
+
+    // Demographics
+    document.getElementById('editNationality').value = student.nationality || '';
+    document.getElementById('editReligion').value = student.religion || '';
+
+    // Contact & Address
+    document.getElementById('editContactNumber').value = student.contact_number || '';
+    document.getElementById('editAddress').value = student.address || '';
+}
+
 // Add hover effect to table rows
 document.querySelectorAll('.table tbody tr').forEach(row => {
     row.addEventListener('mouseover', function () {

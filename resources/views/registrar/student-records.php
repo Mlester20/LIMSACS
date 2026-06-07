@@ -211,7 +211,13 @@ AuthRole::allowOnly(['registrar']);
                                 </td>
                                 <td>
 
-                                    <button class="btn btn-sm btn-primary">Edit</button>
+                                    <button 
+                                        class="btn btn-sm btn-primary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editStudentModal"
+                                        onclick="editStudent(<?php echo htmlspecialchars(json_encode($student)); ?>)">
+                                        Edit
+                                    </button>
                                     <!-- delete action -->
                                     <form method="POST" action="../../../app/controllers/registrar/StudentsController.php" style="display: inline;">
                                     <input type="hidden" name="student_id" value="<?php echo $student['id']; ?>">
@@ -316,10 +322,137 @@ AuthRole::allowOnly(['registrar']);
         </div>
     </div>
 
-    <!-- update modal -->
-    
+    <!-- Update Student Modal -->
+    <div class="modal fade" id="editStudentModal" tabindex="-1" aria-labelledby="editStudentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <form id="editStudentForm" method="POST" action="../../../app/controllers/registrar/StudentsController.php">
+                <div class="modal-content">
+                    <div class="modal-header py-2">
+                        <h6 class="modal-title mb-0" id="editStudentModalLabel">
+                            <i class="icon-base iconify" data-icon="tabler:user-edit"></i> Edit Student
+                        </h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
 
-    <!-- Student Details Modal (Compact) -->
+                    <div class="modal-body p-3">
+
+                        <!-- Hidden Student ID -->
+                        <input type="hidden" id="editStudentId" name="student_id" value="">
+
+                        <p class="text-muted small mb-2"><em>Note: Leave blank if N/A</em></p>
+
+                        <p class="text-muted fw-semibold mb-2" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:.05em;">Student Identity</p>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label form-label-sm mb-1">LRN (Learner Reference Number)</label>
+                                <input type="text" class="form-control form-control-sm" id="editLrn" name="lrn" maxlength="20">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label form-label-sm mb-1">Enrollment Status <span class="text-danger">*</span></label>
+                                <select class="form-select form-select-sm" id="editEnrollmentStatus" name="enrollment_status" required>
+                                    <option value="" disabled>Select Status</option>
+                                    <option value="Enrolled">Enrolled</option>
+                                    <option value="Transferee">Transferee</option>
+                                    <option value="Transferred">Transferred</option>
+                                    <option value="Dropped">Dropped</option>
+                                    <option value="Graduated">Graduated</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <p class="text-muted fw-semibold mb-2" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:.05em;">Personal Information</p>
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-3">
+                                <label class="form-label form-label-sm mb-1">First Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm" id="editFirstName" name="first_name" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label form-label-sm mb-1">Middle Name</label>
+                                <input type="text" class="form-control form-control-sm" id="editMiddleName" name="middle_name">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label form-label-sm mb-1">Last Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-sm" id="editLastName" name="last_name" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label form-label-sm mb-1">Suffix</label>
+                                <input type="text" class="form-control form-control-sm" id="editSuffix" name="suffix" placeholder="Jr., Sr., III">
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-6">
+                                <label class="form-label form-label-sm mb-1">Grade Level <span class="text-danger">*</span></label>
+                                <select class="form-select form-select-sm" id="editGradeLevel" name="grade_level" required>
+                                    <option value="" disabled>Select Grade Level</option>
+                                    <?php foreach(['Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6'] as $g): ?>
+                                        <option value="<?= $g ?>"><?= $g ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label form-label-sm mb-1">Gender <span class="text-danger">*</span></label>
+                                <select class="form-select form-select-sm" id="editGender" name="gender" required>
+                                    <option value="" disabled>Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-3">
+                                <label class="form-label form-label-sm mb-1">Birth Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control form-control-sm" id="editBirthDate" name="birth_date" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label form-label-sm mb-1">Age</label>
+                                <input type="number" class="form-control form-control-sm" id="editAge" name="age" min="1" max="30">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label form-label-sm mb-1">Place of Birth</label>
+                                <input type="text" class="form-control form-control-sm" id="editPlaceOfBirth" name="place_of_birth" maxlength="150">
+                            </div>
+                        </div>
+
+                        <p class="text-muted fw-semibold mb-2" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:.05em;">Demographics</p>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label form-label-sm mb-1">Nationality</label>
+                                <input type="text" class="form-control form-control-sm" id="editNationality" name="nationality" maxlength="100">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label form-label-sm mb-1">Religion</label>
+                                <input type="text" class="form-control form-control-sm" id="editReligion" name="religion" maxlength="100">
+                            </div>
+                        </div>
+
+                        <p class="text-muted fw-semibold mb-2" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:.05em;">Contact & Address</p>
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-6">
+                                <label class="form-label form-label-sm mb-1">Contact Number</label>
+                                <input type="text" class="form-control form-control-sm" id="editContactNumber" name="contact_number" maxlength="20">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label form-label-sm mb-1">Address</label>
+                                <input type="text" class="form-control form-control-sm" id="editAddress" name="address">
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer py-2">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm" id="editStudentBtn" name="edit_student">
+                            <i class="icon-base iconify" data-icon="tabler:device-floppy"></i> Update Student
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
     <div class="modal fade" id="studentDetailsModal" tabindex="-1" aria-labelledby="studentDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
