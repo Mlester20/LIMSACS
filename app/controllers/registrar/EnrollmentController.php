@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../models/registrar/StudentsModel.php';
 require_once __DIR__ . '/../../models/registrar/AcademicHistoryModel.php';
 require_once __DIR__ . '/../../models/registrar/SectionsModel.php';
+require_once __DIR__ . '/../../services/StudentsService.php';
 
 class EnrollmentController extends Controller {
 
@@ -29,23 +30,11 @@ class EnrollmentController extends Controller {
      */
     public function searchStudent($searchTerm) {
         try {
-            if (empty($searchTerm)) {
-                return [];
-            }
-
-            $query = "SELECT id, lrn, first_name, middle_name, last_name, 
-                            gender, age, address, birth_date
-                     FROM students 
-                     WHERE lrn LIKE ? OR CONCAT(first_name, ' ', last_name) LIKE ?
-                     LIMIT 10";
+            $studentsService = new StudentsService($this->model->con);
+            $results = $studentsService->searchStudents($searchTerm);
             
-            $stmt = $this->model->con->prepare($query);
-            $searchTerm = "%{$searchTerm}%";
-            $stmt->bind_param('ss', $searchTerm, $searchTerm);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            
-            return $result->fetch_all(MYSQLI_ASSOC);
+            // Limit to 10 results
+            return array_slice($results, 0, 10);
         } catch (Exception $e) {
             error_log("Search student error: " . $e->getMessage());
             return [];
@@ -326,6 +315,56 @@ try {
             }
             header("Location: ../../../resources/views/registrar/enrollment.php");
             exit();
+        }
+
+        // Get all enrolled students
+        if (isset($_POST['get_all_enrolled_students'])) {
+            $query = "SELECT 
+                        ah.id, 
+                        ah.student_id, 
+                        ah.enrollment_status,
+                        ah.grade_level, 
+                        ah.created_at,
+                        s.lrn,
+                        s.first_name,
+                        s.last_name,
+                        sec.section_name,
+                        sy.school_year
+                     FROM academic_history ah
+                     JOIN students s ON ah.student_id = s.id
+                     JOIN sections sec ON ah.section_id = sec.id
+                     JOIN school_year sy ON ah.school_year_id = sy.id
+                     WHERE ah.enrollment_status IN ('Enrolled', 'Transferred')
+                     ORDER BY sy.school_year DESC, s.first_name ASC
+                     LIMIT 100";
+            
+            try {
+                $stmt = $con->prepare($query);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $enrollments = $result->fetch_all(MYSQLI_ASSOC);
+                
+                header('Content-Type: application/json');
+                echo json_encode($enrollments);
+                exit();
+            } catch (Exception $e) {
+                error_log("Get enrolled students error: " . $e->getMessage());
+                header('Content-Type: application/json');
+                echo json_encode([]);
+                exit();
+            }
+        }
+
+        // Get enrollment history for a student
+        if (isset($_POST['get_enrollment_history'])) {
+            $student_id = $_POST['student_id'] ?? null;
+            
+            if ($student_id) {
+                $history = $controller->getEnrollmentHistory($student_id);
+                header('Content-Type: application/json');
+                echo json_encode($history);
+                exit();
+            }
         }
     }
 } catch (Exception $e) {

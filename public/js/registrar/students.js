@@ -63,7 +63,6 @@ function editStudent(student) {
 
     // Student Identity
     document.getElementById('editLrn').value = student.lrn || '';
-    document.getElementById('editEnrollmentStatus').value = student.enrollment_status || '';
 
     // Personal Information
     document.getElementById('editFirstName').value = student.first_name || '';
@@ -71,8 +70,7 @@ function editStudent(student) {
     document.getElementById('editLastName').value = student.last_name || '';
     document.getElementById('editSuffix').value = student.suffix || '';
 
-    // Academic & Gender
-    document.getElementById('editGradeLevel').value = student.grade_level || '';
+    // Gender
     document.getElementById('editGender').value = student.gender || '';
 
     // Birth Information
