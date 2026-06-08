@@ -98,12 +98,12 @@ require_once __DIR__ . '/../Model.php';
                 ";
                 $stmt = $this->con->prepare($query);
                 $stmt->bind_param(
-                    'ssssssssisssssi',
+                    'ssssssssissssssi',
                     $data['lrn'],
                     $data['first_name'],
                     $data['middle_name'],
                     $data['last_name'],
-                    $data['suffix'],
+                    $data['suffix'],    
                     $data['grade_level'],
                     $data['gender'],
                     $data['birth_date'],

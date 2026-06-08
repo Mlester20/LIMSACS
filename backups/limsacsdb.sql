@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 05, 2026 at 05:43 PM
+-- Generation Time: Jun 07, 2026 at 05:21 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,78 @@ SET time_zone = "+00:00";
 --
 -- Database: `limsacsdb`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `audit_logs`
+--
+
+CREATE TABLE `audit_logs` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `role` varchar(50) NOT NULL,
+  `action` varchar(50) NOT NULL,
+  `module` varchar(100) NOT NULL,
+  `reference_id` int(10) UNSIGNED DEFAULT NULL,
+  `reference_table` varchar(100) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `status` enum('success','failed') NOT NULL DEFAULT 'success',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `audit_logs`
+--
+
+INSERT INTO `audit_logs` (`id`, `user_id`, `role`, `action`, `module`, `reference_id`, `reference_table`, `description`, `ip_address`, `status`, `created_at`) VALUES
+(1, 1, 'admin', 'CREATE USER', 'USER', NULL, 'users', 'admin created a new user record', '::1', 'success', '2026-06-07 13:52:14'),
+(2, 1, 'admin', 'DELETED USER', 'USER', NULL, 'users', 'admin Deleted user record', '::1', 'success', '2026-06-07 14:05:11'),
+(3, 1, 'admin', 'CREATE USER', 'USER', NULL, 'users', 'admin created a new user record', '::1', 'success', '2026-06-07 14:07:45'),
+(4, 1, 'admin', 'DELETED USER', 'USER', NULL, 'users', 'admin Deleted user record', '::1', 'success', '2026-06-07 14:08:40'),
+(5, 1, 'admin', 'CREATE USER', 'USER', NULL, 'users', 'admin created a new user record', '::1', 'success', '2026-06-07 14:11:52'),
+(6, 1, 'admin', 'UPDATE USER', 'USER', NULL, 'users', 'admin updated user record', '::1', 'success', '2026-06-07 14:27:55'),
+(7, 1, 'admin', 'DELETED USER', 'USER', NULL, 'users', 'admin Deleted user record', '::1', 'success', '2026-06-07 14:28:00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `school_year`
+--
+
+CREATE TABLE `school_year` (
+  `id` int(11) NOT NULL,
+  `school_year` varchar(20) NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date NOT NULL,
+  `status` enum('active','inactive','archived') DEFAULT 'inactive',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `school_year`
+--
+
+INSERT INTO `school_year` (`id`, `school_year`, `start_date`, `end_date`, `status`, `created_at`, `updated_at`) VALUES
+(3, '2026-2027', '2026-06-08', '2027-04-05', 'active', '2026-06-06 15:01:38', '2026-06-06 15:48:43');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sections`
+--
+
+CREATE TABLE `sections` (
+  `id` int(11) NOT NULL,
+  `section_name` varchar(100) NOT NULL,
+  `grade_level` varchar(50) DEFAULT NULL,
+  `adviser_id` int(11) DEFAULT NULL,
+  `school_year_id` int(11) DEFAULT NULL,
+  `max_students` int(11) NOT NULL DEFAULT 35,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -55,9 +127,21 @@ INSERT INTO `students` (`id`, `lrn`, `first_name`, `middle_name`, `last_name`, `
 (3, '20242111365', 'Mark Lester ', 'Suguitan', 'Raguindin', '', 'Grade 1', 'Male', '2002-12-20', 23, 'Ilagan City, Isabela', 'Filipino', 'Roman Catholic', 'Rizal, Roxas, Isabela', '09349991034', 'Enrolled', '2026-06-05 14:05:55'),
 (4, '123456789001', 'Juan', 'Santos', 'Dela Cruz', NULL, 'Grade 7', 'Male', '2012-05-15', 14, 'Manila City', 'Filipino', 'Roman Catholic', 'Brgy. San Isidro, Luna, Isabela', '09171234567', 'Enrolled', '2026-06-05 15:03:57'),
 (5, '123456789002', 'Maria', 'Reyes', 'Garcia', NULL, 'Grade 8', 'Female', '2011-09-22', 15, 'Tuguegarao City', 'Filipino', 'Roman Catholic', 'Brgy. Centro, Luna, Isabela', '09181234567', 'Enrolled', '2026-06-05 15:03:57'),
-(6, '123456789003', 'Mark', 'Villanueva', 'Ramos', 'Jr.', 'Grade 9', 'Male', '2010-02-10', 16, 'Santiago City', 'Filipino', 'Iglesia ni Cristo', 'Brgy. Lallayug, Luna, Isabela', '09191234567', '', '2026-06-05 15:03:57'),
+(6, '123456789003', 'Mark', 'Villanueva', 'Ramos', 'Jr.', 'Grade 6', 'Male', '2010-02-10', 16, 'Santiago City', 'Filipino', 'Iglesia ni Cristo', 'Brgy. Lallayug, Luna, Isabela', '09191234567', 'Graduated', '2026-06-05 15:03:57'),
 (7, '123456789004', 'Angela', 'Lopez', 'Fernandez', NULL, 'Grade 10', 'Female', '2009-11-30', 17, 'Ilagan City', 'Filipino', 'Roman Catholic', 'Brgy. Victoria, Luna, Isabela', '09201234567', 'Transferred', '2026-06-05 15:03:57'),
 (8, '123456789005', 'Joshua', 'Mendoza', 'Aquino', NULL, 'Grade 12', 'Male', '2007-08-18', 19, 'Cauayan City', 'Filipino', 'Born Again Christian', 'Brgy. Macatel, Luna, Isabela', '09211234567', 'Graduated', '2026-06-05 15:03:57');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `student_sections`
+--
+
+CREATE TABLE `student_sections` (
+  `id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `section_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -89,10 +173,37 @@ INSERT INTO `users` (`id`, `full_name`, `email`, `password`, `role`, `profile_pi
 --
 
 --
+-- Indexes for table `audit_logs`
+--
+ALTER TABLE `audit_logs`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `school_year`
+--
+ALTER TABLE `school_year`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `sections`
+--
+ALTER TABLE `sections`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `sections_ibfk_1` (`adviser_id`),
+  ADD KEY `sections_ibfk_2` (`school_year_id`);
+
+--
 -- Indexes for table `students`
 --
 ALTER TABLE `students`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `student_sections`
+--
+ALTER TABLE `student_sections`
+  ADD KEY `student_sections_ibfk_1` (`student_id`),
+  ADD KEY `student_sections_ibfk_2` (`section_id`);
 
 --
 -- Indexes for table `users`
@@ -105,6 +216,24 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `audit_logs`
+--
+ALTER TABLE `audit_logs`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `school_year`
+--
+ALTER TABLE `school_year`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `sections`
+--
+ALTER TABLE `sections`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
@@ -114,7 +243,25 @@ ALTER TABLE `students`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `sections`
+--
+ALTER TABLE `sections`
+  ADD CONSTRAINT `sections_ibfk_1` FOREIGN KEY (`adviser_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `sections_ibfk_2` FOREIGN KEY (`school_year_id`) REFERENCES `school_year` (`id`);
+
+--
+-- Constraints for table `student_sections`
+--
+ALTER TABLE `student_sections`
+  ADD CONSTRAINT `student_sections_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`),
+  ADD CONSTRAINT `student_sections_ibfk_2` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

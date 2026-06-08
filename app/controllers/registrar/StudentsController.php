@@ -67,8 +67,21 @@ require_once __DIR__ . '/../../services/StudentsService.php';
         }
 
 
-        public function update($id, $data){
-
+        public function update($id, $data, $page = 1){
+            try{
+                if($this->model->update($id, $data)){
+                    setFlash("success", "Student record updated successfully.");
+                    header("Location: ../../../resources/views/registrar/student-records.php?page=" . intval($page));
+                    exit();
+                }else{
+                    setFlash("error", "Failed to update student record. Please try again.");
+                    header("Location: ../../../resources/views/registrar/student-records.php?page=" . intval($page));
+                    exit();
+                }
+            }catch(Exception $e){
+                error_log($e->getMessage());
+                return false;
+            }
         }
 
         public function delete($id, $page = 1){
@@ -127,9 +140,34 @@ require_once __DIR__ . '/../../services/StudentsService.php';
                 );
             }
 
+            if(isset($_POST['edit_student'])){
+                $studentId = $_POST['student_id'];
+                $controller->update(
+                    $studentId,
+                    [
+                        "lrn" => $_POST['lrn'],
+                        "first_name" => $_POST['first_name'],
+                        "middle_name" => $_POST['middle_name'],
+                        "last_name" => $_POST['last_name'],
+                        "suffix" => $_POST['suffix'],
+                        "grade_level" => $_POST['grade_level'],
+                        "gender" => $_POST['gender'],
+                        "birth_date" => $_POST['birth_date'],
+                        "age" => $_POST['age'],
+                        "place_of_birth" => $_POST['place_of_birth'],
+                        "nationality" => $_POST['nationality'],
+                        "religion" => $_POST['religion'],
+                        "address" => $_POST['address'],
+                        "contact_number" => $_POST['contact_number'],
+                        "enrollment_status" => $_POST['enrollment_status']
+                    ],
+                    $currentPage
+                );
+            }
+
             if(isset($_POST['delete_student'])){
                 $studentId = $_POST['student_id'];
-                $controller->delete($studentId);
+                $controller->delete($studentId, $currentPage);
 
             }
         }
