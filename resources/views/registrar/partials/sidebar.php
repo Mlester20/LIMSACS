@@ -34,18 +34,17 @@
             <div data-i18n="Account Settings">Enroll Students</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="student-records.php" class="menu-link"><div data-i18n="Account">Students Information</div></a></li>
+            <li class="menu-item"><a href="enrollment.php" class="menu-link"><div data-i18n="Account">Enrollment</div></a></li>
+            <li class="menu-item"><a href="student-records.php" class="menu-link"><div data-i18n="Account">Student Information</div></a></li>
           </ul>
         </li>
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-lock-open-alt"></i>
-            <div data-i18n="Authentications">Authentications</div>
+            <i class="menu-icon tf-icons bx bx-book"></i>
+            <div data-i18n="Sections">Sections</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="auth-login-basic.html" class="menu-link" target="_blank"><div data-i18n="Basic">Login</div></a></li>
-            <li class="menu-item"><a href="auth-register-basic.html" class="menu-link" target="_blank"><div data-i18n="Basic">Register</div></a></li>
-            <li class="menu-item"><a href="auth-forgot-password-basic.html" class="menu-link" target="_blank"><div data-i18n="Basic">Forgot Password</div></a></li>
+            <li class="menu-item"><a href="sections.php" class="menu-link"><div data-i18n="Basic">Sections</div></a></li>
           </ul>
         </li>
         <li class="menu-item">

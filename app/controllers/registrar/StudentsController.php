@@ -126,7 +126,6 @@ require_once __DIR__ . '/../../services/StudentsService.php';
                         "middle_name" => $_POST['middle_name'],
                         "last_name" => $_POST['last_name'],
                         "suffix" => $_POST['suffix'],
-                        "grade_level" => $_POST['grade_level'],
                         "gender" => $_POST['gender'],
                         "birth_date" => $_POST['birth_date'],
                         "age" => $_POST['age'],
@@ -134,8 +133,7 @@ require_once __DIR__ . '/../../services/StudentsService.php';
                         "nationality" => $_POST['nationality'],
                         "religion" => $_POST['religion'],
                         "address" => $_POST['address'],
-                        "contact_number" => $_POST['contact_number'],
-                        "enrollment_status" => $_POST['enrollment_status']
+                        "contact_number" => $_POST['contact_number']
                     ]
                 );
             }
@@ -150,7 +148,6 @@ require_once __DIR__ . '/../../services/StudentsService.php';
                         "middle_name" => $_POST['middle_name'],
                         "last_name" => $_POST['last_name'],
                         "suffix" => $_POST['suffix'],
-                        "grade_level" => $_POST['grade_level'],
                         "gender" => $_POST['gender'],
                         "birth_date" => $_POST['birth_date'],
                         "age" => $_POST['age'],
@@ -158,8 +155,7 @@ require_once __DIR__ . '/../../services/StudentsService.php';
                         "nationality" => $_POST['nationality'],
                         "religion" => $_POST['religion'],
                         "address" => $_POST['address'],
-                        "contact_number" => $_POST['contact_number'],
-                        "enrollment_status" => $_POST['enrollment_status']
+                        "contact_number" => $_POST['contact_number']
                     ],
                     $currentPage
                 );

@@ -4,9 +4,12 @@ session_start();
 require_once __DIR__ . '/../models/AuthModel.php';
 require_once __DIR__ . '/../../database/config/config.php';
 require_once __DIR__ . '/../helpers/message.php';
+require_once __DIR__ . '/../helpers/auditLogs.php';
 
     class AuthController extends Model{
-        private $authModel;
+        private AuthModel $authModel;
+        private AuditLogs $logger;
+
 
         public function __construct(){
             global $con; // Access the global connection variable
@@ -14,6 +17,7 @@ require_once __DIR__ . '/../helpers/message.php';
             parent::__construct($con);
 
             $this->authModel = new AuthModel($this->con);
+            $this->logger = new AuditLogs($this->con);
         }
 
         public function handle(){
@@ -28,6 +32,16 @@ require_once __DIR__ . '/../helpers/message.php';
 
             $row = $this->authModel->getUserByEmail($email);
             if($row && $this->authModel->verifyPassword($password, $row['password'])){
+                $this->logger->log(
+                    $row['id'],
+                    $row['role'],
+                    'LOGIN',
+                    'AUTH',
+                    null,
+                    null,
+                    $row['full_name'] . ' logged in',
+                    'success'
+                );
                 $this->startUserSession($row);
                 $this->redirectByRole($row['role']);
             }else{

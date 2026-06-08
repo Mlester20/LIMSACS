@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 07, 2026 at 05:21 PM
+-- Generation Time: Jun 08, 2026 at 05:16 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,22 @@ SET time_zone = "+00:00";
 --
 -- Database: `limsacsdb`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `academic_history`
+--
+
+CREATE TABLE `academic_history` (
+  `id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `school_year_id` int(11) NOT NULL,
+  `grade_level` varchar(50) NOT NULL,
+  `section_id` int(11) DEFAULT NULL,
+  `enrollment_status` enum('Enrolled','Transferred','Graduated','Inactive') DEFAULT 'Enrolled',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -52,7 +68,24 @@ INSERT INTO `audit_logs` (`id`, `user_id`, `role`, `action`, `module`, `referenc
 (4, 1, 'admin', 'DELETED USER', 'USER', NULL, 'users', 'admin Deleted user record', '::1', 'success', '2026-06-07 14:08:40'),
 (5, 1, 'admin', 'CREATE USER', 'USER', NULL, 'users', 'admin created a new user record', '::1', 'success', '2026-06-07 14:11:52'),
 (6, 1, 'admin', 'UPDATE USER', 'USER', NULL, 'users', 'admin updated user record', '::1', 'success', '2026-06-07 14:27:55'),
-(7, 1, 'admin', 'DELETED USER', 'USER', NULL, 'users', 'admin Deleted user record', '::1', 'success', '2026-06-07 14:28:00');
+(7, 1, 'admin', 'DELETED USER', 'USER', NULL, 'users', 'admin Deleted user record', '::1', 'success', '2026-06-07 14:28:00'),
+(8, 3, 'registrar', 'CREATE SECTION', 'SECTIONS', NULL, 'sections', 'registrar created section: Pine', '::1', 'success', '2026-06-08 12:36:01'),
+(9, 3, 'registrar', 'DELETE SECTION', 'SECTIONS', NULL, 'sections', 'registrar deleted section', '::1', 'success', '2026-06-08 12:39:37'),
+(10, 3, 'registrar', 'UPDATE SECTION', 'SECTIONS', NULL, 'sections', 'registrar updated section: Mahogani', '::1', 'success', '2026-06-08 12:41:30'),
+(11, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'registrar logged in', '::1', 'success', '2026-06-08 12:51:18'),
+(12, 3, 'registrar', 'UPDATE SECTION', 'SECTIONS', NULL, 'sections', 'registrar updated section: Mahogani', '::1', 'success', '2026-06-08 12:54:07');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `document_types`
+--
+
+CREATE TABLE `document_types` (
+  `id` int(11) NOT NULL,
+  `document_name` varchar(100) NOT NULL,
+  `is_required` tinyint(1) DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -93,6 +126,13 @@ CREATE TABLE `sections` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `sections`
+--
+
+INSERT INTO `sections` (`id`, `section_name`, `grade_level`, `adviser_id`, `school_year_id`, `max_students`, `created_at`) VALUES
+(1, 'Mahogani', 'Grade 1', 7, 3, 35, '2026-06-08 08:45:56');
+
 -- --------------------------------------------------------
 
 --
@@ -106,7 +146,6 @@ CREATE TABLE `students` (
   `middle_name` varchar(100) DEFAULT NULL,
   `last_name` varchar(100) DEFAULT NULL,
   `suffix` varchar(20) DEFAULT NULL,
-  `grade_level` varchar(50) NOT NULL,
   `gender` enum('Male','Female') DEFAULT NULL,
   `birth_date` date DEFAULT NULL,
   `age` int(11) DEFAULT NULL,
@@ -115,7 +154,6 @@ CREATE TABLE `students` (
   `religion` varchar(100) DEFAULT NULL,
   `address` text DEFAULT NULL,
   `contact_number` varchar(20) DEFAULT NULL,
-  `enrollment_status` enum('Enrolled','Transferee','Transferred','Dropped','Graduated') DEFAULT 'Enrolled',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -123,24 +161,29 @@ CREATE TABLE `students` (
 -- Dumping data for table `students`
 --
 
-INSERT INTO `students` (`id`, `lrn`, `first_name`, `middle_name`, `last_name`, `suffix`, `grade_level`, `gender`, `birth_date`, `age`, `place_of_birth`, `nationality`, `religion`, `address`, `contact_number`, `enrollment_status`, `created_at`) VALUES
-(3, '20242111365', 'Mark Lester ', 'Suguitan', 'Raguindin', '', 'Grade 1', 'Male', '2002-12-20', 23, 'Ilagan City, Isabela', 'Filipino', 'Roman Catholic', 'Rizal, Roxas, Isabela', '09349991034', 'Enrolled', '2026-06-05 14:05:55'),
-(4, '123456789001', 'Juan', 'Santos', 'Dela Cruz', NULL, 'Grade 7', 'Male', '2012-05-15', 14, 'Manila City', 'Filipino', 'Roman Catholic', 'Brgy. San Isidro, Luna, Isabela', '09171234567', 'Enrolled', '2026-06-05 15:03:57'),
-(5, '123456789002', 'Maria', 'Reyes', 'Garcia', NULL, 'Grade 8', 'Female', '2011-09-22', 15, 'Tuguegarao City', 'Filipino', 'Roman Catholic', 'Brgy. Centro, Luna, Isabela', '09181234567', 'Enrolled', '2026-06-05 15:03:57'),
-(6, '123456789003', 'Mark', 'Villanueva', 'Ramos', 'Jr.', 'Grade 6', 'Male', '2010-02-10', 16, 'Santiago City', 'Filipino', 'Iglesia ni Cristo', 'Brgy. Lallayug, Luna, Isabela', '09191234567', 'Graduated', '2026-06-05 15:03:57'),
-(7, '123456789004', 'Angela', 'Lopez', 'Fernandez', NULL, 'Grade 10', 'Female', '2009-11-30', 17, 'Ilagan City', 'Filipino', 'Roman Catholic', 'Brgy. Victoria, Luna, Isabela', '09201234567', 'Transferred', '2026-06-05 15:03:57'),
-(8, '123456789005', 'Joshua', 'Mendoza', 'Aquino', NULL, 'Grade 12', 'Male', '2007-08-18', 19, 'Cauayan City', 'Filipino', 'Born Again Christian', 'Brgy. Macatel, Luna, Isabela', '09211234567', 'Graduated', '2026-06-05 15:03:57');
+INSERT INTO `students` (`id`, `lrn`, `first_name`, `middle_name`, `last_name`, `suffix`, `gender`, `birth_date`, `age`, `place_of_birth`, `nationality`, `religion`, `address`, `contact_number`, `created_at`) VALUES
+(3, '20242111365', 'Mark Lester ', 'Suguitan', 'Raguindin', '', 'Male', '2002-12-20', 23, 'Ilagan City, Isabela', 'Filipino', 'Roman Catholic', 'Rizal, Roxas, Isabela', '09349991034', '2026-06-05 14:05:55'),
+(4, '123456789001', 'Juan', 'Santos', 'Dela Cruz', NULL, 'Male', '2012-05-15', 14, 'Manila City', 'Filipino', 'Roman Catholic', 'Brgy. San Isidro, Luna, Isabela', '09171234567', '2026-06-05 15:03:57'),
+(5, '123456789002', 'Maria', 'Reyes', 'Garcia', NULL, 'Female', '2011-09-22', 15, 'Tuguegarao City', 'Filipino', 'Roman Catholic', 'Brgy. Centro, Luna, Isabela', '09181234567', '2026-06-05 15:03:57'),
+(6, '123456789003', 'Mark', 'Villanueva', 'Ramos', 'Jr.', 'Male', '2010-02-10', 16, 'Santiago City', 'Filipino', 'Iglesia ni Cristo', 'Brgy. Lallayug, Luna, Isabela', '09191234567', '2026-06-05 15:03:57'),
+(7, '123456789004', 'Angela', 'Lopez', 'Fernandez', NULL, 'Female', '2009-11-30', 17, 'Ilagan City', 'Filipino', 'Roman Catholic', 'Brgy. Victoria, Luna, Isabela', '09201234567', '2026-06-05 15:03:57'),
+(8, '123456789005', 'Joshua', 'Mendoza', 'Aquino', NULL, 'Male', '2007-08-18', 19, 'Cauayan City', 'Filipino', 'Born Again Christian', 'Brgy. Macatel, Luna, Isabela', '09211234567', '2026-06-05 15:03:57');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `student_sections`
+-- Table structure for table `student_documents`
 --
 
-CREATE TABLE `student_sections` (
+CREATE TABLE `student_documents` (
   `id` int(11) NOT NULL,
   `student_id` int(11) NOT NULL,
-  `section_id` int(11) NOT NULL
+  `document_type_id` int(11) NOT NULL,
+  `file_path` varchar(500) NOT NULL,
+  `status` enum('Pending','Submitted','Verified','Rejected') DEFAULT 'Submitted',
+  `remarks` text DEFAULT NULL,
+  `uploaded_by` int(11) NOT NULL,
+  `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -166,16 +209,33 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `full_name`, `email`, `password`, `role`, `profile_picture`, `created_at`, `updated_at`) VALUES
 (1, 'admin', 'admin@gmail.com', '$2y$10$ISff11xX1PgO7HpubtYmBO4ck8pKTKXAd9kn2aI/ZIJtIhOvfnpTy', 'admin', 'storage/profiles/pfp_1_1780663737.png', '2026-06-03 05:10:02', '2026-06-05 20:48:57'),
-(3, 'registrar', 'registrar@gmail.com', '$2y$10$/e3gO4nFgjXHxVvN1fvodeIlj60rF/IIvzWHhSUE2PfmWZG4KO8YC', 'registrar', 'storage/profiles/pfp_3_1780558920.jpg', '2026-06-03 07:01:06', '2026-06-04 15:42:00');
+(3, 'Registrar', 'registrar@gmail.com', '$2y$10$/e3gO4nFgjXHxVvN1fvodeIlj60rF/IIvzWHhSUE2PfmWZG4KO8YC', 'registrar', 'storage/profiles/pfp_3_1780558920.jpg', '2026-06-03 07:01:06', '2026-06-08 22:22:20'),
+(7, 'John Doe', 'teacher@gmail.com', '$2y$10$LcAKY/X2C2t4Fu4LYdioBOu3hV1x8.bnc9R7pjfFSTQWY95mTY0WG', 'teacher', NULL, '2026-06-08 10:38:13', '2026-06-08 10:38:13'),
+(8, 'Mark Lester', 'marklester@gmail.com', '$2y$10$Mr7XFswgt3TDt43QRe3CrO/tsc1IIMaguPegRKcH1WXazKUFEixNm', 'teacher', NULL, '2026-06-08 11:15:37', '2026-06-08 11:15:37');
 
 --
 -- Indexes for dumped tables
 --
 
 --
+-- Indexes for table `academic_history`
+--
+ALTER TABLE `academic_history`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_ah_school_year` (`school_year_id`),
+  ADD KEY `fk_ah_section` (`section_id`),
+  ADD KEY `fk_ah_student` (`student_id`);
+
+--
 -- Indexes for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `document_types`
+--
+ALTER TABLE `document_types`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -199,11 +259,13 @@ ALTER TABLE `students`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `student_sections`
+-- Indexes for table `student_documents`
 --
-ALTER TABLE `student_sections`
-  ADD KEY `student_sections_ibfk_1` (`student_id`),
-  ADD KEY `student_sections_ibfk_2` (`section_id`);
+ALTER TABLE `student_documents`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `student_id` (`student_id`),
+  ADD KEY `document_type_id` (`document_type_id`),
+  ADD KEY `uploaded_by` (`uploaded_by`);
 
 --
 -- Indexes for table `users`
@@ -216,10 +278,22 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `academic_history`
+--
+ALTER TABLE `academic_history`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `document_types`
+--
+ALTER TABLE `document_types`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `school_year`
@@ -231,7 +305,7 @@ ALTER TABLE `school_year`
 -- AUTO_INCREMENT for table `sections`
 --
 ALTER TABLE `sections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `students`
@@ -240,14 +314,28 @@ ALTER TABLE `students`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
+-- AUTO_INCREMENT for table `student_documents`
+--
+ALTER TABLE `student_documents`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `academic_history`
+--
+ALTER TABLE `academic_history`
+  ADD CONSTRAINT `fk_ah_school_year` FOREIGN KEY (`school_year_id`) REFERENCES `school_year` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_ah_section` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_ah_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `sections`
@@ -257,11 +345,12 @@ ALTER TABLE `sections`
   ADD CONSTRAINT `sections_ibfk_2` FOREIGN KEY (`school_year_id`) REFERENCES `school_year` (`id`);
 
 --
--- Constraints for table `student_sections`
+-- Constraints for table `student_documents`
 --
-ALTER TABLE `student_sections`
-  ADD CONSTRAINT `student_sections_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`),
-  ADD CONSTRAINT `student_sections_ibfk_2` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`);
+ALTER TABLE `student_documents`
+  ADD CONSTRAINT `student_documents_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`),
+  ADD CONSTRAINT `student_documents_ibfk_2` FOREIGN KEY (`document_type_id`) REFERENCES `document_types` (`id`),
+  ADD CONSTRAINT `student_documents_ibfk_3` FOREIGN KEY (`uploaded_by`) REFERENCES `users` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

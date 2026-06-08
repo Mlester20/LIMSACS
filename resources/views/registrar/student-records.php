@@ -70,20 +70,9 @@ AuthRole::allowOnly(['registrar']);
 
                         <p class="text-muted fw-semibold mb-2" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:.05em;">Student Identity</p>
                         <div class="row g-2 mb-3">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <label class="form-label form-label-sm mb-1">LRN (Learner Reference Number)</label>
                                 <input type="text" class="form-control form-control-sm" name="lrn" maxlength="20">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label form-label-sm mb-1">Enrollment Status <span class="text-danger">*</span></label>
-                                <select class="form-select form-select-sm" name="enrollment_status" required>
-                                    <option value="" disabled selected>Select Status</option>
-                                    <option value="Enrolled">Enrolled</option>
-                                    <option value="Transferee">Transferee</option>
-                                    <option value="Transferred">Transferred</option>
-                                    <option value="Dropped">Dropped</option>
-                                    <option value="Graduated">Graduated</option>
-                                </select>
                             </div>
                         </div>
 
@@ -108,16 +97,7 @@ AuthRole::allowOnly(['registrar']);
                         </div>
 
                         <div class="row g-2 mb-2">
-                            <div class="col-md-6">
-                                <label class="form-label form-label-sm mb-1">Grade Level <span class="text-danger">*</span></label>
-                                <select class="form-select form-select-sm" name="grade_level" required>
-                                    <option value="" disabled selected>Select Grade Level</option>
-                                    <?php foreach(['Grade 1','Grade 2','Grade 3','Grade 4','Grade 5','Grade 6'] as $g): ?>
-                                        <option value="<?= $g ?>"><?= $g ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <label class="form-label form-label-sm mb-1">Gender <span class="text-danger">*</span></label>
                                 <select class="form-select form-select-sm" name="gender" required>
                                     <option value="" disabled selected>Select Gender</option>

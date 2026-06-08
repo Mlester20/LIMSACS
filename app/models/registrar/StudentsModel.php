@@ -56,21 +56,38 @@ require_once __DIR__ . '/../Model.php';
             }
         }
 
+        /**
+         * Get student by LRN
+         * @param string $lrn
+         * @return array|null
+         */
+        public function getByLrn($lrn){
+            try{
+                $query = "SELECT * FROM {$this->students} WHERE lrn = ? LIMIT 1";
+                $stmt = $this->con->prepare($query);
+                $stmt->bind_param('s', $lrn);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                return $result->fetch_assoc();
+            }catch(Exception $e){
+                error_log($e->getMessage());
+                return null;
+            }
+        }
+
         public function create($data){
             try{
-                $query = "INSERT
-                    INTO students(lrn, first_name, middle_name, last_name, suffix, grade_level, gender, birth_date, age, place_of_birth, nationality, religion, address, contact_number, enrollment_status) 
-                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                $query = "INSERT INTO {$this->students}(lrn, first_name, middle_name, last_name, suffix, gender, birth_date, age, place_of_birth, nationality, religion, address, contact_number) 
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ";
                 $stmt = $this->con->prepare($query);
                 $stmt->bind_param(
-                    'ssssssssissssss',
+                    'ssssssssisssss',
                     $data['lrn'],
                     $data['first_name'],
                     $data['middle_name'],
                     $data['last_name'],
                     $data['suffix'],
-                    $data['grade_level'],
                     $data['gender'],
                     $data['birth_date'],
                     $data['age'],
@@ -78,8 +95,7 @@ require_once __DIR__ . '/../Model.php';
                     $data['nationality'],
                     $data['religion'],
                     $data['address'],
-                    $data['contact_number'],
-                    $data['enrollment_status']
+                    $data['contact_number']
                 );
                 $stmt->execute();
                 return true;
@@ -91,20 +107,18 @@ require_once __DIR__ . '/../Model.php';
 
         public function update($id, $data){
             try{
-                $query = "UPDATE
-                    students
-                    SET lrn = ?, first_name = ?, middle_name = ?, last_name = ?, suffix = ?, grade_level = ?, gender = ?, birth_date = ?, age = ?, place_of_birth = ?, nationality = ?, religion = ?, address = ?, contact_number = ?, enrollment_status = ?
+                $query = "UPDATE {$this->students}
+                    SET lrn = ?, first_name = ?, middle_name = ?, last_name = ?, suffix = ?, gender = ?, birth_date = ?, age = ?, place_of_birth = ?, nationality = ?, religion = ?, address = ?, contact_number = ?
                     WHERE id = ?
                 ";
                 $stmt = $this->con->prepare($query);
                 $stmt->bind_param(
-                    'ssssssssissssssi',
+                    'ssssssssissssi',
                     $data['lrn'],
                     $data['first_name'],
                     $data['middle_name'],
                     $data['last_name'],
                     $data['suffix'],    
-                    $data['grade_level'],
                     $data['gender'],
                     $data['birth_date'],
                     $data['age'],
@@ -113,7 +127,6 @@ require_once __DIR__ . '/../Model.php';
                     $data['religion'],
                     $data['address'],
                     $data['contact_number'],
-                    $data['enrollment_status'],
                     $id
                 );
                 $stmt->execute();
