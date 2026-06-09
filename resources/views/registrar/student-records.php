@@ -49,7 +49,7 @@ AuthRole::allowOnly(['registrar']);
       </div>
       
       <div class="col-md-6 text-end mt-2 mt-md-0">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#enrollStudentModal">Enroll Student</button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#enrollStudentModal">Add Student Information</button>
       </div>
     </div>
 
@@ -59,7 +59,7 @@ AuthRole::allowOnly(['registrar']);
                 <div class="modal-content">
                     <div class="modal-header py-2">
                         <h6 class="modal-title mb-0" id="enrollStudentModalLabel">
-                            <i class="icon-base iconify" data-icon="tabler:user-plus"></i> Enroll New Student
+                            <i class="icon-base iconify" data-icon="tabler:user-plus"></i> Add New Student Information
                         </h6>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
@@ -72,7 +72,7 @@ AuthRole::allowOnly(['registrar']);
                         <div class="row g-2 mb-3">
                             <div class="col-md-12">
                                 <label class="form-label form-label-sm mb-1">LRN (Learner Reference Number)</label>
-                                <input type="text" class="form-control form-control-sm" name="lrn" maxlength="20">
+                                <input type="text" class="form-control form-control-sm" name="lrn" maxlength="20" placeholder="e.g., 102305621901">
                             </div>
                         </div>
 
@@ -80,15 +80,15 @@ AuthRole::allowOnly(['registrar']);
                         <div class="row g-2 mb-2">
                             <div class="col-md-3">
                                 <label class="form-label form-label-sm mb-1">First Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control form-control-sm" name="first_name" required>
+                                <input type="text" class="form-control form-control-sm" name="first_name" placeholder="e.g., Juan" required>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label form-label-sm mb-1">Middle Name</label>
-                                <input type="text" class="form-control form-control-sm" name="middle_name">
+                                <input type="text" class="form-control form-control-sm" name="middle_name" placeholder="e.g., Mabini">
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label form-label-sm mb-1">Last Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control form-control-sm" name="last_name" required>
+                                <input type="text" class="form-control form-control-sm" name="last_name" required placeholder="e.g., Dela Cruz">
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label form-label-sm mb-1">Suffix</label>
@@ -114,11 +114,12 @@ AuthRole::allowOnly(['registrar']);
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label form-label-sm mb-1">Age</label>
-                                <input type="number" class="form-control form-control-sm" name="age" id="enrollAge" min="1" max="30">
+                                <!-- auto computed age base from the birth date-->
+                                <input type="number" id="ageInput" class="form-control form-control-sm" name="age" min="1" max="30" readonly> 
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label form-label-sm mb-1">Place of Birth</label>
-                                <input type="text" class="form-control form-control-sm" name="place_of_birth" maxlength="150">
+                                <input type="text" class="form-control form-control-sm" name="place_of_birth" maxlength="150" placeholder="e.g., Manila, Philippines">
                             </div>
                         </div>
 
@@ -130,7 +131,7 @@ AuthRole::allowOnly(['registrar']);
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label form-label-sm mb-1">Religion</label>
-                                <input type="text" class="form-control form-control-sm" name="religion" maxlength="100">
+                                <input type="text" class="form-control form-control-sm" name="religion" maxlength="100" placeholder="e.g., Catholic">
                             </div>
                         </div>
 
@@ -138,11 +139,11 @@ AuthRole::allowOnly(['registrar']);
                         <div class="row g-2 mb-2">
                             <div class="col-md-6">
                                 <label class="form-label form-label-sm mb-1">Contact Number</label>
-                                <input type="text" class="form-control form-control-sm" name="contact_number" maxlength="20">
+                                <input type="text" class="form-control form-control-sm" name="contact_number" maxlength="12" placeholder="e.g., 09123456789">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label form-label-sm mb-1">Address</label>
-                                <input type="text" class="form-control form-control-sm" name="address">
+                                <input type="text" class="form-control form-control-sm" name="address" placeholder="e.g., San Juan City, Manila, Philippines">
                             </div>
                         </div>
 
@@ -169,7 +170,6 @@ AuthRole::allowOnly(['registrar']);
                         <th>Full Name</th>
                         <th>Gender</th>
                         <th>Age</th>
-                        <th>Student Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -186,9 +186,6 @@ AuthRole::allowOnly(['registrar']);
                                 <td><?php echo htmlspecialchars($student['full_name'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($student['gender'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($student['age'] ?? 'N/A'); ?></td>
-                                <td>
-                                    <span class="badge bg-label-success"><?php echo htmlspecialchars($student['enrollment_status'] ?? 'Active'); ?></span>
-                                </td>
                                 <td>
 
                                     <button 
@@ -416,7 +413,7 @@ AuthRole::allowOnly(['registrar']);
     <div class="modal fade" id="studentDetailsModal" tabindex="-1" aria-labelledby="studentDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-md">
             <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header text-white">
                     <h5 class="modal-title" id="studentDetailsModalLabel">Student Profile</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -426,10 +423,6 @@ AuthRole::allowOnly(['registrar']);
                         <div class="col-md-6">
                             <small class="text-muted d-block">LRN</small>
                             <strong id="modalLrn">-</strong>
-                        </div>
-                        <div class="col-md-6">
-                            <small class="text-muted d-block">Grade Level</small>
-                            <strong id="modalGradeLevel">-</strong>
                         </div>
 
                         <!-- Row 2 -->
@@ -488,11 +481,6 @@ AuthRole::allowOnly(['registrar']);
                             <strong id="modalAddress" class="text-break">-</strong>
                         </div>
 
-                        <!-- Row 8 -->
-                        <div class="col-12">
-                            <small class="text-muted d-block">Email</small>
-                            <strong id="modalEmail">-</strong>
-                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">

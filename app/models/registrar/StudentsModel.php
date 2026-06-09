@@ -82,7 +82,7 @@ require_once __DIR__ . '/../Model.php';
                 ";
                 $stmt = $this->con->prepare($query);
                 $stmt->bind_param(
-                    'ssssssssissss',
+                    'sssssssisssss',
                     $data['lrn'],
                     $data['first_name'],
                     $data['middle_name'],
@@ -113,7 +113,7 @@ require_once __DIR__ . '/../Model.php';
                 ";
                 $stmt = $this->con->prepare($query);
                 $stmt->bind_param(
-                    'ssssssssissssi',
+                    'sssssssisssssi',
                     $data['lrn'],
                     $data['first_name'],
                     $data['middle_name'],
