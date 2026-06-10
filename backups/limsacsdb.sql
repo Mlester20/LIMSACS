@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 09, 2026 at 05:37 PM
+-- Generation Time: Jun 10, 2026 at 07:00 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -36,6 +36,13 @@ CREATE TABLE `academic_history` (
   `enrollment_status` enum('Enrolled','Transferred','Graduated','Inactive') DEFAULT 'Enrolled',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `academic_history`
+--
+
+INSERT INTO `academic_history` (`id`, `student_id`, `school_year_id`, `grade_level`, `section_id`, `enrollment_status`, `created_at`) VALUES
+(7, 11, 3, 'Grade 2', 4, 'Enrolled', '2026-06-10 16:59:30');
 
 -- --------------------------------------------------------
 
@@ -111,7 +118,17 @@ INSERT INTO `audit_logs` (`id`, `user_id`, `role`, `action`, `module`, `referenc
 (50, 3, 'registrar', 'UPDATE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar updated a document type with ID: 17.', '::1', 'success', '2026-06-09 15:36:59'),
 (51, 3, 'registrar', 'UPDATE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar updated a document type with ID: 15.', '::1', 'success', '2026-06-09 15:37:05'),
 (52, 3, 'registrar', 'UPDATE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar updated a document type with ID: 14.', '::1', 'success', '2026-06-09 15:37:11'),
-(53, 3, 'registrar', 'UPDATE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar updated a document type with ID: 13.', '::1', 'success', '2026-06-09 15:37:18');
+(53, 3, 'registrar', 'UPDATE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar updated a document type with ID: 13.', '::1', 'success', '2026-06-09 15:37:18'),
+(54, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-10 12:58:29'),
+(55, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-10 14:13:26'),
+(56, 3, 'registrar', 'DELETE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar deleted parent/guardian record with ID: 1', '::1', 'success', '2026-06-10 15:22:42'),
+(57, 3, 'registrar', 'DELETE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar deleted parent/guardian record with ID: 2', '::1', 'success', '2026-06-10 15:25:48'),
+(58, 3, 'registrar', 'DELETE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar deleted parent/guardian record with ID: 3', '::1', 'success', '2026-06-10 16:14:17'),
+(59, 3, 'registrar', 'CREATE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar created a new parent/guardian record for student ID: 11', '::1', 'success', '2026-06-10 16:28:52'),
+(60, 3, 'registrar', 'UPDATE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', 4, 'parents_guardians', 'Registrar updated parent/guardian record with ID: 4', '::1', 'success', '2026-06-10 16:51:50'),
+(61, 3, 'registrar', 'DELETE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar deleted parent/guardian record with ID: 4', '::1', 'success', '2026-06-10 16:51:59'),
+(62, 3, 'registrar', 'CREATE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar created a new parent/guardian record for student ID: 11', '::1', 'success', '2026-06-10 16:58:46'),
+(63, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 2', '::1', 'success', '2026-06-10 16:59:30');
 
 -- --------------------------------------------------------
 
@@ -137,6 +154,34 @@ INSERT INTO `document_types` (`id`, `document_name`, `is_required`, `is_active`)
 (14, 'Good Moral Certificate', 1, 1),
 (15, 'Medical Certificate', 1, 1),
 (17, 'Certificate of Completion', 1, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `parents_guardians`
+--
+
+CREATE TABLE `parents_guardians` (
+  `id` int(11) NOT NULL,
+  `student_id` int(11) DEFAULT NULL,
+  `father_name` varchar(150) DEFAULT NULL,
+  `father_occupation` varchar(100) DEFAULT NULL,
+  `father_contact` varchar(20) DEFAULT NULL,
+  `mother_name` varchar(150) DEFAULT NULL,
+  `mother_occupation` varchar(100) DEFAULT NULL,
+  `mother_contact` varchar(20) DEFAULT NULL,
+  `guardian_name` varchar(150) DEFAULT NULL,
+  `guardian_relationship` varchar(50) DEFAULT NULL,
+  `guardian_contact` varchar(20) DEFAULT NULL,
+  `created_at` date NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `parents_guardians`
+--
+
+INSERT INTO `parents_guardians` (`id`, `student_id`, `father_name`, `father_occupation`, `father_contact`, `mother_name`, `mother_occupation`, `mother_contact`, `guardian_name`, `guardian_relationship`, `guardian_contact`, `created_at`) VALUES
+(5, 11, 'Armando Raguindin', 'Tricycle Driver', '', 'Melba Raguindin', 'Baby Sitter', '', 'Melba Raguindin', 'Mother', '09213001234', '2026-06-11');
 
 -- --------------------------------------------------------
 
@@ -214,7 +259,7 @@ CREATE TABLE `students` (
 --
 
 INSERT INTO `students` (`id`, `lrn`, `first_name`, `middle_name`, `last_name`, `suffix`, `gender`, `birth_date`, `age`, `place_of_birth`, `nationality`, `religion`, `address`, `contact_number`, `created_at`) VALUES
-(10, '20242111365', 'Mark Lester ', 'Suguitan', 'Raguindin', '', 'Male', '2002-12-20', 23, 'Ilagan City, Isabela', 'Filipino', 'Roman Catholic', 'Rizal, Roxas, Isabela', '', '2026-06-09 14:12:23');
+(11, '20242110365', 'Mark Lester ', 'Suguitan', 'Raguindin', '', 'Male', '2002-12-20', 23, 'Ilagan City, Isabela', 'Filipino', 'Roman Catholic', 'Rizal, Roxas, Isabela', '', '2026-06-09 15:49:56');
 
 -- --------------------------------------------------------
 
@@ -286,6 +331,13 @@ ALTER TABLE `document_types`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `parents_guardians`
+--
+ALTER TABLE `parents_guardians`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `student_id` (`student_id`);
+
+--
 -- Indexes for table `school_year`
 --
 ALTER TABLE `school_year`
@@ -329,19 +381,25 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `academic_history`
 --
 ALTER TABLE `academic_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT for table `document_types`
 --
 ALTER TABLE `document_types`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+--
+-- AUTO_INCREMENT for table `parents_guardians`
+--
+ALTER TABLE `parents_guardians`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `school_year`
@@ -359,7 +417,7 @@ ALTER TABLE `sections`
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `student_documents`
@@ -384,6 +442,12 @@ ALTER TABLE `academic_history`
   ADD CONSTRAINT `fk_ah_school_year` FOREIGN KEY (`school_year_id`) REFERENCES `school_year` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_ah_section` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_ah_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `parents_guardians`
+--
+ALTER TABLE `parents_guardians`
+  ADD CONSTRAINT `parents_guardians_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`);
 
 --
 -- Constraints for table `sections`

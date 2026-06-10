@@ -62,6 +62,15 @@
             <li class="menu-item"><a href="student-documents.php" class="menu-link"><div data-i18n="Student Documents">Student Documents</div></a></li>
           </ul>
         </li>
+        <li class="menu-item <?php echo ($currentPage == 'parent-guardians.php') ? 'active' : ''; ?>">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <i class="menu-icon tf-icons bx bx-user"></i>
+            <div data-i18n="Parents & Guardians">Parents</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item"><a href="parent-guardians.php" class="menu-link"><div data-i18n="Parents & Guardians">Parents & Guardians</div></a></li>
+          </ul>
+        </li>
       </ul>
     </aside>
     <!-- / Menu -->
