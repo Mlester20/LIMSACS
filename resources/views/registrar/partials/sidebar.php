@@ -1,3 +1,7 @@
+<?php
+  $currentPage = basename($_SERVER['PHP_SELF']);
+?>
+
 <!-- Layout wrapper -->
 <div class="layout-wrapper layout-content-navbar">
   <div class="layout-container">
@@ -19,7 +23,7 @@
       <div class="menu-inner-shadow"></div>
 
       <ul class="menu-inner py-1">
-        <li class="menu-item">
+        <li class="menu-item <?php echo ($currentPage == 'home.php') ? 'active' : ''; ?>">
           <a href="home.php" class="menu-link">
             <i class="menu-icon tf-icons bx bx-home-circle"></i>
             <div data-i18n="Analytics">Dashboard</div>
@@ -28,34 +32,43 @@
         <li class="menu-header small text-uppercase">
           <span class="menu-header-text">Pages</span>
         </li>
-        <li class="menu-item">
+        <li class="menu-item <?php echo ($currentPage == 'enrollment.php' || $currentPage == 'student-records.php') ? 'active' : ''; ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
             <i class="menu-icon tf-icons bx bx-user"></i>
             <div data-i18n="Account Settings">Enroll Students</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="student-records.php" class="menu-link"><div data-i18n="Account">Students Information</div></a></li>
+            <li class="menu-item"><a href="enrollment.php" class="menu-link"><div data-i18n="Account">Enrollment</div></a></li>
+            <li class="menu-item"><a href="student-records.php" class="menu-link"><div data-i18n="Account">Student Information</div></a></li>
           </ul>
         </li>
-        <li class="menu-item">
+        <li class="menu-item <?php echo ($currentPage == 'sections.php') ? 'active' : ''; ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-lock-open-alt"></i>
-            <div data-i18n="Authentications">Authentications</div>
+            <i class="menu-icon tf-icons bx bx-book"></i>
+            <div data-i18n="Sections">Sections</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="auth-login-basic.html" class="menu-link" target="_blank"><div data-i18n="Basic">Login</div></a></li>
-            <li class="menu-item"><a href="auth-register-basic.html" class="menu-link" target="_blank"><div data-i18n="Basic">Register</div></a></li>
-            <li class="menu-item"><a href="auth-forgot-password-basic.html" class="menu-link" target="_blank"><div data-i18n="Basic">Forgot Password</div></a></li>
+            <li class="menu-item"><a href="sections.php" class="menu-link"><div data-i18n="Basic">Sections</div></a></li>
           </ul>
         </li>
-        <li class="menu-item">
+        <li class="menu-item <?php echo ($currentPage == 'document-types.php' || $currentPage == 'student-documents.php') ? 'active' : ''; ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-cube-alt"></i>
-            <div data-i18n="Misc">Misc</div>
+            <i class="menu-icon tf-icons bx bx-file"></i>
+            <div data-i18n="Documents">Documents</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="pages-misc-error.html" class="menu-link"><div data-i18n="Error">Error</div></a></li>
-            <li class="menu-item"><a href="pages-misc-under-maintenance.html" class="menu-link"><div data-i18n="Under Maintenance">Under Maintenance</div></a></li>
+            <li class="menu-item"><a href="document-types.php" class="menu-link"><div data-i18n="Document Types">Documents Types</div></a></li>
+
+            <li class="menu-item"><a href="student-documents.php" class="menu-link"><div data-i18n="Student Documents">Student Documents</div></a></li>
+          </ul>
+        </li>
+        <li class="menu-item <?php echo ($currentPage == 'parent-guardians.php') ? 'active' : ''; ?>">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <i class="menu-icon tf-icons bx bx-user"></i>
+            <div data-i18n="Parents & Guardians">Parents</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item"><a href="parent-guardians.php" class="menu-link"><div data-i18n="Parents & Guardians">Parents & Guardians</div></a></li>
           </ul>
         </li>
       </ul>

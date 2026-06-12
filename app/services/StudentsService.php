@@ -68,9 +68,7 @@ require_once __DIR__ . '/../models/Model.php';
                 s.nationality,
                 s.religion,
                 s.address,
-                s.contact_number,
-                s.grade_level,
-                s.enrollment_status
+                s.contact_number
                 FROM {$this->students} s
                 WHERE 
                 s.lrn LIKE ? OR

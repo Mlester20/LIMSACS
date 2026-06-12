@@ -12,12 +12,8 @@ function populateStudentModal(student) {
     document.getElementById('modalAge').textContent = student.age || '-';
     document.getElementById('modalPlaceOfBirth').textContent = student.place_of_birth || '-';
 
-    // Academic Information
-    document.getElementById('modalGradeLevel').textContent = student.grade_level || '-';
-
     // Contact Information
     document.getElementById('modalContactNumber').textContent = student.contact_number || '-';
-    document.getElementById('modalEmail').textContent = student.email || '-';
     document.getElementById('modalAddress').textContent = student.address || '-';
 
     // Other Information
@@ -63,7 +59,6 @@ function editStudent(student) {
 
     // Student Identity
     document.getElementById('editLrn').value = student.lrn || '';
-    document.getElementById('editEnrollmentStatus').value = student.enrollment_status || '';
 
     // Personal Information
     document.getElementById('editFirstName').value = student.first_name || '';
@@ -71,8 +66,7 @@ function editStudent(student) {
     document.getElementById('editLastName').value = student.last_name || '';
     document.getElementById('editSuffix').value = student.suffix || '';
 
-    // Academic & Gender
-    document.getElementById('editGradeLevel').value = student.grade_level || '';
+    // Gender
     document.getElementById('editGender').value = student.gender || '';
 
     // Birth Information
@@ -101,6 +95,26 @@ document.querySelectorAll('.table tbody tr').forEach(row => {
     });
 });
 
+//auto calculated age
+document.getElementById('enrollBirthDate').addEventListener('change', function () {
+    const birthDate = new Date(this.value);
+    const today = new Date();
+
+    if (!this.value || birthDate > today) {
+        document.getElementById('ageInput').value = '';
+        return;
+    }
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    // Adjust if birthday hasn't occurred yet this year
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+
+    document.getElementById('ageInput').value = age;
+});
 
 // ============== create rest api to create search student function ==================== //
 
@@ -205,7 +219,6 @@ function renderSearchResults(results){
     const rows = results.map((student, index) => {
         const studentName = `${student.first_name || ''} ${student.middle_name || ''} ${student.last_name || ''}`.trim();
         const lrn = student.lrn || 'N/A';
-        const gradeLevel = student.grade_level || 'N/A';
         const enrollmentStatus = student.enrollment_status || 'N/A';
 
         return `
@@ -213,7 +226,6 @@ function renderSearchResults(results){
                 <td>${escapeHtml(index + 1)}</td>
                 <td>${escapeHtml(lrn)}</td>
                 <td>${escapeHtml(studentName)}</td>
-                <td>${escapeHtml(gradeLevel)}</td>
                 <td>${escapeHtml(enrollmentStatus)}</td>
                 <td>
                     <button 
