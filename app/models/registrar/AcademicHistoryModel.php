@@ -188,5 +188,39 @@ class AcademicHistoryModel extends Model {
             return false;
         }
     }
+
+    /**
+     * Get total of students in each section with capacity info
+     * @return array
+     */
+    public function getTotalCount(){
+        try{
+            $query = "SELECT
+                s.id AS section_id,
+                s.section_name,
+                s.max_students,
+                COUNT(ah.student_id) AS total_section_students
+                FROM
+                    sections AS s
+                LEFT JOIN 
+                    {$this->academic_history} AS ah ON s.id = ah.section_id AND ah.enrollment_status = 'Enrolled'
+                GROUP BY
+                    s.id, s.section_name, s.max_students
+            ";
+            $stmt = $this->con->prepare($query);
+            if (!$stmt) {
+                error_log("Prepare failed: " . $this->con->error);
+                return [];
+            }
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            return $result->fetch_all(MYSQLI_ASSOC) ?? [];
+        }catch(Exception $e){
+            error_log("Error getting total count: " . $e->getMessage());
+            return [];
+        }
+    }
+
 }
 ?>

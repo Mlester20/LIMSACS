@@ -10,8 +10,25 @@ try {
     $controller = new EnrollmentController($con);
     $schoolYears = $controller->getSchoolYears();
     $gradeLevels = $controller->getGradeLevels();
+    
+    // Get current page from query parameter
+    $currentPage = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+    
+    // Get enrolled students with pagination
+    $paginatedData = $controller->getEnrolledStudentsWithPagination($currentPage, 10);
+    $enrollments = $paginatedData['enrollments'];
+    $pagination = $paginatedData['pagination'];
 } catch (Exception $e) {
     error_log($e->getMessage());
+    $enrollments = [];
+    $pagination = [
+        'currentPage' => 1,
+        'itemsPerPage' => 10,
+        'totalRecords' => 0,
+        'totalPages' => 0,
+        'hasPrevPage' => false,
+        'hasNextPage' => false
+    ];
 }
 ?>
 
@@ -84,12 +101,115 @@ try {
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="enrolledStudentsBody">
-                        <tr>
-                            <td colspan="8" class="text-center text-muted py-3">Loading enrolled students...</td>
-                        </tr>
+                    <tbody>
+                        <?php if(!empty($enrollments)): ?>
+                            <?php foreach($enrollments as $index => $enrollment): ?>
+                                <tr>
+                                    <td><?php echo $pagination['itemsPerPage'] * ($pagination['currentPage'] - 1) + ($index + 1); ?></td>
+                                    <td><?php echo htmlspecialchars($enrollment['first_name'] . ' ' . $enrollment['last_name']); ?></td>
+                                    <td><?php echo htmlspecialchars($enrollment['lrn']); ?></td>
+                                    <td><?php echo htmlspecialchars($enrollment['school_year']); ?></td>
+                                    <td><?php echo htmlspecialchars($enrollment['grade_level']); ?></td>
+                                    <td><?php echo htmlspecialchars($enrollment['section_name']); ?></td>
+                                    <td>
+                                        <span class="badge bg-success"><?php echo htmlspecialchars($enrollment['enrollment_status']); ?></span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info" title="View History" data-bs-toggle="modal" data-bs-target="#enrollmentHistoryModal" onclick="enrollmentController.showEnrollmentHistory(<?php echo $enrollment['student_id']; ?>, '<?php echo htmlspecialchars($enrollment['first_name'] . ' ' . $enrollment['last_name']); ?>')">
+                                            <i class="bx bx-history"></i>
+                                        </button>
+                                        <!-- <button class="btn btn-sm btn-warning" title="Edit">
+                                            <i class="bx bx-edit"></i>
+                                        </button> -->
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-3">No enrolled students found.</td>
+                            </tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="card-footer">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted">
+                            Showing <?php echo (($pagination['currentPage'] - 1) * $pagination['itemsPerPage']) + 1; ?> 
+                            to <?php echo min($pagination['currentPage'] * $pagination['itemsPerPage'], $pagination['totalRecords']); ?>
+                            of <?php echo $pagination['totalRecords']; ?> records
+                        </small>
+                    </div>
+                    
+                    <nav>
+                        <ul class="pagination pagination-sm m-0">
+                            <!-- Previous Button -->
+                            <?php if($pagination['hasPrevPage']): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?php echo $pagination['currentPage'] - 1; ?>">Previous</a>
+                                </li>
+                            <?php else: ?>
+                                <li class="page-item disabled">
+                                    <span class="page-link">Previous</span>
+                                </li>
+                            <?php endif; ?>
+
+                            <!-- Page Numbers -->
+                            <?php 
+                                $startPage = max(1, $pagination['currentPage'] - 2);
+                                $endPage = min($pagination['totalPages'], $pagination['currentPage'] + 2);
+                                
+                                if($startPage > 1): 
+                            ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1">1</a>
+                                </li>
+                                <?php if($startPage > 2): ?>
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                <?php endif; ?>
+                            <?php endif; ?>
+
+                            <?php for($i = $startPage; $i <= $endPage; $i++): ?>
+                                <?php if($i == $pagination['currentPage']): ?>
+                                    <li class="page-item active">
+                                        <span class="page-link"><?php echo $i; ?></span>
+                                    </li>
+                                <?php else: ?>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                                    </li>
+                                <?php endif; ?>
+                            <?php endfor; ?>
+
+                            <?php if($endPage < $pagination['totalPages']): ?>
+                                <?php if($endPage < $pagination['totalPages'] - 1): ?>
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                <?php endif; ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?php echo $pagination['totalPages']; ?>"><?php echo $pagination['totalPages']; ?></a>
+                                </li>
+                            <?php endif; ?>
+
+                            <!-- Next Button -->
+                            <?php if($pagination['hasNextPage']): ?>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=<?php echo $pagination['currentPage'] + 1; ?>">Next</a>
+                                </li>
+                            <?php else: ?>
+                                <li class="page-item disabled">
+                                    <span class="page-link">Next</span>
+                                </li>
+                            <?php endif; ?>
+                        </ul>
+                    </nav>
+                </div>
             </div>
         </div>
     </div>

@@ -6,7 +6,7 @@ require_once __DIR__ . '/../Model.php';
 
         public function index(){
             try{
-                $query = "SELECT * FROM {$this->students} ORDER BY id DESC";
+                $query = "SELECT * FROM {$this->students} ORDER BY last_name ASC";
                 $stmt = $this->con->prepare($query);
                 $stmt->execute();
                 $result = $stmt->get_result();
@@ -25,7 +25,7 @@ require_once __DIR__ . '/../Model.php';
          */
         public function getPaginated($limit = 10, $offset = 0){
             try{
-                $query = "SELECT * FROM {$this->students} ORDER BY id DESC LIMIT ? OFFSET ?";
+                $query = "SELECT * FROM {$this->students} ORDER BY last_name ASC LIMIT ? OFFSET ?";
                 $stmt = $this->con->prepare($query);
                 $stmt->bind_param('ii', $limit, $offset);
                 $stmt->execute();
@@ -43,7 +43,7 @@ require_once __DIR__ . '/../Model.php';
          */
         public function getTotalCount(){
             try{
-                $query = "SELECT COUNT(*) as total FROM {$this->students}";
+                $query = "SELECT COUNT(*) as total FROM {$this->students} ORDER by last_name ASC";
                 $stmt = $this->con->prepare($query);
                 $stmt->execute();
                 $result = $stmt->get_result();

@@ -67,4 +67,51 @@ require_once __DIR__ . '/../models/Model.php';
             }
             return $result ?? [];
         }
+
+        /**
+         * Map enrollment counts and capacity to sections
+         * @param array $sections - Array of sections
+         * @param array $total_counts - Array of enrollment counts from getTotalCount()
+         * @return array - Sections with total_students and max_capacity mapped
+         */
+        public function mapEnrollmentToSections($sections, $total_counts){
+            if(empty($sections)){
+                return [];
+            }
+
+            // If no enrollment data, set defaults
+            if(empty($total_counts) || !is_array($total_counts)){
+                foreach($sections as $key => $section){
+                    $sections[$key]['total_students'] = 0;
+                    $sections[$key]['max_capacity'] = $section['max_students'] ?? 35;
+                }
+                return $sections;
+            }
+
+            // Create lookup maps
+            $count_map = [];
+            $max_map = [];
+            
+            foreach($total_counts as $count){
+                $section_id = $count['section_id'] ?? null;
+                if($section_id !== null){
+                    $count_map[$section_id] = $count['total_section_students'] ?? 0;
+                    $max_map[$section_id] = $count['max_students'] ?? 35;
+                }
+            }
+
+            // Map counts to sections
+            foreach($sections as $key => $section){
+                $section_id = $section['id'] ?? null;
+                if($section_id !== null){
+                    $sections[$key]['total_students'] = $count_map[$section_id] ?? 0;
+                    $sections[$key]['max_capacity'] = $max_map[$section_id] ?? 35;
+                } else {
+                    $sections[$key]['total_students'] = 0;
+                    $sections[$key]['max_capacity'] = 35;
+                }
+            }
+
+            return $sections;
+        }
     }

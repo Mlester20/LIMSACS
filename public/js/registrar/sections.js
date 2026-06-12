@@ -6,6 +6,75 @@ function editFunction(id, section_name, grade_level, adviser_id, school_year_id)
     document.getElementById('edit_school_year_id').value = school_year_id; 
 }
 
+function viewSection(id, section_name, grade_level, adviser_name, school_year, total_students, max_capacity) {
+    document.getElementById('view_section_name').textContent = section_name;
+    document.getElementById('view_section_grade_level').textContent = grade_level;
+    document.getElementById('view_adviser_name').textContent = adviser_name;
+    document.getElementById('view_school_year').textContent = school_year;
+
+    const total = parseInt(total_students) || 0;
+    const max = parseInt(max_capacity) || 35;
+    document.getElementById('view_total_students').textContent = total;
+    document.getElementById('view_max_capacity').textContent = max;
+    document.getElementById('view_capacity_info').textContent = total + ' / ' + max;
+
+    const percentage = Math.round((total / max) * 100);
+
+    // Progress bar
+    const progressBar = document.getElementById('view_capacity_progress');
+    if (progressBar) {
+        progressBar.style.width = percentage + '%';
+        progressBar.setAttribute('aria-valuenow', percentage);
+        progressBar.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+
+        if (percentage >= 90) {
+            progressBar.classList.add('bg-danger');
+        } else if (percentage >= 70) {
+            progressBar.classList.add('bg-warning');
+        } else {
+            progressBar.classList.add('bg-success');
+        }
+    }
+
+    // Percent label inside bar (only show if wide enough)
+    const percentLabel = document.getElementById('view_capacity_percent');
+    if (percentLabel) {
+        percentLabel.textContent = percentage >= 10 ? percentage + '%' : '';
+    }
+
+    // "X% full" label below bar
+    const capacityLabel = document.getElementById('view_capacity_label');
+    if (capacityLabel) {
+        capacityLabel.textContent = percentage + '% full';
+
+        capacityLabel.className = 'mb-0';
+        capacityLabel.style.fontSize = '12px';
+
+        if (percentage >= 90) {
+            capacityLabel.classList.add('text-danger');
+        } else if (percentage >= 70) {
+            capacityLabel.classList.add('text-warning');
+        } else {
+            capacityLabel.classList.add('text-success');
+        }
+    }
+
+    // Capacity info color (top-right "X / 35")
+    const capacityInfo = document.getElementById('view_capacity_info');
+    if (capacityInfo) {
+        capacityInfo.className = 'fw-semibold';
+        capacityInfo.style.fontSize = '15px';
+
+        if (percentage >= 90) {
+            capacityInfo.classList.add('text-danger');
+        } else if (percentage >= 70) {
+            capacityInfo.classList.add('text-warning');
+        } else {
+            capacityInfo.classList.add('text-success');
+        }
+    }
+}
+
 // ========================================
 // Search Functionality
 // ========================================
@@ -125,8 +194,26 @@ function renderSearchResults(results) {
                 <td>${escapeHtml(gradeLevel)}</td>
                 <td>${escapeHtml(adviserName)}</td>
                 <td>${escapeHtml(schoolYear)}</td>
-                <td>${escapeHtml(totalStudents)}</td>
+                <td><span class="badge bg-primary">${escapeHtml(totalStudents)}</span></td>
                 <td>
+                    <button 
+                        class="btn btn-sm btn-primary me-1"
+                        title="View Section"
+                        data-bs-toggle="modal" 
+                        data-bs-target="#viewSectionModal"
+                        onclick="viewSection(
+                            ${sectionId},
+                            '${sectionName.replace(/'/g, "\\'").replace(/"/g, '\\"')}',
+                            '${gradeLevel.replace(/'/g, "\\'").replace(/"/g, '\\"')}',
+                            '${adviserName.replace(/'/g, "\\'").replace(/"/g, '\\"')}',
+                            '${schoolYear.replace(/'/g, "\\'").replace(/"/g, '\\"')}',
+                            ${totalStudents},
+                            ${section.max_capacity || 35}
+                        )"
+                    >
+                        View
+                    </button>
+
                     <button 
                         class="btn btn-sm btn-primary me-1"
                         title="Edit Section"

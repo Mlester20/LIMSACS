@@ -2,19 +2,25 @@
 session_start();
 
 require_once __DIR__ . '/../../models/registrar/SectionsModel.php';
+require_once __DIR__ . '/../../models/registrar/AcademicHistoryModel.php';
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../helpers/message.php';
+require_once __DIR__ . '/../../services/SectionService.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 
     class SectionsController extends Controller{
         protected $auditLogs;
+        protected $academicHistory;
+        protected $sectionService;
 
         public function __construct($con){
             parent::__construct(
                 new SectionsModel($con)
             );
             $this->auditLogs = new AuditLogs($con);
+            $this->academicHistory = new AcademicHistoryModel($con);
+            $this->sectionService = new SectionService($con);
         }
 
         public function index(){
@@ -57,6 +63,20 @@ require_once __DIR__ . '/../../../database/config/config.php';
 
         public function getActiveSchoolYear(){
             return $this->model->getActiveSchoolYear();
+        }
+
+        public function getStudentTotal(){
+            return $this->academicHistory->getTotalCount();
+        }
+
+        /**
+         * Get sections with enrollment counts and capacity mapped
+         * @return array - Sections with total_students and max_capacity fields
+         */
+        public function getSectionsWithEnrollment(){
+            $sections = $this->index();
+            $total_counts = $this->getStudentTotal();
+            return $this->sectionService->mapEnrollmentToSections($sections, $total_counts);
         }
 
         public function update($id, $data){
@@ -152,18 +172,10 @@ require_once __DIR__ . '/../../../database/config/config.php';
             }
         }
 
-        $sections = $controller->index();
+        $sections = $controller->getSectionsWithEnrollment();
         $teachers = $controller->getAvailableTeachers();
         $allTeachers = $controller->getAllTeachers();
         $sy = $controller->getActiveSchoolYear();
-
-        if(!empty($sections)){
-            foreach($sections as $key => $section){
-                $sections[$key]['total_students'] = 0; // Placeholder, as totalStudents is not implemented
-            }
-            unset($section);
-        }
-
 
     }catch(Exception $e){
         error_log($e->getMessage());

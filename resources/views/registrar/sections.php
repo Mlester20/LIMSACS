@@ -196,6 +196,95 @@ AuthRole::allowOnly(['registrar']);
       </div>
     </div>
 
+<!-- view sections modal -->
+<div class="modal fade" id="viewSectionModal" tabindex="-1" aria-labelledby="viewSectionModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content border-0 rounded-3 overflow-hidden">
+
+      <div class="modal-header border-bottom px-4 py-3">
+        <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-2" style="width:34px;height:34px;">
+            <i class="bi bi-grid text-primary fs-5"></i>
+          </div>
+          <h5 class="modal-title mb-0 fw-medium" id="viewSectionModalLabel">Section details</h5>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body px-4 py-3">
+
+        <div class="row g-3 mb-3">
+          <div class="col-6">
+            <div class="bg-light rounded-2 p-3">
+              <p class="text-uppercase text-muted mb-1" style="font-size:11px;letter-spacing:.05em;">Section name</p>
+              <p class="mb-0 fw-medium fs-6" id="view_section_name">-</p>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="bg-light rounded-2 p-3">
+              <p class="text-uppercase text-muted mb-1" style="font-size:11px;letter-spacing:.05em;">Grade level</p>
+              <p class="mb-0 fw-medium fs-6" id="view_section_grade_level">-</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-6">
+            <div class="bg-light rounded-2 p-3">
+              <p class="text-uppercase text-muted mb-1" style="font-size:11px;letter-spacing:.05em;">Adviser</p>
+              <p class="mb-0 fw-medium fs-6" id="view_adviser_name">-</p>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="bg-light rounded-2 p-3">
+              <p class="text-uppercase text-muted mb-1" style="font-size:11px;letter-spacing:.05em;">School year</p>
+              <p class="mb-0 fw-medium fs-6" id="view_school_year">-</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-6">
+            <div class="bg-light rounded-2 p-3">
+              <p class="text-uppercase text-muted mb-1" style="font-size:11px;letter-spacing:.05em;">Enrolled students</p>
+              <p class="mb-0 fw-medium text-primary" style="font-size:2rem;line-height:1;" id="view_total_students">0</p>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="bg-light rounded-2 p-3">
+              <p class="text-uppercase text-muted mb-1" style="font-size:11px;letter-spacing:.05em;">Max capacity</p>
+              <p class="mb-0 fw-medium" style="font-size:2rem;line-height:1;" id="view_max_capacity">35</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-light rounded-2 p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <p class="text-uppercase text-muted mb-0" style="font-size:11px;letter-spacing:.05em;">Capacity status</p>
+            <span class="fw-semibold text-success" style="font-size:15px;" id="view_capacity_info">0 / 35</span>
+          </div>
+          <div class="progress rounded-pill mb-2" style="height:18px;">
+            <div id="view_capacity_progress"
+              class="progress-bar bg-success rounded-pill fw-semibold"
+              role="progressbar"
+              style="width:0%; font-size:12px; transition: width 0.4s ease;"
+              aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+              <span id="view_capacity_percent">0%</span>
+            </div>
+          </div>
+          <p class="text-muted mb-0" style="font-size:12px;" id="view_capacity_label">0% full</p>
+        </div>
+
+      </div>
+
+      <div class="modal-footer border-top px-4 py-3">
+        <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
     <div class="card mt-4">
       <h5 class="card-header">Sections</h5>
       <div class="table-responsive nowrap">
@@ -207,7 +296,7 @@ AuthRole::allowOnly(['registrar']);
               <th>Grade Level</th>
               <th>Teacher Assigned</th>
               <th>School Year</th>
-              <th>Total Students</th>
+              <th>Capacity</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -222,22 +311,44 @@ AuthRole::allowOnly(['registrar']);
                   <td><?php echo $section['grade_level']; ?></td>
                   <td><?php echo $section['adviser_name']; ?></td>
                   <td><?php echo $section['school_year']; ?></td>
-                  <td><?php echo $section['total_students']; ?></td>
                   <td>
-                  <button 
-                    class="btn btn-sm btn-primary"
-                    data-bs-toggle="modal" 
-                    data-bs-target="#editSectionModal"
-                    onclick="editFunction(
-                      <?php echo $section['id']; ?>,
-                      '<?php echo addslashes(htmlspecialchars($section['section_name'])); ?>',
-                      '<?php echo addslashes(htmlspecialchars($section['grade_level'])); ?>',
-                      <?php echo $section['adviser_id']; ?>,
-                      <?php echo $section['school_year_id']; ?>
-                    )"
-                  >
-                    Edit
-                  </button>
+                    <span class="badge bg-primary"><?php echo $section['total_students']; ?></span> 
+                    / 
+                    <span class="badge bg-secondary"><?php echo $section['max_capacity']; ?></span>
+                  </td>
+                 
+                  <td>
+                    <button 
+                      class="btn btn-sm btn-primary"
+                      data-bs-toggle="modal" 
+                      data-bs-target="#viewSectionModal"
+                      onclick="viewSection(
+                        <?php echo $section['id']; ?>,
+                        '<?php echo addslashes(htmlspecialchars($section['section_name'])); ?>',
+                        '<?php echo addslashes(htmlspecialchars($section['grade_level'])); ?>',
+                        '<?php echo addslashes(htmlspecialchars($section['adviser_name'])); ?>',
+                        '<?php echo addslashes(htmlspecialchars($section['school_year'])); ?>',
+                        <?php echo $section['total_students']; ?>,
+                        <?php echo $section['max_capacity']; ?>
+                      )"
+                    >
+                      View
+                    </button>
+
+                    <button 
+                      class="btn btn-sm btn-primary"
+                      data-bs-toggle="modal" 
+                      data-bs-target="#editSectionModal"
+                      onclick="editFunction(
+                        <?php echo $section['id']; ?>,
+                        '<?php echo addslashes(htmlspecialchars($section['section_name'])); ?>',
+                        '<?php echo addslashes(htmlspecialchars($section['grade_level'])); ?>',
+                        <?php echo $section['adviser_id']; ?>,
+                        <?php echo $section['school_year_id']; ?>
+                      )"
+                    >
+                      Edit
+                    </button>
 
                     <form method="POST" action="../../../app/controllers/registrar/SectionsController.php" style="display: inline;">
                       <input type="hidden" name="delete_section" value="<?php echo $section['id']; ?>">

@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-require_once __DIR__ . '/app/helpers/message.php';
+require_once __DIR__ . '/app/helpers/flashMessage.php';
 ?>
 
 <!DOCTYPE html>
@@ -39,7 +39,7 @@ require_once __DIR__ . '/app/helpers/message.php';
 </head>
 <body>
 
-    <?php showFlash(); ?>
+    <?php FlashMessage::showFlash(); ?>
 
     <div class="container-xxl">
       <div class="authentication-wrapper authentication-basic container-p-y">
@@ -112,6 +112,7 @@ require_once __DIR__ . '/app/helpers/message.php';
     <script src="public/assets/vendor/js/menu.js"></script>
     <script src="public/assets/js/main.js"></script>
     <script async defer src="https://buttons.github.io/buttons.js"></script>
+    
     <script>
       function togglePassword() {
         const pw = document.getElementById('password');

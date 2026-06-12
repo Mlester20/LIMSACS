@@ -256,6 +256,88 @@ class EnrollmentController extends Controller {
         // Deletion handled by AcademicHistoryModel
         return $this->academicHistoryModel->delete($id);
     }
+
+    /**
+     * Get enrolled students with pagination
+     * @param int $page - Current page number (default: 1)
+     * @param int $itemsPerPage - Items per page (default: 10)
+     * @return array - Array with 'enrollments' and 'pagination' keys
+     */
+    public function getEnrolledStudentsWithPagination($page = 1, $itemsPerPage = 10) {
+        try {
+            $page = max(1, (int)$page);
+            $itemsPerPage = max(1, (int)$itemsPerPage);
+            $offset = ($page - 1) * $itemsPerPage;
+
+            // Get total count
+            $query_count = "
+                SELECT COUNT(*) as total
+                FROM academic_history ah
+                JOIN students s ON ah.student_id = s.id
+                WHERE ah.enrollment_status = 'Enrolled'
+            ";
+            $stmt = $this->model->con->prepare($query_count);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
+            $totalRecords = $row['total'] ?? 0;
+
+            // Get paginated data
+            $query = "
+                SELECT 
+                    ah.id as enrollment_id,
+                    s.id as student_id,
+                    s.first_name,
+                    s.last_name,
+                    s.lrn,
+                    sy.school_year,
+                    ah.grade_level,
+                    sec.section_name,
+                    ah.enrollment_status
+                FROM academic_history ah
+                JOIN students s ON ah.student_id = s.id
+                JOIN school_year sy ON ah.school_year_id = sy.id
+                JOIN sections sec ON ah.section_id = sec.id
+                WHERE ah.enrollment_status = 'Enrolled'
+                ORDER BY s.last_name ASC, s.first_name ASC
+                LIMIT ? OFFSET ?
+            ";
+            
+            $stmt = $this->model->con->prepare($query);
+            $stmt->bind_param('ii', $itemsPerPage, $offset);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $enrollments = $result->fetch_all(MYSQLI_ASSOC);
+
+            // Calculate pagination info
+            $totalPages = ceil($totalRecords / $itemsPerPage);
+            
+            return [
+                'enrollments' => $enrollments,
+                'pagination' => [
+                    'currentPage' => $page,
+                    'itemsPerPage' => $itemsPerPage,
+                    'totalRecords' => $totalRecords,
+                    'totalPages' => $totalPages,
+                    'hasPrevPage' => $page > 1,
+                    'hasNextPage' => $page < $totalPages
+                ]
+            ];
+        } catch (Exception $e) {
+            error_log("Get enrolled students error: " . $e->getMessage());
+            return [
+                'enrollments' => [],
+                'pagination' => [
+                    'currentPage' => 1,
+                    'itemsPerPage' => $itemsPerPage,
+                    'totalRecords' => 0,
+                    'totalPages' => 0,
+                    'hasPrevPage' => false,
+                    'hasNextPage' => false
+                ]
+            ];
+        }
+    }
 }
 
 // ===== Bootstrap the controller =====
@@ -339,6 +421,7 @@ try {
                      LIMIT 100";
             
             try {
+            
                 $stmt = $con->prepare($query);
                 $stmt->execute();
                 $result = $stmt->get_result();
