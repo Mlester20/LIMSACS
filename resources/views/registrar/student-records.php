@@ -411,79 +411,105 @@ AuthRole::allowOnly(['registrar']);
 
     
     <div class="modal fade" id="studentDetailsModal" tabindex="-1" aria-labelledby="studentDetailsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-md">
+        <div class="modal-dialog modal-md modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header text-white">
                     <h5 class="modal-title" id="studentDetailsModalLabel">Student Profile</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-3">
-                    <div class="row g-2">
-                        <!-- Row 1 -->
-                        <div class="col-md-6">
-                            <small class="text-muted d-block">LRN</small>
-                            <strong id="modalLrn">-</strong>
-                        </div>
+                
+                <div class="modal-body p-3" style="max-height: 70vh; overflow-y: auto; -webkit-overflow-scrolling: touch;">
+                    
+                    <div class="mb-4">
+                        <h6 class="mb-3 text-primary border-bottom pb-2">Personal Information</h6>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <small class="text-muted d-block">LRN</small>
+                                <strong id="modalLrn">-</strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Gender</small>
+                                <strong id="modalGender">-</strong>
+                            </div>
 
-                        <!-- Row 2 -->
-                        <div class="col-md-6">
-                            <small class="text-muted d-block">First Name</small>
-                            <strong id="modalFirstName">-</strong>
-                        </div>
-                        <div class="col-md-6">
-                            <small class="text-muted d-block">Gender</small>
-                            <strong id="modalGender">-</strong>
-                        </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">First Name</small>
+                                <strong id="modalFirstName">-</strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Age</small>
+                                <strong id="modalAge">-</strong>
+                            </div>
 
-                        <!-- Row 3 -->
-                        <div class="col-md-6">
-                            <small class="text-muted d-block">Middle Name</small>
-                            <strong id="modalMiddleName">-</strong>
-                        </div>
-                        <div class="col-md-6">
-                            <small class="text-muted d-block">Age</small>
-                            <strong id="modalAge">-</strong>
-                        </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Middle Name</small>
+                                <strong id="modalMiddleName">-</strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Status</small>
+                                <div><span id="modalStatusBadge" class="badge bg-success">Active</span></div>
+                            </div>
 
-                        <!-- Row 4 -->
-                        <div class="col-md-6">
-                            <small class="text-muted d-block">Last Name</small>
-                            <strong id="modalLastName">-</strong>
-                        </div>
-                        <div class="col-md-6">
-                            <small class="text-muted d-block">Status</small>
-                            <span id="modalStatusBadge" class="badge bg-success">Active</span>
-                        </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Last Name</small>
+                                <strong id="modalLastName">-</strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Contact</small>
+                                <strong id="modalContactNumber">-</strong>
+                            </div>
 
-                        <!-- Row 5 -->
-                        <div class="col-md-6">
-                            <small class="text-muted d-block">Birth Date</small>
-                            <strong id="modalBirthDate">-</strong>
-                        </div>
-                        <div class="col-md-6">
-                            <small class="text-muted d-block">Contact</small>
-                            <strong id="modalContactNumber">-</strong>
-                        </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Birth Date</small>
+                                <strong id="modalBirthDate">-</strong>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted d-block">Religion</small>
+                                <strong id="modalReligion">-</strong>
+                            </div>
 
-                        <!-- Row 6 -->
-                        <div class="col-md-6">
-                            <small class="text-muted d-block">Place of Birth</small>
-                            <strong id="modalPlaceOfBirth">-</strong>
-                        </div>
-                        <div class="col-md-6">
-                            <small class="text-muted d-block">Religion</small>
-                            <strong id="modalReligion">-</strong>
-                        </div>
+                            <div class="col-12">
+                                <small class="text-muted d-block">Place of Birth</small>
+                                <strong id="modalPlaceOfBirth">-</strong>
+                            </div>
 
-                        <!-- Row 7 -->
-                        <div class="col-12">
-                            <small class="text-muted d-block">Address</small>
-                            <strong id="modalAddress" class="text-break">-</strong>
+                            <div class="col-12">
+                                <small class="text-muted d-block">Address</small>
+                                <strong id="modalAddress" class="text-break">-</strong>
+                            </div>
                         </div>
+                    </div>
 
+                    <div class="mb-4">
+                        <h6 class="mb-3 text-info border-bottom pb-2">Academic History</h6>
+                        <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>School Year</th>
+                                        <th>Grade & Section</th>
+                                        <th>Adviser</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="academicHistoryBody">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h6 class="mb-3 text-warning border-bottom pb-2">Parent/Guardians Information</h6>
+                        <div id="parentGuardiansInfo">
+                            <p class="text-center text-muted">Loading...</p>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer">
+                
+                <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary btn-sm">Edit</button>
                 </div>

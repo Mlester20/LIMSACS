@@ -1,52 +1,181 @@
-// Function to populate modal with student data
 function populateStudentModal(student) {
-    // Personal Information
-    document.getElementById('modalLrn').textContent = student.lrn || '-';
-    document.getElementById('modalFirstName').textContent = student.first_name || '-';
-    document.getElementById('modalMiddleName').textContent = student.middle_name || '-';
-    document.getElementById('modalLastName').textContent = student.last_name || '-';
-    document.getElementById('modalGender').textContent = student.gender || '-';
+    const studentId = student.id;
+    
+    $.ajax({
+        url: '../../../app/controllers/registrar/StudentsController.php',
+        type: 'POST',
+        data: {
+            action: 'get_student_profile',
+            student_id: studentId
+        },
+        dataType: 'json',
+        success: function(response) {
+            const studentData = response.student || student;
+            const academicHistory = response.academic_history || [];
+            const parentGuardians = response.parent_guardians || {};
 
-    // Birth Information
-    document.getElementById('modalBirthDate').textContent = student.birth_date || '-';
-    document.getElementById('modalAge').textContent = student.age || '-';
-    document.getElementById('modalPlaceOfBirth').textContent = student.place_of_birth || '-';
+            // Personal Information
+            document.getElementById('modalLrn').textContent = studentData.lrn || '-';
+            document.getElementById('modalFirstName').textContent = studentData.first_name || '-';
+            document.getElementById('modalMiddleName').textContent = studentData.middle_name || '-';
+            document.getElementById('modalLastName').textContent = studentData.last_name || '-';
+            document.getElementById('modalGender').textContent = studentData.gender || '-';
 
-    // Contact Information
-    document.getElementById('modalContactNumber').textContent = student.contact_number || '-';
-    document.getElementById('modalAddress').textContent = student.address || '-';
+            // Birth Information
+            document.getElementById('modalBirthDate').textContent = studentData.birth_date || '-';
+            document.getElementById('modalAge').textContent = studentData.age || '-';
+            document.getElementById('modalPlaceOfBirth').textContent = studentData.place_of_birth || '-';
 
-    // Other Information
-    document.getElementById('modalReligion').textContent = student.religion || '-';
+            // Contact Information
+            document.getElementById('modalContactNumber').textContent = studentData.contact_number || '-';
+            document.getElementById('modalAddress').textContent = studentData.address || '-';
 
-    // Status Badge
-    const statusBadge = document.getElementById('modalStatusBadge');
-    const status = student.student_status || 'Active';
+            // Other Information
+            document.getElementById('modalReligion').textContent = studentData.religion || '-';
 
-    statusBadge.textContent = status;
+            // Status Badge
+            const statusBadge = document.getElementById('modalStatusBadge');
+            const status = studentData.student_status || 'Active';
 
-    // Status color mapping
-    switch (status) {
-        case 'Enrolled':
-            statusBadge.className = 'badge bg-success';
-            break;
+            statusBadge.textContent = status;
 
-        case 'Inactive':
-            statusBadge.className = 'badge bg-secondary';
-            break;
+            // Status color mapping
+            switch (status) {
+                case 'Enrolled':
+                    statusBadge.className = 'badge bg-success';
+                    break;
 
-        case 'Transferred':
-            statusBadge.className = 'badge bg-warning';
-            break;
+                case 'Inactive':
+                    statusBadge.className = 'badge bg-secondary';
+                    break;
 
-        case 'Graduated':
-            statusBadge.className = 'badge bg-info';
-            break;
+                case 'Transferred':
+                    statusBadge.className = 'badge bg-warning';
+                    break;
 
-        default:
-            statusBadge.className = 'badge bg-primary';
-            break;
+                case 'Graduated':
+                    statusBadge.className = 'badge bg-info';
+                    break;
+
+                default:
+                    statusBadge.className = 'badge bg-primary';
+                    break;
+            }
+
+            // Render Academic History
+            renderAcademicHistory(academicHistory);
+
+            // Render Parent/Guardians Information
+            renderParentGuardians(parentGuardians);
+        },
+        error: function(error) {
+            console.error('Error fetching student profile:', error);
+            // Fallback to basic student data display
+            document.getElementById('modalLrn').textContent = student.lrn || '-';
+            document.getElementById('modalFirstName').textContent = student.first_name || '-';
+            document.getElementById('modalMiddleName').textContent = student.middle_name || '-';
+            document.getElementById('modalLastName').textContent = student.last_name || '-';
+        }
+    });
+}
+
+/**
+ * Render academic history table
+ * @param {Array} academicHistory - Array of enrollment records
+ */
+function renderAcademicHistory(academicHistory) {
+    const tableBody = document.getElementById('academicHistoryBody');
+    if (!tableBody) return;
+
+    if (!academicHistory || academicHistory.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No academic history found</td></tr>';
+        return;
     }
+
+    let html = '';
+    academicHistory.forEach(record => {
+        html += `
+            <tr>
+                <td>${record.school_year || 'N/A'}</td>
+                <td>${record.grade_level || 'N/A'} - ${record.section_name || 'N/A'}</td>
+                <td>${record.adviser_name || 'N/A'}</td>
+                <td>
+                    <span class="badge bg-${record.enrollment_status === 'Enrolled' ? 'success' : 'secondary'}">
+                        ${record.enrollment_status || 'N/A'}
+                    </span>
+                </td>
+            </tr>
+        `;
+    });
+
+    tableBody.innerHTML = html;
+}
+
+/**
+ * Render parent/guardians information
+ * @param {Object} parentGuardians - Parent/Guardian data
+ */
+function renderParentGuardians(parentGuardians) {
+    const container = document.getElementById('parentGuardiansInfo');
+    if (!container) return;
+
+    if (!parentGuardians || Object.keys(parentGuardians).length === 0) {
+        container.innerHTML = '<p class="text-muted text-center">No parent/guardian information found</p>';
+        return;
+    }
+
+    let html = '<div class="row">';
+
+    // Father Information
+    if (parentGuardians.father_name) {
+        html += `
+            <div class="col-md-6 mb-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title text-primary">Father</h6>
+                        <p class="mb-1"><strong>Name:</strong> ${parentGuardians.father_name || 'N/A'}</p>
+                        <p class="mb-1"><strong>Occupation:</strong> ${parentGuardians.father_occupation || 'N/A'}</p>
+                        <p class="mb-0"><strong>Contact:</strong> ${parentGuardians.father_contact || 'N/A'}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Mother Information
+    if (parentGuardians.mother_name) {
+        html += `
+            <div class="col-md-6 mb-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title text-success">Mother</h6>
+                        <p class="mb-1"><strong>Name:</strong> ${parentGuardians.mother_name || 'N/A'}</p>
+                        <p class="mb-1"><strong>Occupation:</strong> ${parentGuardians.mother_occupation || 'N/A'}</p>
+                        <p class="mb-0"><strong>Contact:</strong> ${parentGuardians.mother_contact || 'N/A'}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Guardian Information
+    if (parentGuardians.guardian_name) {
+        html += `
+            <div class="col-md-6 mb-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title text-warning">Guardian</h6>
+                        <p class="mb-1"><strong>Name:</strong> ${parentGuardians.guardian_name || 'N/A'}</p>
+                        <p class="mb-1"><strong>Relationship:</strong> ${parentGuardians.guardian_relationship || 'N/A'}</p>
+                        <p class="mb-0"><strong>Contact:</strong> ${parentGuardians.guardian_contact || 'N/A'}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
 }
 
 /**
