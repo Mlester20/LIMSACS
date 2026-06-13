@@ -245,6 +245,29 @@ document.getElementById('enrollBirthDate').addEventListener('change', function (
     document.getElementById('ageInput').value = age;
 });
 
+function deleteStudent(id) {
+    if (!confirm('Are you sure you want to delete this student? This action cannot be undone.')) return;
+
+    fetch(`../../../app/controllers/registrar/EnrollStudentController.php?action=delete&id=${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `id=${id}`
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert('Student deleted successfully.');
+                location.reload();
+            } else {
+                alert(data.message || 'Failed to delete student.');
+            }
+        })
+        .catch(err => {
+            console.error('deleteStudent error:', err);
+            alert('An error occurred while deleting the student.');
+        });
+}
+
 // ============== create rest api to create search student function ==================== //
 
 let searchTimeout;
@@ -346,35 +369,43 @@ function renderSearchResults(results){
     }
 
     const rows = results.map((student, index) => {
-        const studentName = `${student.first_name || ''} ${student.middle_name || ''} ${student.last_name || ''}`.trim();
         const lrn = student.lrn || 'N/A';
-        const enrollmentStatus = student.enrollment_status || 'N/A';
+        const studentName = `${student.first_name || ''} ${student.middle_name || ''} ${student.last_name || ''}`.trim();
+        const gender = student.gender
+        const age = student.age
+        // const enrollmentStatus = student.enrollment_status || 'N/A';
 
         return `
-            <tr>
+            <tr 
+                style="cursor: pointer;" 
+                data-bs-toggle="modal" 
+                data-bs-target="#studentDetailsModal"
+                onclick='populateStudentModal(${JSON.stringify(student)})'
+            >
                 <td>${escapeHtml(index + 1)}</td>
                 <td>${escapeHtml(lrn)}</td>
                 <td>${escapeHtml(studentName)}</td>
-                <td>${escapeHtml(enrollmentStatus)}</td>
+                <td>${escapeHtml(gender)}</td>
+                <td>${escapeHtml(age)}</td>
                 <td>
                     <button 
-                        class="btn btn-sm btn-warning me-1"
+                        class="btn btn-sm btn-primary me-1"
                         title="Edit Student"
-                        onclick="editStudent(${student.id})"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editStudentModal"
+                        onclick='event.stopPropagation(); editStudent(${JSON.stringify(student)})'
                     >
                         Edit
                     </button>
-
                     <button 
                         class="btn btn-sm btn-danger" 
                         title="Delete Student"
-                        onclick="if(confirm('Are you sure you want to delete this student?')) deleteStudent(${student.id})"
+                        onclick="event.stopPropagation(); if(confirm('Are you sure you want to delete this student? This action cannot be undone.')) deleteStudentAjax(${student.id})"
                     >
                         Delete
                     </button>
                 </td>
-            </tr>
-        `;
+            </tr>`;
     }).join('');
 
     //insert rows into table

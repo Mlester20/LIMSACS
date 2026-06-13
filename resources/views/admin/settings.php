@@ -2,7 +2,7 @@
 session_start();
 
 require_once __DIR__ . '/../../../app/middleware/Auth.php';
-require_once __DIR__ . '/../../../app/helpers/message.php';
+require_once __DIR__ . '/../../../app/helpers/flashMessage.php';
 require_once __DIR__ . '/../../../app/models/UpdateProfileModel.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 
@@ -46,6 +46,9 @@ $memberSince = $userProfile['created_at'] ? date('M d, Y', strtotime($userProfil
     <script src="../../../public/assets/js/config.js"></script>
 </head>
 <body>
+    
+    <!-- Display flash messages -->
+    <?php FlashMessage::showFlash(); ?>
 
     <?php require_once __DIR__ . '/partials/sidebar.php'; ?>
     <?php require_once __DIR__ . '/partials/topbar.php'; ?>
@@ -53,9 +56,6 @@ $memberSince = $userProfile['created_at'] ? date('M d, Y', strtotime($userProfil
     <!-- Main content -->
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="py-3 mb-4"><span class="text-muted fw-light">Account /</span> Profile Settings</h4>
-
-        <!-- Display flash messages -->
-        <?php showFlash(); ?>
 
         <div class="row">
             <!-- Profile Information Section -->

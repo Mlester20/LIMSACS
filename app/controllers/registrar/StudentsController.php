@@ -3,7 +3,7 @@ session_start();
 
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../../database/config/config.php';
-require_once __DIR__ . '/../../helpers/message.php';
+require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../../models/registrar/StudentsModel.php';
 require_once __DIR__ . '/../../models/registrar/AcademicHistoryModel.php';
 require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
@@ -58,11 +58,11 @@ require_once __DIR__ . '/../../services/StudentsService.php';
         public function create($data){
             try{
                 if($this->model->create($data)){
-                    setFlash("success", "Student enrolled successfully.");
+                    FlashMessage::setFlash("success", "Student added successfully.");
                     header("Location: ../../../resources/views/registrar/student-records.php");
                     exit();
                 }else{
-                    setFlash("error", "Failed to enroll student. Please try again.");
+                    FlashMessage::setFlash("error", "Failed to enroll student. Please try again.");
                     header("Location: ../../../resources/views/registrar/student-records.php");
                     exit();
                 }
@@ -76,11 +76,11 @@ require_once __DIR__ . '/../../services/StudentsService.php';
         public function update($id, $data, $page = 1){
             try{
                 if($this->model->update($id, $data)){
-                    setFlash("success", "Student record updated successfully.");
+                    FlashMessage::setFlash("success", "Student record updated successfully.");
                     header("Location: ../../../resources/views/registrar/student-records.php?page=" . intval($page));
                     exit();
                 }else{
-                    setFlash("error", "Failed to update student record. Please try again.");
+                    FlashMessage::setFlash("error", "Failed to update student record. Please try again.");
                     header("Location: ../../../resources/views/registrar/student-records.php?page=" . intval($page));
                     exit();
                 }
@@ -93,11 +93,11 @@ require_once __DIR__ . '/../../services/StudentsService.php';
         public function delete($id, $page = 1){
            try{
                 if($this->model->delete($id)){
-                    setFlash("success", "Student record deleted successfully.");
+                    FlashMessage::setFlash("success", "Student record deleted successfully.");
                     header("Location: ../../../resources/views/registrar/student-records.php?page=" . intval($page));
                     exit();
                 }else{
-                    setFlash("error", "Failed to delete student record. Please try again.");
+                    FlashMessage::setFlash("error", "Failed to delete student record. Please try again.");
                     header("Location: ../../../resources/views/registrar/student-records.php?page=" . intval($page));
                     exit();
                 }

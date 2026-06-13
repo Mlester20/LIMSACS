@@ -4,7 +4,7 @@ session_start();
 require_once __DIR__ . '/../../../database/config/config.php';
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../models/admin/SchoolYearModel.php';
-require_once __DIR__ . '/../../helpers/message.php';
+require_once __DIR__ . '/../../helpers/flashMessage.php';
 
     class SchoolYearController extends Controller{
         public function __construct($con){
@@ -20,11 +20,11 @@ require_once __DIR__ . '/../../helpers/message.php';
         public function create($data){
             try{
                 if($this->model->create($data)){
-                    setFlash('success', 'School year created successfully');
+                    FlashMessage::setFlash('success', 'School year created successfully');
                     header("Location: ../../../resources/views/admin/school-year.php");
                     exit();
                 }else{
-                    setFlash('error', 'Failed to create school year');
+                    FlashMessage::setFlash('error', 'Failed to create school year');
                     exit();
                 }
             }catch(Exception $e){
@@ -32,11 +32,6 @@ require_once __DIR__ . '/../../helpers/message.php';
                 exit();
             }
         }
-
-        //function to check if there's an active sy, data should be abled to insert
-        // public function canInsert(){
-
-        // }
 
         //function to avoid deleting active school year
         public function canDelete($id){
@@ -52,11 +47,11 @@ require_once __DIR__ . '/../../helpers/message.php';
         public function update($id, $data){
             try{
                 if($this->model->update($id, $data)){
-                    setFlash('success', 'School year updated successfully');
+                    FlashMessage::setFlash('success', 'School year updated successfully');
                     header("Location: ../../../resources/views/admin/school-year.php");
                     exit();
                 }else{
-                    setFlash('error', 'Failed to update school year');
+                    FlashMessage::setFlash('error', 'Failed to update school year');
                     exit();
                 }
             }catch(Exception $e){
@@ -68,17 +63,17 @@ require_once __DIR__ . '/../../helpers/message.php';
         public function delete($id){
             try{
                 if(!$this->canDelete($id)){
-                    setFlash('error', 'This is an active school year and cannot be deleted.');
+                    FlashMessage::setFlash('error', 'This is an active school year and cannot be deleted.');
                     header('Location: ../../../resources/views/admin/school-year.php');
                     exit();
                 }
 
                 if($this->model->delete($id)){
-                    setFlash('success', 'School year deleted successfully');
+                    FlashMessage::setFlash('success', 'School year deleted successfully');
                     header("Location: ../../../resources/views/admin/school-year.php");
                     exit();                    
                 }else{
-                    setFlash('error', 'Failed to delete school year');
+                    FlashMessage::setFlash('error', 'Failed to delete school year');
                     header("Location: ../../../resources/views/admin/school-year.php");
                     exit();
                 }

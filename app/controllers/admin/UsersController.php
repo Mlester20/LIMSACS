@@ -2,11 +2,10 @@
 session_start();
 
 require_once __DIR__ . '/../../../database/config/config.php';
-require_once __DIR__ . '/../../helpers/message.php';
+require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../helpers/password.php';
 require_once __DIR__ . '/../Controller.php';
-
 require_once __DIR__ . '/../../models/admin/UsersModel.php';
 
 
@@ -39,10 +38,10 @@ require_once __DIR__ . '/../../models/admin/UsersModel.php';
                         'users',
                         $_SESSION['full_name'] . ' created a new user record',
                     );
-                    setFlash('success', 'User created successfully');
+                    FlashMessage::setFlash('success', 'User created successfully');
                     header('Location: ../../../resources/views/admin/users.php');
                 }else{
-                    setFlash("error", "Failed to create user");
+                    FlashMessage::setFlash("error", "Failed to create user");
                     header("Location: ../../../resources/views/admin/users.php");
                     exit();
                 }
@@ -64,10 +63,10 @@ require_once __DIR__ . '/../../models/admin/UsersModel.php';
                         'users',
                         $_SESSION['full_name'] . ' updated user record',
                     );
-                    setFlash('success', 'User updated successfully');
+                    FlashMessage::setFlash('success', 'User updated successfully');
                     header('Location: ../../../resources/views/admin/users.php');
                 }else{
-                    setFlash("error", "Failed to update user");
+                    FlashMessage::setFlash("error", "Failed to update user");
                     header("Location: ../../../resources/views/admin/users.php");
                     exit();
                 }
@@ -89,11 +88,11 @@ require_once __DIR__ . '/../../models/admin/UsersModel.php';
                         'users',
                         $_SESSION['full_name'] . ' Deleted user record',
                     );
-                    setFlash("success", "User deleted successfully.");
+                    FlashMessage::setFlash("success", "User deleted successfully.");
                     header("Location: ../../../resources/views/admin/users.php");
                     exit();
                 }else{
-                    setFlash("success", "There's something wrong with the server. Please try again.");
+                    FlashMessage::setFlash("success", "There's something wrong with the server. Please try again.");
                     header("Location: ../../../resources/views/admin/users.php");
                     exit();
                 }

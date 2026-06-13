@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../../app/helpers/message.php';
+require_once __DIR__ . '/../../../app/helpers/flashMessage.php';
 require_once __DIR__ . '/../../../app/controllers/registrar/ParentGuardiansController.php';
 require_once __DIR__ . '/../../../app/middleware/Auth.php';
 AuthRole::allowOnly(['registrar']);
@@ -39,7 +39,7 @@ AuthRole::allowOnly(['registrar']);
 </head>
 <body>
 
-    <?php showFlash(); ?>   
+    <?php FlashMessage::showFlash(); ?>   
 
     <?php require_once __DIR__ . '/partials/sidebar.php'; ?>
     <?php require_once __DIR__ . '/partials/topbar.php'; ?>

@@ -42,25 +42,27 @@ class AcademicHistoryModel extends Model {
      * @return array
      */
     public function getByStudentId($student_id) {
-        try {
+        try{
             $query = "SELECT 
                         ah.*,
                         sy.school_year,
                         s.section_name,
-                        s.grade_level as section_grade
-                     FROM {$this->academic_history} ah
-                     LEFT JOIN {$this->school_year} sy ON ah.school_year_id = sy.id
-                     LEFT JOIN {$this->sections} s ON ah.section_id = s.id
-                     WHERE ah.student_id = ?
-                     ORDER BY ah.created_at DESC";
-            
+                        s.grade_level as section_grade,
+                        u.full_name as adviser_name
+                        FROM {$this->academic_history} ah
+                        LEFT JOIN {$this->school_year} sy ON ah.school_year_id = sy.id
+                        LEFT JOIN {$this->sections} s ON ah.section_id = s.id
+                        LEFT JOIN users u ON s.adviser_id = u.id
+                        WHERE ah.student_id = ?
+                        ORDER BY ah.created_at DESC
+                    ";
             $stmt = $this->con->prepare($query);
             $stmt->bind_param('i', $student_id);
             $stmt->execute();
             $result = $stmt->get_result();
             
             return $result->fetch_all(MYSQLI_ASSOC);
-        } catch (Exception $e) {
+        }catch(Exception $e) {
             error_log("Get enrollment history error: " . $e->getMessage());
             return [];
         }
