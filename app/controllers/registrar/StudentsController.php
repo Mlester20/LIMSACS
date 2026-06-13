@@ -3,17 +3,23 @@ session_start();
 
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../../database/config/config.php';
-require_once __DIR__ . '/../../helpers/message.php';
+require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../../models/registrar/StudentsModel.php';
+require_once __DIR__ . '/../../models/registrar/AcademicHistoryModel.php';
+require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
 require_once __DIR__ . '/../../services/StudentsService.php';
 
     class StudentsController extends Controller{
         private $itemsPerPage = 10;
+        protected $academicHistory;
+        protected $parentGuardians;
 
         public function __construct($con){
             parent::__construct(
                 new StudentsModel($con)
             );
+            $this->academicHistory = new AcademicHistoryModel($con);
+            $this->parentGuardians = new ParentGuardiansModel($con);
         }
 
         /**
@@ -52,11 +58,11 @@ require_once __DIR__ . '/../../services/StudentsService.php';
         public function create($data){
             try{
                 if($this->model->create($data)){
-                    setFlash("success", "Student enrolled successfully.");
+                    FlashMessage::setFlash("success", "Student added successfully.");
                     header("Location: ../../../resources/views/registrar/student-records.php");
                     exit();
                 }else{
-                    setFlash("error", "Failed to enroll student. Please try again.");
+                    FlashMessage::setFlash("error", "Failed to enroll student. Please try again.");
                     header("Location: ../../../resources/views/registrar/student-records.php");
                     exit();
                 }
@@ -70,11 +76,11 @@ require_once __DIR__ . '/../../services/StudentsService.php';
         public function update($id, $data, $page = 1){
             try{
                 if($this->model->update($id, $data)){
-                    setFlash("success", "Student record updated successfully.");
+                    FlashMessage::setFlash("success", "Student record updated successfully.");
                     header("Location: ../../../resources/views/registrar/student-records.php?page=" . intval($page));
                     exit();
                 }else{
-                    setFlash("error", "Failed to update student record. Please try again.");
+                    FlashMessage::setFlash("error", "Failed to update student record. Please try again.");
                     header("Location: ../../../resources/views/registrar/student-records.php?page=" . intval($page));
                     exit();
                 }
@@ -87,11 +93,11 @@ require_once __DIR__ . '/../../services/StudentsService.php';
         public function delete($id, $page = 1){
            try{
                 if($this->model->delete($id)){
-                    setFlash("success", "Student record deleted successfully.");
+                    FlashMessage::setFlash("success", "Student record deleted successfully.");
                     header("Location: ../../../resources/views/registrar/student-records.php?page=" . intval($page));
                     exit();
                 }else{
-                    setFlash("error", "Failed to delete student record. Please try again.");
+                    FlashMessage::setFlash("error", "Failed to delete student record. Please try again.");
                     header("Location: ../../../resources/views/registrar/student-records.php?page=" . intval($page));
                     exit();
                 }
@@ -99,6 +105,41 @@ require_once __DIR__ . '/../../services/StudentsService.php';
                error_log($e->getMessage());
                return false;
            }
+        }
+
+        /**
+         * Get student profile with academic history and parents/guardians
+         * @param int $student_id Student ID
+         * @return array Student profile data
+         */
+        public function getStudentProfile($student_id) {
+            try {
+                $academicHistoryModel = $this->academicHistory;
+                $parentGuardiansModel = $this->parentGuardians;
+
+                // Get student data
+                $student = $this->model->getById($student_id);
+
+                // Get academic history
+                $academicHistory = $academicHistoryModel->getByStudentId($student_id);
+
+                // Get parents/guardians
+                $parentGuardians = $parentGuardiansModel->getByStudentId($student_id);
+
+                return [
+                    'student' => $student,
+                    'academic_history' => $academicHistory ?: [],
+                    
+                    'parent_guardians' => $parentGuardians ?: []
+                ];
+            } catch (Exception $e) {
+                error_log("Get student profile error: " . $e->getMessage());
+                return [
+                    'student' => null,
+                    'academic_history' => [],
+                    'parent_guardians' => []
+                ];
+            }
         }
     }
 
@@ -171,3 +212,17 @@ require_once __DIR__ . '/../../services/StudentsService.php';
         error_log($e->getMessage());
         exit();
     }
+
+    //=================================== Handle AJAX requests ====================================//
+    if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])){
+        $controller = new StudentsController($con);
+        header('Content-Type: application/json');
+
+        if($_POST['action'] === 'get_student_profile'){
+            $student_id = isset($_POST['student_id']) ? intval($_POST['student_id']) : 0;
+            $profile = $controller->getStudentProfile($student_id);
+            echo json_encode($profile);
+            exit();
+        }
+    }
+?>

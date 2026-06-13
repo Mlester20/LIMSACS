@@ -2,7 +2,7 @@
 session_start();
 
 require_once __DIR__ . '/../../../app/middleware/Auth.php';
-require_once __DIR__ . '/../../../app/helpers/message.php';
+require_once __DIR__ . '/../../../app/helpers/flashMessage.php';
 require_once __DIR__ . '/../../../app/models/UpdateProfileModel.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 
@@ -54,7 +54,7 @@ $memberSince = $userProfile['created_at'] ? date('M d, Y', strtotime($userProfil
         <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Account Settings /</span> Account</h4>
 
         <!-- Display flash messages -->
-        <?php showFlash(); ?>
+        <?php FlashMessage::showFlash(); ?>
 
         <div class="row">
             <div class="col-md-12">

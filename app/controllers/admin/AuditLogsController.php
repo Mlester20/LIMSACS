@@ -3,7 +3,7 @@ session_start();
 
 require_once __DIR__ . '/../../models/admin/AuditLogsModel.php';
 require_once __DIR__ . '/../../../database/config/config.php';
-require_once __DIR__ . '/../../helpers/message.php';
+require_once __DIR__ . '/../../helpers/flashMessage.php';
 
     class AuditLogsController{
         private $model;
@@ -18,11 +18,11 @@ require_once __DIR__ . '/../../helpers/message.php';
 
         public function delete($id){
             if($this->model->delete($id)){
-                setFlash("success", "Log deleted successfully.");
+                FlashMessage::setFlash("success", "Log deleted successfully.");
                 header("Location: ../../../resources/views/admin/audit-logs.php");
                 exit();
             }else{
-                setFlash("success", "Error deleting log.");
+                FlashMessage::setFlash("success", "Error deleting log.");
                 header("Location: ../../../resources/views/admin/audit-logs.php");
                 exit();                
             }

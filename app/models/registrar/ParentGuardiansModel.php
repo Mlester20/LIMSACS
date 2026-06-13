@@ -95,6 +95,20 @@ require_once __DIR__ . '/../Model.php';
             }
         }
 
+        public function getByStudentId($student_id){
+            try{
+                $query = "SELECT * FROM {$this->parents_guardians} WHERE student_id = ?";
+                $stmt = $this->con->prepare($query);
+                $stmt->bind_param('i', $student_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                return $result->fetch_assoc();
+            }catch(Exception $e){
+                error_log("Get parent guardians error: " . $e->getMessage());
+                return null;
+            }
+        }
+
         public function delete($id){
             try{
                 $query = "DELETE FROM {$this->parents_guardians} WHERE id = ?";

@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../../../database/config/config.php';
 require_once __DIR__ . '/../../../app/controllers/registrar/EnrollmentController.php';
 require_once __DIR__ . '/../../../app/middleware/Auth.php';
-require_once __DIR__ . '/../../../app/helpers/message.php';
+require_once __DIR__ . '/../../../app/helpers/flashMessage.php';
 
 AuthRole::allowOnly(['registrar']);
 
@@ -61,6 +61,8 @@ try {
     <script src="../../../public/assets/js/config.js"></script>
 </head>
 <body>
+    <!-- Display flash messages -->
+    <?php FlashMessage::showFlash(); ?>
 
     <?php require_once __DIR__ . '/partials/sidebar.php'; ?>
     <?php require_once __DIR__ . '/partials/topbar.php'; ?>
@@ -68,10 +70,6 @@ try {
     <!-- Main content -->
     <div class="container-xxl flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Enrollment /</span> Student Enrollment</h4>
-
-        <!-- Display flash messages -->
-        <?php showFlash(); ?>
-
         <div class="row mb-3 align-items-center">
             <div class="col-md-6">
                 <div class="input-group">

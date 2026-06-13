@@ -3,7 +3,7 @@ session_start();
 
 require_once __DIR__ . '/../models/AuthModel.php';
 require_once __DIR__ . '/../../database/config/config.php';
-require_once __DIR__ . '/../helpers/message.php';
+require_once __DIR__ . '/../helpers/flashMessage.php';
 require_once __DIR__ . '/../helpers/auditLogs.php';
 
     class AuthController extends Model{
@@ -45,7 +45,7 @@ require_once __DIR__ . '/../helpers/auditLogs.php';
                 $this->startUserSession($row);
                 $this->redirectByRole($row['role']);
             }else{
-                setFlash('error', 'Invalid email or password');
+                FlashMessage::setFlash('error', 'Invalid email or password');
                 header('Location: ../../index.php');
                 exit();
             }

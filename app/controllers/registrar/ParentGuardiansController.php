@@ -3,7 +3,7 @@ session_start();
 
 require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
 require_once __DIR__ . '/../../models/registrar/StudentsModel.php';
-require_once __DIR__ . '/../../helpers/message.php';
+require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../../database/config/config.php';
@@ -67,11 +67,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         'parents_guardians',
                         $_SESSION['full_name'] . ' created a new parent/guardian record for student ID: ' . $data['student_id'],
                     );
-                    setFlash("success", "Parent/Guardian record created successfully.");
+                    FlashMessage::setFlash("success", "Parent/Guardian record created successfully.");
                     header("Location: ../../../resources/views/registrar/parent-guardians.php");
                     exit();
                 }else{
-                    setFlash("error", "Error creating Parent/Guardian record.");
+                    FlashMessage::setFlash("error", "Error creating Parent/Guardian record.");
                     header("Location: ../../../resources/views/registrar/parent-guardians.php");
                     exit();
                 }
@@ -92,11 +92,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         'parents_guardians',
                         $_SESSION['full_name'] . ' updated parent/guardian record with ID: ' . $id,
                     );
-                    setFlash("success", "Parent/Guardian record updated successfully.");
+                    FlashMessage::setFlash("success", "Parent/Guardian record updated successfully.");
                     header("Location: ../../../resources/views/registrar/parent-guardians.php");
                     exit();
                 }else{
-                    setFlash("error", "Error updating Parent/Guardian record.");
+                    FlashMessage::setFlash("error", "Error updating Parent/Guardian record.");
                     header("Location: ../../../resources/views/registrar/parent-guardians.php");
                     exit();
                 }
@@ -117,11 +117,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         'parents_guardians',
                         $_SESSION['full_name'] . ' deleted parent/guardian record with ID: ' . $id,
                     );
-                    setFlash("success", "Parent/Guardian record deleted successfully.");
+                    FlashMessage::setFlash("success", "Parent/Guardian record deleted successfully.");
                     header("Location: ../../../resources/views/registrar/parent-guardians.php");
                     exit();
                 }else{
-                    setFlash("error", "Error deleting Parent/Guardian record.");
+                    FlashMessage::setFlash("error", "Error deleting Parent/Guardian record.");
                     header("Location: ../../../resources/views/registrar/parent-guardians.php");
                     exit();
                 }

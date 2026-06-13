@@ -3,7 +3,7 @@ session_start();
 
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../models/registrar/DocumentTypesModel.php';
-require_once __DIR__ . '/../../helpers/message.php';
+require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 
@@ -33,17 +33,17 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         'document_types',
                         $_SESSION['full_name'] . ' created a new document type: ' . $data['document_name'] . '.',
                     );
-                    setFlash("success", "Document type created successfully.");
+                    FlashMessage::setFlash("success", "Document type created successfully.");
                     header("Location: ../../../resources/views/registrar/document-types.php");
                     exit();
                 }else{
-                    setFlash("error", "Failed to create document type.");
+                    FlashMessage::setFlash("error", "Failed to create document type.");
                     header("Location: ../../../resources/views/registrar/document-types.php");
                     exit();
                 }
             }catch(Exception $e){
                 error_log($e->getMessage());
-                setFlash('error', 'Failed to create document type. Please try again.');
+                FlashMessage::setFlash('error', 'Failed to create document type. Please try again.');
             }
         }
 
@@ -59,17 +59,17 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         'document_types',
                         $_SESSION['full_name'] . ' updated a document type with ID: ' . $id . '.',
                     );
-                    setFlash("success", "Document type updated successfully.");
+                    FlashMessage::setFlash("success", "Document type updated successfully.");
                     header("Location: ../../../resources/views/registrar/document-types.php");
                     exit();
                 }else{
-                    setFlash("error", "Failed to update document type.");
+                    FlashMessage::setFlash("error", "Failed to update document type.");
                     header("Location: ../../../resources/views/registrar/document-types.php");
                     exit();
                 }
             }catch(Exception $e){
                 error_log($e->getMessage());
-                setFlash('error', 'Failed to update document type. Please try again.');
+                FlashMessage::setFlash('error', 'Failed to update document type. Please try again.');
             }
         }
 
@@ -85,17 +85,17 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         'document_types',
                         $_SESSION['full_name'] . ' deleted a document type with ID: ' . $id . '.',
                     );
-                    setFlash("success", "Document type deleted successfully.");
+                    FlashMessage::setFlash("success", "Document type deleted successfully.");
                     header("Location: ../../../resources/views/registrar/document-types.php");
                     exit();
                 }else{
-                    setFlash("error", "Failed to delete document type.");
+                    FlashMessage::setFlash("error", "Failed to delete document type.");
                     header("Location: ../../../resources/views/registrar/document-types.php");
                     exit();
                 }
             }catch(Exception $e){
                 error_log($e->getMessage());
-                setFlash('error', 'Failed to delete document type. Please try again.');
+                FlashMessage::setFlash('error', 'Failed to delete document type. Please try again.');
                 header("Location: ../../../resources/views/registrar/document-types.php");
                 exit();
             }

@@ -1,52 +1,181 @@
-// Function to populate modal with student data
 function populateStudentModal(student) {
-    // Personal Information
-    document.getElementById('modalLrn').textContent = student.lrn || '-';
-    document.getElementById('modalFirstName').textContent = student.first_name || '-';
-    document.getElementById('modalMiddleName').textContent = student.middle_name || '-';
-    document.getElementById('modalLastName').textContent = student.last_name || '-';
-    document.getElementById('modalGender').textContent = student.gender || '-';
+    const studentId = student.id;
+    
+    $.ajax({
+        url: '../../../app/controllers/registrar/StudentsController.php',
+        type: 'POST',
+        data: {
+            action: 'get_student_profile',
+            student_id: studentId
+        },
+        dataType: 'json',
+        success: function(response) {
+            const studentData = response.student || student;
+            const academicHistory = response.academic_history || [];
+            const parentGuardians = response.parent_guardians || {};
 
-    // Birth Information
-    document.getElementById('modalBirthDate').textContent = student.birth_date || '-';
-    document.getElementById('modalAge').textContent = student.age || '-';
-    document.getElementById('modalPlaceOfBirth').textContent = student.place_of_birth || '-';
+            // Personal Information
+            document.getElementById('modalLrn').textContent = studentData.lrn || '-';
+            document.getElementById('modalFirstName').textContent = studentData.first_name || '-';
+            document.getElementById('modalMiddleName').textContent = studentData.middle_name || '-';
+            document.getElementById('modalLastName').textContent = studentData.last_name || '-';
+            document.getElementById('modalGender').textContent = studentData.gender || '-';
 
-    // Contact Information
-    document.getElementById('modalContactNumber').textContent = student.contact_number || '-';
-    document.getElementById('modalAddress').textContent = student.address || '-';
+            // Birth Information
+            document.getElementById('modalBirthDate').textContent = studentData.birth_date || '-';
+            document.getElementById('modalAge').textContent = studentData.age || '-';
+            document.getElementById('modalPlaceOfBirth').textContent = studentData.place_of_birth || '-';
 
-    // Other Information
-    document.getElementById('modalReligion').textContent = student.religion || '-';
+            // Contact Information
+            document.getElementById('modalContactNumber').textContent = studentData.contact_number || '-';
+            document.getElementById('modalAddress').textContent = studentData.address || '-';
 
-    // Status Badge
-    const statusBadge = document.getElementById('modalStatusBadge');
-    const status = student.student_status || 'Active';
+            // Other Information
+            document.getElementById('modalReligion').textContent = studentData.religion || '-';
 
-    statusBadge.textContent = status;
+            // Status Badge
+            const statusBadge = document.getElementById('modalStatusBadge');
+            const status = studentData.student_status || 'Active';
 
-    // Status color mapping
-    switch (status) {
-        case 'Enrolled':
-            statusBadge.className = 'badge bg-success';
-            break;
+            statusBadge.textContent = status;
 
-        case 'Inactive':
-            statusBadge.className = 'badge bg-secondary';
-            break;
+            // Status color mapping
+            switch (status) {
+                case 'Enrolled':
+                    statusBadge.className = 'badge bg-success';
+                    break;
 
-        case 'Transferred':
-            statusBadge.className = 'badge bg-warning';
-            break;
+                case 'Inactive':
+                    statusBadge.className = 'badge bg-secondary';
+                    break;
 
-        case 'Graduated':
-            statusBadge.className = 'badge bg-info';
-            break;
+                case 'Transferred':
+                    statusBadge.className = 'badge bg-warning';
+                    break;
 
-        default:
-            statusBadge.className = 'badge bg-primary';
-            break;
+                case 'Graduated':
+                    statusBadge.className = 'badge bg-info';
+                    break;
+
+                default:
+                    statusBadge.className = 'badge bg-primary';
+                    break;
+            }
+
+            // Render Academic History
+            renderAcademicHistory(academicHistory);
+
+            // Render Parent/Guardians Information
+            renderParentGuardians(parentGuardians);
+        },
+        error: function(error) {
+            console.error('Error fetching student profile:', error);
+            // Fallback to basic student data display
+            document.getElementById('modalLrn').textContent = student.lrn || '-';
+            document.getElementById('modalFirstName').textContent = student.first_name || '-';
+            document.getElementById('modalMiddleName').textContent = student.middle_name || '-';
+            document.getElementById('modalLastName').textContent = student.last_name || '-';
+        }
+    });
+}
+
+/**
+ * Render academic history table
+ * @param {Array} academicHistory - Array of enrollment records
+ */
+function renderAcademicHistory(academicHistory) {
+    const tableBody = document.getElementById('academicHistoryBody');
+    if (!tableBody) return;
+
+    if (!academicHistory || academicHistory.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No academic history found</td></tr>';
+        return;
     }
+
+    let html = '';
+    academicHistory.forEach(record => {
+        html += `
+            <tr>
+                <td>${record.school_year || 'N/A'}</td>
+                <td>${record.grade_level || 'N/A'} - ${record.section_name || 'N/A'}</td>
+                <td>${record.adviser_name || 'N/A'}</td>
+                <td>
+                    <span class="badge bg-${record.enrollment_status === 'Enrolled' ? 'success' : 'secondary'}">
+                        ${record.enrollment_status || 'N/A'}
+                    </span>
+                </td>
+            </tr>
+        `;
+    });
+
+    tableBody.innerHTML = html;
+}
+
+/**
+ * Render parent/guardians information
+ * @param {Object} parentGuardians - Parent/Guardian data
+ */
+function renderParentGuardians(parentGuardians) {
+    const container = document.getElementById('parentGuardiansInfo');
+    if (!container) return;
+
+    if (!parentGuardians || Object.keys(parentGuardians).length === 0) {
+        container.innerHTML = '<p class="text-muted text-center">No parent/guardian information found</p>';
+        return;
+    }
+
+    let html = '<div class="row">';
+
+    // Father Information
+    if (parentGuardians.father_name) {
+        html += `
+            <div class="col-md-6 mb-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title text-primary">Father</h6>
+                        <p class="mb-1"><strong>Name:</strong> ${parentGuardians.father_name || 'N/A'}</p>
+                        <p class="mb-1"><strong>Occupation:</strong> ${parentGuardians.father_occupation || 'N/A'}</p>
+                        <p class="mb-0"><strong>Contact:</strong> ${parentGuardians.father_contact || 'N/A'}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Mother Information
+    if (parentGuardians.mother_name) {
+        html += `
+            <div class="col-md-6 mb-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title text-success">Mother</h6>
+                        <p class="mb-1"><strong>Name:</strong> ${parentGuardians.mother_name || 'N/A'}</p>
+                        <p class="mb-1"><strong>Occupation:</strong> ${parentGuardians.mother_occupation || 'N/A'}</p>
+                        <p class="mb-0"><strong>Contact:</strong> ${parentGuardians.mother_contact || 'N/A'}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Guardian Information
+    if (parentGuardians.guardian_name) {
+        html += `
+            <div class="col-md-6 mb-3">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h6 class="card-title text-warning">Guardian</h6>
+                        <p class="mb-1"><strong>Name:</strong> ${parentGuardians.guardian_name || 'N/A'}</p>
+                        <p class="mb-1"><strong>Relationship:</strong> ${parentGuardians.guardian_relationship || 'N/A'}</p>
+                        <p class="mb-0"><strong>Contact:</strong> ${parentGuardians.guardian_contact || 'N/A'}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
 }
 
 /**
@@ -115,6 +244,29 @@ document.getElementById('enrollBirthDate').addEventListener('change', function (
 
     document.getElementById('ageInput').value = age;
 });
+
+function deleteStudent(id) {
+    if (!confirm('Are you sure you want to delete this student? This action cannot be undone.')) return;
+
+    fetch(`../../../app/controllers/registrar/EnrollStudentController.php?action=delete&id=${id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `id=${id}`
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert('Student deleted successfully.');
+                location.reload();
+            } else {
+                alert(data.message || 'Failed to delete student.');
+            }
+        })
+        .catch(err => {
+            console.error('deleteStudent error:', err);
+            alert('An error occurred while deleting the student.');
+        });
+}
 
 // ============== create rest api to create search student function ==================== //
 
@@ -217,35 +369,43 @@ function renderSearchResults(results){
     }
 
     const rows = results.map((student, index) => {
-        const studentName = `${student.first_name || ''} ${student.middle_name || ''} ${student.last_name || ''}`.trim();
         const lrn = student.lrn || 'N/A';
-        const enrollmentStatus = student.enrollment_status || 'N/A';
+        const studentName = `${student.first_name || ''} ${student.middle_name || ''} ${student.last_name || ''}`.trim();
+        const gender = student.gender
+        const age = student.age
+        // const enrollmentStatus = student.enrollment_status || 'N/A';
 
         return `
-            <tr>
+            <tr 
+                style="cursor: pointer;" 
+                data-bs-toggle="modal" 
+                data-bs-target="#studentDetailsModal"
+                onclick='populateStudentModal(${JSON.stringify(student)})'
+            >
                 <td>${escapeHtml(index + 1)}</td>
                 <td>${escapeHtml(lrn)}</td>
                 <td>${escapeHtml(studentName)}</td>
-                <td>${escapeHtml(enrollmentStatus)}</td>
+                <td>${escapeHtml(gender)}</td>
+                <td>${escapeHtml(age)}</td>
                 <td>
                     <button 
-                        class="btn btn-sm btn-warning me-1"
+                        class="btn btn-sm btn-primary me-1"
                         title="Edit Student"
-                        onclick="editStudent(${student.id})"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editStudentModal"
+                        onclick='event.stopPropagation(); editStudent(${JSON.stringify(student)})'
                     >
                         Edit
                     </button>
-
                     <button 
                         class="btn btn-sm btn-danger" 
                         title="Delete Student"
-                        onclick="if(confirm('Are you sure you want to delete this student?')) deleteStudent(${student.id})"
+                        onclick="event.stopPropagation(); if(confirm('Are you sure you want to delete this student? This action cannot be undone.')) deleteStudentAjax(${student.id})"
                     >
                         Delete
                     </button>
                 </td>
-            </tr>
-        `;
+            </tr>`;
     }).join('');
 
     //insert rows into table

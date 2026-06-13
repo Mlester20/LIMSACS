@@ -137,6 +137,25 @@ require_once __DIR__ . '/../Model.php';
             }
         }
 
+        /**
+         * Get student by ID
+         * @param int $id Student ID
+         * @return array|null Student data or null if not found
+         */
+        public function getById($id){
+            try{
+                $query = "SELECT * FROM {$this->students} WHERE id = ? LIMIT 1";
+                $stmt = $this->con->prepare($query);
+                $stmt->bind_param('i', $id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                return $result->fetch_assoc();
+            }catch(Exception $e){
+                error_log($e->getMessage());
+                return null;
+            }
+        }
+
         public function delete($id){
             try{
                 $query = "DELETE FROM {$this->students} WHERE id = ?";

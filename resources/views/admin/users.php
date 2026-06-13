@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../../../app/controllers/admin/UsersController.php';
-require_once __DIR__ . '/../../../app/helpers/message.php';
+require_once __DIR__ . '/../../../app/helpers/flashMessage.php';
 require_once __DIR__ . '/../../../app/middleware/auth.php';
 AuthRole::allowOnly(['admin']); 
 ?>
@@ -35,7 +35,7 @@ AuthRole::allowOnly(['admin']);
     <script src="../../../public/assets/js/config.js"></script>
 </head>
 <body>
-    <?php showFlash(); ?>
+    <?php FlashMessage::showFlash(); ?>
 
     <?php require_once __DIR__ . '/partials/sidebar.php'; ?>
     <?php require_once __DIR__ . '/partials/topbar.php'; ?>

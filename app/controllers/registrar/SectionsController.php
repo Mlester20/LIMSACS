@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../models/registrar/SectionsModel.php';
 require_once __DIR__ . '/../../models/registrar/AcademicHistoryModel.php';
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
-require_once __DIR__ . '/../../helpers/message.php';
+require_once __DIR__ . '/../../helpers/fLashMessage.php';
 require_once __DIR__ . '/../../services/SectionService.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 
@@ -39,11 +39,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         'sections',
                         $_SESSION['full_name'] . ' created section: ' . $data['section_name'],
                     );
-                    setFlash('success', 'Section created successfully.');
+                    FlashMessage::setFlash('success', 'Section created successfully.');
                     header('Location: ../../../resources/views/registrar/sections.php');
                     exit();
                 }else{
-                    setFlash("error", "Failed to create section. Please try again.");
+                    FlashMessage::setFlash("error", "Failed to create section. Please try again.");
                     header('Location: ../../../resources/views/registrar/sections.php');
                     exit();
                 }
@@ -91,11 +91,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         'sections',
                         $_SESSION['full_name'] . ' updated section: ' . $data['section_name'],
                     );
-                    setFlash('success', 'Section updated successfully.');
+                    FlashMessage::setFlash('success', 'Section updated successfully.');
                     header('Location: ../../../resources/views/registrar/sections.php');
                     exit();
                 }else{
-                    setFlash("error", "Failed to update section. Please try again.");
+                    FlashMessage::setFlash("error", "Failed to update section. Please try again.");
                     header('Location: ../../../resources/views/registrar/sections.php');
                     exit();
                 }
@@ -117,11 +117,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         'sections',
                         $_SESSION['full_name'] . ' deleted section',
                     );
-                    setFlash('success', 'Section deleted successfully.');
+                    FlashMessage::setFlash('success', 'Section deleted successfully.');
                     header('Location: ../../../resources/views/registrar/sections.php');
                     exit();
                 }else{
-                    setFlash("error", "Failed to delete section. Please try again.");
+                    FlashMessage::setFlash("error", "Failed to delete section. Please try again.");
                     header('Location: ../../../resources/views/registrar/sections.php');
                     exit();
                 }
