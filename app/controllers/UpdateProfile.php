@@ -95,14 +95,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             mkdir($uploadDir, 0755, true);
         }
 
+        // Get existing profile picture to delete old file
+        $existingProfilePic = $updateProfileModel->getProfilePicture($userId);
+        
         // Generate unique filename
         $fileExtension = pathinfo($_FILES['profile_pic']['name'], PATHINFO_EXTENSION);
         $fileName = 'pfp_' . $userId . '_' . time() . '.' . $fileExtension;
         $uploadPath = $uploadDir . $fileName;
 
         if (move_uploaded_file($_FILES['profile_pic']['tmp_name'], $uploadPath)) {
+            // Delete old profile picture if it exists
+            if ($existingProfilePic && $existingProfilePic !== 'storage/profiles/') {
+                $oldFilePath = __DIR__ . '/../../' . $existingProfilePic;
+                if (file_exists($oldFilePath)) {
+                    unlink($oldFilePath);
+                }
+            }
+            
             // Store path relative to project root for consistency
-            $profilePicturePath = 'storage/profiles/' . $fileName;
+            $profilePicturePath = 'storage' . DIRECTORY_SEPARATOR . 'profiles' . DIRECTORY_SEPARATOR . $fileName;
         } else {
             setFlash('error', 'Failed to upload profile picture.');
             header("Location: " . $_SERVER['HTTP_REFERER']);
@@ -119,9 +130,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Update profile picture if uploaded
         if ($profilePicturePath) {
-            $updateProfileModel->updateProfilePicture($userId, $profilePicturePath);
-            // Store relative path for session (will be resolved by views)
-            $_SESSION['profile_picture'] = $profilePicturePath;
+            // Normalize path to forward slashes for consistency
+            $normalizedPath = str_replace(DIRECTORY_SEPARATOR, '/', $profilePicturePath);
+            $updateProfileModel->updateProfilePicture($userId, $normalizedPath);
+            // Store normalized path in session for views to use
+            $_SESSION['profile_picture'] = $normalizedPath;
         }
 
         setFlash('success', 'Profile updated successfully!');

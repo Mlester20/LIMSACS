@@ -9,18 +9,21 @@ require_once __DIR__ . '/../../models/registrar/StudentsModel.php';
 require_once __DIR__ . '/../../models/registrar/AcademicHistoryModel.php';
 require_once __DIR__ . '/../../models/registrar/SectionsModel.php';
 require_once __DIR__ . '/../../services/StudentsService.php';
+require_once __DIR__ . '/../../services/EnrollmentService.php';
 
     class EnrollmentController extends Controller {
 
         private $academicHistoryModel;
         private $sectionsModel;
         protected $auditLogs;
+        private $enrollmentService;
 
         public function __construct($con) {
             parent::__construct(new StudentsModel($con));
             $this->academicHistoryModel = new AcademicHistoryModel($con);
             $this->sectionsModel = new SectionsModel($con);
             $this->auditLogs = new AuditLogs($con);
+            $this->enrollmentService = new EnrollmentService($con);
         }
 
         /**
@@ -338,6 +341,17 @@ require_once __DIR__ . '/../../services/StudentsService.php';
                 ];
             }
         }
+
+        /**
+         * Search enrolled students by name or LRN with pagination
+         * @param string $keyword
+         * @param int $page
+         * @param int $itemsPerPage
+         * @return array ['enrollments' => array, 'pagination' => array]
+         */
+        public function searchEnrolledStudents($keyword, $page = 1, $itemsPerPage = 10) {
+            return $this->enrollmentService->searchEnrolledStudents($keyword, $page, $itemsPerPage);
+        }
     }
 
     // ===== Bootstrap the controller =====
@@ -448,6 +462,18 @@ require_once __DIR__ . '/../../services/StudentsService.php';
                     echo json_encode($history);
                     exit();
                 }
+            }
+
+            // Search enrolled students
+            if (isset($_POST['search_enrolled'])) {
+                $keyword      = $_POST['keyword'] ?? '';
+                $page         = $_POST['page'] ?? 1;
+                $itemsPerPage = $_POST['items_per_page'] ?? 10;
+
+                $result = $controller->searchEnrolledStudents($keyword, $page, $itemsPerPage);
+                header('Content-Type: application/json');
+                echo json_encode($result);
+                exit();
             }
         }
     } catch (Exception $e) {

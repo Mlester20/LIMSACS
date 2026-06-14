@@ -3,6 +3,7 @@ session_start();
 
 require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
 require_once __DIR__ . '/../../models/registrar/StudentsModel.php';
+require_once __DIR__ . '/../../services/StudentsService.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
@@ -149,6 +150,29 @@ require_once __DIR__ . '/../../../database/config/config.php';
         ];
 
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
+            // Search available students (no guardian yet)
+            if (isset($_POST['search_available_students'])) {
+                $keyword = $_POST['keyword'] ?? '';
+                $service = new StudentsService($con);
+                $results = $service->searchAvailableStudents($keyword);
+                header('Content-Type: application/json');
+                echo json_encode($results);
+                exit();
+            }
+
+            // Check if student already has a guardian record
+            if (isset($_POST['check_guardian_exists'])) {
+                $studentId = (int)($_POST['student_id'] ?? 0);
+                $query = "SELECT COUNT(*) as total FROM parents_guardians WHERE student_id = ?";
+                $stmt = $con->prepare($query);
+                $stmt->bind_param('i', $studentId);
+                $stmt->execute();
+                $row = $stmt->get_result()->fetch_assoc();
+                header('Content-Type: application/json');
+                echo json_encode(['exists' => $row['total'] > 0]);
+                exit();
+            }
+
             if(isset($_POST['save_guardian'])){
                 $controller->create(
                     [

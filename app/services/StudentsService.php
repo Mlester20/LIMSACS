@@ -111,4 +111,49 @@ require_once __DIR__ . '/../models/Model.php';
             return $results ?? [];
         }
 
+        /**
+         * Search students who do NOT yet have a guardian record
+         * @param string $keyword
+         * @return array
+         */
+        public function searchAvailableStudents($keyword) {
+            $keyword = trim($keyword);
+
+            if (empty($keyword) || strlen($keyword) < 2) {
+                return [];
+            }
+
+            $searchKeyword = '%' . $keyword . '%';
+
+            $query = "
+                SELECT s.id, s.lrn, s.first_name, s.middle_name, s.last_name
+                FROM {$this->students} s
+                WHERE (
+                    s.first_name LIKE ? OR
+                    s.last_name  LIKE ? OR
+                    s.lrn        LIKE ?
+                )
+                AND NOT EXISTS (
+                    SELECT 1 FROM parents_guardians pg WHERE pg.student_id = s.id
+                )
+                ORDER BY s.first_name ASC, s.last_name ASC
+                LIMIT 10
+            ";
+
+            try {
+                $stmt = $this->con->prepare($query);
+                if (!$stmt) return [];
+
+                $stmt->bind_param('sss', $searchKeyword, $searchKeyword, $searchKeyword);
+                $stmt->execute();
+                $results = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+                $stmt->close();
+
+                return $results ?? [];
+            } catch (Exception $e) {
+                error_log("searchAvailableStudents error: " . $e->getMessage());
+                return [];
+            }
+        }
+
     }
