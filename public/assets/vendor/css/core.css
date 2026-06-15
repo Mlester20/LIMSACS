@@ -5892,6 +5892,11 @@ input:-internal-autofill-selected {
   color: #03c3ec !important;
 }
 
+.bg-label-pink {
+  background-color: #d7f5fc !important;
+  color: var(--bs-pink) !important;
+}
+
 .border-label-info {
   border: 3px solid #9ae7f7 !important;
 }

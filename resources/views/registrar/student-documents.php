@@ -1,6 +1,5 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../../../app/controllers/registrar/StudentsDocumentController.php';
 require_once __DIR__ . '/../../../app/middleware/Auth.php';
 AuthRole::allowOnly(['registrar']);
 ?>

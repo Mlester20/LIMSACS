@@ -259,7 +259,7 @@ $statusBadge = static function (string $status): string {
                       <th>Full Name</th>
                       <th>Gender</th>
                       <th>Contact</th>
-                      <th class="pe-3">Registered</th>
+                 
                     </tr>
                   </thead>
                   <tbody>
@@ -277,9 +277,7 @@ $statusBadge = static function (string $status): string {
                             </span>
                           </td>
                           <td class="text-muted"><?= $e($s['contact_number'] ?: '—') ?></td>
-                          <td class="pe-3 text-muted small">
-                            <?= $e(date('M j, Y', strtotime($s['created_at']))) ?>
-                          </td>
+             
                         </tr>
                       <?php endforeach; ?>
                     <?php else: ?>
