@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 12, 2026 at 04:28 PM
+-- Generation Time: Jun 14, 2026 at 06:42 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -69,7 +69,9 @@ INSERT INTO `academic_history` (`id`, `student_id`, `school_year_id`, `grade_lev
 (110, 36, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:17:37'),
 (111, 33, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:18:45'),
 (112, 22, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:20:48'),
-(113, 13, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:23:38');
+(113, 13, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:23:38'),
+(114, 43, 3, 'Grade 1', 4, 'Enrolled', '2026-06-14 15:01:25'),
+(115, 44, 3, 'Grade 1', 4, 'Enrolled', '2026-06-14 15:34:53');
 
 -- --------------------------------------------------------
 
@@ -200,7 +202,22 @@ INSERT INTO `audit_logs` (`id`, `user_id`, `role`, `action`, `module`, `referenc
 (105, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:17:37'),
 (106, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:18:45'),
 (107, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:20:48'),
-(108, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:23:38');
+(108, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:23:38'),
+(109, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-14 14:46:36'),
+(110, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-14 15:01:25'),
+(111, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-14 15:03:32'),
+(112, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-14 15:04:35'),
+(113, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-14 15:06:31'),
+(114, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-14 15:11:51'),
+(115, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-14 15:34:53'),
+(116, 3, 'registrar', 'ADD STUDENT', 'STUDENT', NULL, 'students', 'Registrar added student record', '::1', 'success', '2026-06-14 15:47:51'),
+(117, 3, 'registrar', 'CREATE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar created a new parent/guardian record for student ID: 11', '::1', 'success', '2026-06-14 16:03:17'),
+(118, 3, 'registrar', 'UPDATE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', 7, 'parents_guardians', 'Registrar updated parent/guardian record with ID: 7', '::1', 'success', '2026-06-14 16:18:47'),
+(119, 3, 'registrar', 'CREATE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar created a new parent/guardian record for student ID: 11', '::1', 'success', '2026-06-14 16:19:19'),
+(120, 3, 'registrar', 'DELETE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar deleted parent/guardian record with ID: 8', '::1', 'success', '2026-06-14 16:19:47'),
+(121, 3, 'registrar', 'DELETE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar deleted parent/guardian record with ID: 7', '::1', 'success', '2026-06-14 16:19:51'),
+(122, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Pogi si Lester logged in', '::1', 'success', '2026-06-14 16:30:40'),
+(123, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-14 16:39:59');
 
 -- --------------------------------------------------------
 
@@ -356,7 +373,9 @@ INSERT INTO `students` (`id`, `lrn`, `first_name`, `middle_name`, `last_name`, `
 (39, '102345678932', 'Timothy', 'John', 'Villafuerte', NULL, 'Male', '2007-07-22', 18, 'Tuguegarao', 'Filipino', 'Iglesia ni Cristo', 'Zone 1, Brgy. San Gabriel, Tuguegarao City, Cagayan', '09458883344', '2026-06-12 13:05:21'),
 (40, '102345678933', 'Nicole', 'Anne', 'Manalo', NULL, 'Female', '2009-09-02', 16, 'Roxas', 'Filipino', 'Roman Catholic', 'Zone 4, Brgy. San Pedro, Roxas, Cagayan', '09264445511', '2026-06-12 13:05:21'),
 (41, '102345678934', 'Patrick', 'Neil', 'Bautista', 'Jr.', 'Male', '2008-02-28', 18, 'Manila', 'Filipino', 'Christian', 'Zone 2, Brgy. Holy Monday, Roxas, Cagayan', '09773336644', '2026-06-12 13:05:21'),
-(42, '102345678935', 'Erica', 'Louise', 'Javier', NULL, 'Female', '2008-12-05', 17, 'Ilagan', 'Filipino', 'Roman Catholic', 'Zone 3, Brgy. Masaya, Roxas, Cagayan', '09157774433', '2026-06-12 13:05:21');
+(42, '102345678935', 'Erica', 'Louise', 'Javier', NULL, 'Female', '2008-12-05', 17, 'Ilagan', 'Filipino', 'Roman Catholic', 'Zone 3, Brgy. Masaya, Roxas, Cagayan', '09157774433', '2026-06-12 13:05:21'),
+(43, '2026202705', 'Noriel John', 'Dolado', 'Vidal', '', 'Male', '2003-05-01', 23, 'Cagayan', 'Filipino', 'Roman Catholic', 'Sitio Karagsakan, Rizal', '', '2026-06-14 14:58:59'),
+(44, '0943588103', 'Russel Gio', 'Guerra', 'Briva', '', 'Male', '2018-08-26', 7, 'Yumena Hospital, Roxas', 'Filipino', 'Roman Catholic', 'Rizal, Roxas, Isabela', '', '2026-06-14 15:34:03');
 
 -- --------------------------------------------------------
 
@@ -398,7 +417,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `full_name`, `email`, `password`, `role`, `profile_picture`, `created_at`, `updated_at`) VALUES
 (1, 'admin', 'admin@gmail.com', '$2y$10$ISff11xX1PgO7HpubtYmBO4ck8pKTKXAd9kn2aI/ZIJtIhOvfnpTy', 'admin', 'storage/profiles/pfp_1_1780663737.png', '2026-06-03 05:10:02', '2026-06-05 20:48:57'),
-(3, 'Registrar', 'registrar@gmail.com', '$2y$10$/e3gO4nFgjXHxVvN1fvodeIlj60rF/IIvzWHhSUE2PfmWZG4KO8YC', 'registrar', 'storage/profiles/pfp_3_1780558920.jpg', '2026-06-03 07:01:06', '2026-06-08 22:22:20'),
+(3, 'Registrar', 'registrar@gmail.com', '$2y$10$rrHlYbYy4H0aRnlHLfdYju3PpzK5Pr5dp6mr54VfVXIs2nbvr968q', 'registrar', 'storage/profiles/pfp_3_1780558920.jpg', '2026-06-03 07:01:06', '2026-06-15 00:39:00'),
 (7, 'John Doe', 'teacher@gmail.com', '$2y$10$LcAKY/X2C2t4Fu4LYdioBOu3hV1x8.bnc9R7pjfFSTQWY95mTY0WG', 'teacher', NULL, '2026-06-08 10:38:13', '2026-06-08 10:38:13'),
 (8, 'Mark Lester', 'marklester@gmail.com', '$2y$10$Mr7XFswgt3TDt43QRe3CrO/tsc1IIMaguPegRKcH1WXazKUFEixNm', 'teacher', NULL, '2026-06-08 11:15:37', '2026-06-08 11:15:37');
 
@@ -478,13 +497,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `academic_history`
 --
 ALTER TABLE `academic_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=114;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=116;
 
 --
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=109;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=124;
 
 --
 -- AUTO_INCREMENT for table `document_types`
@@ -496,7 +515,7 @@ ALTER TABLE `document_types`
 -- AUTO_INCREMENT for table `parents_guardians`
 --
 ALTER TABLE `parents_guardians`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `school_year`
@@ -514,7 +533,7 @@ ALTER TABLE `sections`
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT for table `student_documents`

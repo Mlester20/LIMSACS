@@ -4,6 +4,7 @@ session_start();
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
+require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../models/registrar/StudentsModel.php';
 require_once __DIR__ . '/../../models/registrar/AcademicHistoryModel.php';
 require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
@@ -13,6 +14,7 @@ require_once __DIR__ . '/../../services/StudentsService.php';
         private $itemsPerPage = 10;
         protected $academicHistory;
         protected $parentGuardians;
+        protected $auditLogs;
 
         public function __construct($con){
             parent::__construct(
@@ -20,6 +22,7 @@ require_once __DIR__ . '/../../services/StudentsService.php';
             );
             $this->academicHistory = new AcademicHistoryModel($con);
             $this->parentGuardians = new ParentGuardiansModel($con);
+            $this->auditLogs = new AuditLogs($con);
         }
 
         /**
@@ -55,9 +58,33 @@ require_once __DIR__ . '/../../services/StudentsService.php';
             ];
         }
 
+        /**
+         * Get lrnExists
+         * @param string $lrn
+         */
+
+        public function lrnExists($lrn){
+            return $this->model->lrnExists($lrn);
+        }
+
         public function create($data){
             try{
+                // Check if LRN exists
+                if($this->lrnExists($data['lrn'])){
+                    FlashMessage::setFlash("error", "LRN already exists. Please use a unique LRN.");
+                    header("Location: ../../../resources/views/registrar/student-records.php");
+                    exit();
+                }
                 if($this->model->create($data)){
+                    $this->auditLogs->log(
+                        $_SESSION['id'] ?? null,
+                        $_SESSION['role'] ?? 'unknown',
+                        'ADD STUDENT',
+                        'STUDENT',
+                        null,
+                        'students',
+                        $_SESSION['full_name'] . ' added student record',
+                    );
                     FlashMessage::setFlash("success", "Student added successfully.");
                     header("Location: ../../../resources/views/registrar/student-records.php");
                     exit();

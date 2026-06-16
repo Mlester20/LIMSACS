@@ -75,6 +75,29 @@ require_once __DIR__ . '/../Model.php';
             }
         }
 
+        /**
+         * Check if LRN exists
+         * @param string $lrn
+         * @return bool  
+         */       
+        public function lrnExists($lrn){
+            try{
+                $query = "SELECT id FROM {$this->students} WHERE lrn = ? LIMIT 1";
+                $stmt = $this->con->prepare($query);
+                $stmt->bind_param('s', $lrn);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                return $result->num_rows > 0;
+            }catch(Exception $e){
+                error_log($e->getMessage());
+                return false;
+            }
+        } 
+
+        /**
+         * Create new student record
+         * @param array $data Student data
+         */
         public function create($data){
             try{
                 $query = "INSERT INTO {$this->students}(lrn, first_name, middle_name, last_name, suffix, gender, birth_date, age, place_of_birth, nationality, religion, address, contact_number) 

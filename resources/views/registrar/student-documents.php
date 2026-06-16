@@ -1,6 +1,5 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../../../app/controllers/registrar/StudentsDocumentController.php';
 require_once __DIR__ . '/../../../app/middleware/Auth.php';
 AuthRole::allowOnly(['registrar']);
 ?>
@@ -22,7 +21,8 @@ AuthRole::allowOnly(['registrar']);
     />
     <title>Students Documents | <?php  require_once __DIR__ . '/../../../app/helpers/title.php'; ?></title>
     <meta name="description" content="" />
-    <link rel="icon" type="image/x-icon" href="../../../public/assets/img/favicon/logo.png" />
+    <link rel="icon" type="image/x-icon" href=".
+    ./../../public/assets/img/favicon/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

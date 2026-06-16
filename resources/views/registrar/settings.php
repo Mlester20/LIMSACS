@@ -65,20 +65,29 @@ $memberSince = $userProfile['created_at'] ? date('M d, Y', strtotime($userProfil
                         <div class="d-flex align-items-start align-items-sm-center gap-4">
                             <!-- Profile Picture -->
                             <?php
-                            $profilePic = $userProfile['profile_picture'] ?? null;
+                            $profilePicDb = $userProfile['profile_picture'] ?? null;
                             $defaultProfilePic = '../../../public/assets/img/avatars/1.png';
-                            
-                            if ($profilePic) {
-                                // Resolve the profile picture path
-                                $resolvedPath = __DIR__ . '/../../..' . '/' . $profilePic;
-                                if (file_exists($resolvedPath)) {
-                                    $profilePic = '../../../' . $profilePic;
-                                } else {
-                                    $profilePic = $defaultProfilePic;
+                            $displayProfilePic = $defaultProfilePic;
+
+                            if ($profilePicDb) {
+                                // Normalize path separators to forward slashes
+                                $normalizedPath = str_replace('\\', '/', $profilePicDb);
+
+                                // FIX: Resolve the project root independently first,
+                                // then append the relative path — avoids realpath()
+                                // returning false when given a mixed traversal string.
+                                $projectRoot = realpath(__DIR__ . '/../../../');
+
+                                if ($projectRoot) {
+                                    $absolutePath = $projectRoot . '/' . $normalizedPath;
+
+                                    if (file_exists($absolutePath)) {
+                                        $displayProfilePic = '../../../' . $normalizedPath;
+                                    }
                                 }
-                            } else {
-                                $profilePic = $defaultProfilePic;
                             }
+
+                            $profilePic = $displayProfilePic;
                             ?>
                             <img src="<?php echo htmlspecialchars($profilePic); ?>" alt="user-avatar" 
                                  class="d-block rounded" height="100" width="100" id="uploadedAvatar" style="object-fit: cover;">

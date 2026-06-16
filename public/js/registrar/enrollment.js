@@ -242,40 +242,45 @@ const enrollmentController = {
             '📋 ' + selectedOption.text;
     },
 
-    loadEnrolledStudentsTable: function() {
+    searchEnrolled: function (keyword, page = 1) {
+        const tbody = document.querySelector('.table tbody');
+        if (!tbody) return;
+
+        // Show loading state
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-3">Searching...</td></tr>';
+
         $.ajax({
             url: '../../../app/controllers/registrar/EnrollmentController.php',
             type: 'POST',
             data: {
-                get_all_enrolled_students: 1
+                search_enrolled: 1,
+                keyword: keyword,
+                page: page,
+                items_per_page: 10
             },
             dataType: 'json',
-            success: function(data) {
+            success: function (data) {
+                const enrollments = data.enrollments || [];
+                const pagination  = data.pagination  || {};
                 let html = '';
 
-                if (data && data.length > 0) {
-                    data.forEach((enrollment, index) => {
-                        const statusBadge = enrollment.enrollment_status === 'Enrolled' 
-                            ? '<span class="badge bg-success">Enrolled</span>'
-                            : '<span class="badge bg-warning">Transferred</span>';
-
+                if (enrollments.length > 0) {
+                    enrollments.forEach((enrollment, index) => {
+                        const rowNum = (pagination.itemsPerPage * (pagination.currentPage - 1)) + (index + 1);
                         html += `
                             <tr>
-                                <td>${index + 1}</td>
-                                <td><strong>${enrollment.first_name} ${enrollment.last_name}</strong></td>
+                                <td>${rowNum}</td>
+                                <td>${enrollment.first_name} ${enrollment.last_name}</td>
                                 <td>${enrollment.lrn || 'N/A'}</td>
                                 <td>${enrollment.school_year || 'N/A'}</td>
                                 <td>${enrollment.grade_level || 'N/A'}</td>
                                 <td>${enrollment.section_name || 'N/A'}</td>
-                                <td>${statusBadge}</td>
+                                <td><span class="badge bg-success">${enrollment.enrollment_status}</span></td>
                                 <td>
-                                    <button 
-                                        class="btn btn-sm btn-info" 
-                                        onclick="enrollmentController.showEnrollmentHistory(${enrollment.student_id}, '${enrollment.first_name} ${enrollment.last_name}')"
+                                    <button class="btn btn-sm btn-info" title="View History"
                                         data-bs-toggle="modal"
                                         data-bs-target="#enrollmentHistoryModal"
-                                        title="View History"
-                                    >
+                                        onclick="enrollmentController.showEnrollmentHistory(${enrollment.student_id}, '${enrollment.first_name} ${enrollment.last_name}')">
                                         <i class="bx bx-history"></i>
                                     </button>
                                 </td>
@@ -283,17 +288,55 @@ const enrollmentController = {
                         `;
                     });
                 } else {
-                    html = '<tr><td colspan="8" class="text-center text-muted small py-3">No enrolled students</td></tr>';
+                    html = '<tr><td colspan="8" class="text-center text-muted py-3">No results found.</td></tr>';
                 }
 
-                document.getElementById('enrolledStudentsBody').innerHTML = html;
+                tbody.innerHTML = html;
+
+                // Update pagination UI
+                enrollmentController.updateSearchPagination(keyword, pagination);
             },
-            error: function() {
-                document.getElementById('enrolledStudentsBody').innerHTML = 
-                    '<tr><td colspan="8" class="text-center text-danger small py-3">Error loading students</td></tr>';
+            error: function () {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger py-3">Search error. Please try again.</td></tr>';
             }
         });
     },
+
+    updateSearchPagination: function (keyword, pagination) {
+        const paginationEl = document.querySelector('.pagination');
+        if (!paginationEl) return;
+
+        if (!keyword || keyword.trim() === '') {
+            // Reload the page to restore PHP pagination when search is cleared
+            window.location.href = '?page=1';
+            return;
+        }
+
+        let html = '';
+
+        // Previous
+        html += pagination.hasPrevPage
+            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage - 1}); return false;">Previous</a></li>`
+            : `<li class="page-item disabled"><span class="page-link">Previous</span></li>`;
+
+        // Page numbers
+        const start = Math.max(1, pagination.currentPage - 2);
+        const end   = Math.min(pagination.totalPages, pagination.currentPage + 2);
+
+        for (let i = start; i <= end; i++) {
+            html += i === pagination.currentPage
+                ? `<li class="page-item active"><span class="page-link">${i}</span></li>`
+                : `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${i}); return false;">${i}</a></li>`;
+        }
+
+        // Next
+        html += pagination.hasNextPage
+            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage + 1}); return false;">Next</a></li>`
+            : `<li class="page-item disabled"><span class="page-link">Next</span></li>`;
+
+        paginationEl.innerHTML = html;
+    },
+
 
     showEnrollmentHistory: function(studentId, studentName) {
         $.ajax({
@@ -350,59 +393,62 @@ const enrollmentController = {
     }
 };
 
-// Helper function to reset the enrollment form
+// ===== Helper: Reset enrollment form =====
 function resetForm() {
+    document.getElementById('enrollmentForm').reset();
     document.getElementById('searchStudent').value = '';
     document.getElementById('hiddenStudentId').value = '';
+    document.getElementById('searchResults').innerHTML = '';
     document.getElementById('studentProfileSection').style.display = 'none';
     document.getElementById('separator2').style.display = 'none';
     document.getElementById('enrollmentFormSection').style.display = 'none';
-    document.getElementById('searchResults').innerHTML = '';
     document.getElementById('schoolYear').value = '';
     document.getElementById('gradeLevel').value = '';
     document.getElementById('section').innerHTML = '<option value="" disabled selected>Select Section</option>';
     document.getElementById('sectionCapacityInfo').innerText = '';
 }
 
-// Event Listeners
 
-document
-    .getElementById('searchStudent')
-    .addEventListener('keyup', function() {
-        enrollmentController.searchStudent(this.value);
+// ===== All Event Listeners inside DOMContentLoaded =====
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Modal: search student by LRN or name
+    document.getElementById('searchStudent')
+        .addEventListener('keyup', function () {
+            enrollmentController.searchStudent(this.value);
+        });
+
+    document.getElementById('schoolYear')
+        .addEventListener('change', function () {
+            enrollmentController.loadSections();
+        });
+
+    document.getElementById('gradeLevel')
+        .addEventListener('change', function () {
+            enrollmentController.loadSections();
+        });
+
+    document.getElementById('section')
+        .addEventListener('change', function () {
+            enrollmentController.updateCapacityInfo();
+        });
+
+    // Search enrolled students — server-side WHERE LIKE
+    let searchTimer = null;
+    document.getElementById('searchInput').addEventListener('keyup', function () {
+        const keyword = this.value.trim();
+        clearTimeout(searchTimer);
+
+        if (keyword === '') {
+            // Restore PHP-rendered table by reloading page
+            window.location.href = '?page=1';
+            return;
+        }
+
+        // Debounce: wait 400ms after user stops typing before firing AJAX
+        searchTimer = setTimeout(function () {
+            enrollmentController.searchEnrolled(keyword, 1);
+        }, 400);
     });
 
-document
-    .getElementById('schoolYear')
-    .addEventListener('change', function() {
-        enrollmentController.loadSections();
-    });
-
-document
-    .getElementById('gradeLevel')
-    .addEventListener('change', function() {
-        enrollmentController.loadSections();
-    });
-
-document
-    .getElementById('section')
-    .addEventListener('change', function() {
-        enrollmentController.updateCapacityInfo();
-    });
-
-// Load enrolled students table on page load
-document.addEventListener('DOMContentLoaded', function() {
-    enrollmentController.loadEnrolledStudentsTable();
-    // Reload table every 5 seconds for real-time updates
-    setInterval(enrollmentController.loadEnrolledStudentsTable, 5000);
 });
-
-function resetForm() {
-    document.getElementById('enrollmentForm').reset();
-    document.getElementById('searchStudent').value = '';
-    document.getElementById('searchResults').innerHTML = '';
-
-    document.getElementById('studentProfileSection').style.display = 'none';
-    document.getElementById('separator2').style.display = 'none';
-    document.getElementById('enrollmentFormSection').style.display = 'none';
-}

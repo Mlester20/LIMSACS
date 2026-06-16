@@ -99,7 +99,7 @@ try {
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="enrolledStudentsBody">
                         <?php if(!empty($enrollments)): ?>
                             <?php foreach($enrollments as $index => $enrollment): ?>
                                 <tr>

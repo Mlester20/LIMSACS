@@ -1,6 +1,7 @@
-function editParentGuardian(id, studentId, fatherName, fatherOccupation, fatherContact, motherName, motherOccupation, motherContact, guardianName, guardianRelationship, guardianContact) {
+function editParentGuardian(id, studentId, studentName, fatherName, fatherOccupation, fatherContact, motherName, motherOccupation, motherContact, guardianName, guardianRelationship, guardianContact) {
     document.getElementById('edit_id').value = id;
-    document.getElementById('editStudentId').value = studentId || '';
+    document.getElementById('edit_student_id').value = studentId || '';
+    document.getElementById('editStudentSearchInput').value = studentName || '';
     document.getElementById('editFatherName').value = fatherName || '';
     document.getElementById('editFatherOccupation').value = fatherOccupation || '';
     document.getElementById('editFatherContact').value = fatherContact || '';
@@ -257,3 +258,293 @@ function initializeSearch() {
 }
 
 document.addEventListener('DOMContentLoaded', initializeSearch);
+
+// ========================================
+// Add Guardian: Student Search
+// ========================================
+
+let studentSearchTimer = null;
+
+/**
+ * Search students with no existing guardian record
+ * @param {string} keyword
+ */
+function searchAvailableStudents(keyword) {
+    const resultsContainer = document.getElementById('studentSearchResults');
+    const warning = document.getElementById('duplicateWarning');
+
+    if (!keyword || keyword.trim().length < 2) {
+        resultsContainer.style.display = 'none';
+        resultsContainer.innerHTML = '';
+        return;
+    }
+
+    $.ajax({
+        url: '../../../app/controllers/registrar/ParentGuardiansController.php',
+        type: 'POST',
+        data: {
+            search_available_students: 1,
+            keyword: keyword.trim()
+        },
+        dataType: 'json',
+        success: function (data) {
+            resultsContainer.innerHTML = '';
+
+            if (data.length === 0) {
+                resultsContainer.innerHTML = '<div class="list-group-item text-muted small">No available students found.</div>';
+            } else {
+                data.forEach(function (student) {
+                    const fullName = [student.first_name, student.middle_name, student.last_name]
+                        .filter(Boolean).join(' ');
+                    const lrn = student.lrn ? ` — LRN: ${student.lrn}` : '';
+
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'list-group-item list-group-item-action small';
+                    item.textContent = fullName + lrn;
+                    item.addEventListener('click', function () {
+                        selectStudent(student.id, fullName);
+                    });
+
+                    resultsContainer.appendChild(item);
+                });
+            }
+
+            resultsContainer.style.display = 'block';
+            if (warning) warning.style.display = 'none';
+        },
+        error: function () {
+            resultsContainer.innerHTML = '<div class="list-group-item text-danger small">Search error.</div>';
+            resultsContainer.style.display = 'block';
+        }
+    });
+}
+
+/**
+ * Select a student from search results
+ * @param {number} studentId
+ * @param {string} fullName
+ */
+function selectStudent(studentId, fullName) {
+    document.getElementById('add_student_id').value = studentId;
+    document.getElementById('studentSearchInput').value = fullName;
+    document.getElementById('studentSearchResults').style.display = 'none';
+    document.getElementById('studentSearchResults').innerHTML = '';
+
+    // Double-check server-side for duplicate
+    $.ajax({
+        url: '../../../app/controllers/registrar/ParentGuardiansController.php',
+        type: 'POST',
+        data: {
+            check_guardian_exists: 1,
+            student_id: studentId
+        },
+        dataType: 'json',
+        success: function (data) {
+            const warning = document.getElementById('duplicateWarning');
+            const submitBtn = document.querySelector('#addGuardianModal button[name="save_guardian"]');
+
+            if (data.exists) {
+                if (warning) warning.style.display = 'block';
+                if (submitBtn) submitBtn.disabled = true;
+                document.getElementById('add_student_id').value = '';
+            } else {
+                if (warning) warning.style.display = 'none';
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        }
+    });
+}
+
+/**
+ * Initialize student search inside Add Guardian modal
+ */
+function initializeStudentSearch() {
+    const input = document.getElementById('studentSearchInput');
+    if (!input) return;
+
+    input.addEventListener('keyup', function () {
+        const keyword = this.value.trim();
+        clearTimeout(studentSearchTimer);
+
+        if (keyword === '') {
+            document.getElementById('add_student_id').value = '';
+            document.getElementById('studentSearchResults').style.display = 'none';
+            return;
+        }
+
+        studentSearchTimer = setTimeout(function () {
+            searchAvailableStudents(keyword);
+        }, 300);
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function (e) {
+        if (!input.contains(e.target)) {
+            document.getElementById('studentSearchResults').style.display = 'none';
+        }
+    });
+
+    // Reset on modal close
+    const modal = document.getElementById('addGuardianModal');
+    if (modal) {
+        modal.addEventListener('hidden.bs.modal', function () {
+            document.getElementById('studentSearchInput').value = '';
+            document.getElementById('add_student_id').value = '';
+            document.getElementById('studentSearchResults').style.display = 'none';
+            document.getElementById('studentSearchResults').innerHTML = '';
+            const warning = document.getElementById('duplicateWarning');
+            if (warning) warning.style.display = 'none';
+            const submitBtn = document.querySelector('#addGuardianModal button[name="save_guardian"]');
+            if (submitBtn) submitBtn.disabled = false;
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    initializeSearch();         // existing: main table search
+    initializeStudentSearch();  // new: student search inside add modal
+    initializeEditStudentSearch(); // new: student search inside edit modal
+});
+
+// ========================================
+// Edit Guardian: Student Search
+// ========================================
+
+let editStudentSearchTimer = null;
+
+/**
+ * Search students for edit modal (may allow reassigning to different student)
+ * @param {string} keyword
+ */
+function searchStudentsForEdit(keyword) {
+    const resultsContainer = document.getElementById('editStudentSearchResults');
+    const warning = document.getElementById('editDuplicateWarning');
+
+    if (!keyword || keyword.trim().length < 2) {
+        resultsContainer.style.display = 'none';
+        resultsContainer.innerHTML = '';
+        return;
+    }
+
+    $.ajax({
+        url: '../../../app/controllers/registrar/ParentGuardiansController.php',
+        type: 'POST',
+        data: {
+            search_available_students: 1,
+            keyword: keyword.trim()
+        },
+        dataType: 'json',
+        success: function (data) {
+            resultsContainer.innerHTML = '';
+
+            if (data.length === 0) {
+                resultsContainer.innerHTML = '<div class="list-group-item text-muted small">No available students found.</div>';
+            } else {
+                data.forEach(function (student) {
+                    const fullName = [student.first_name, student.middle_name, student.last_name]
+                        .filter(Boolean).join(' ');
+                    const lrn = student.lrn ? ` — LRN: ${student.lrn}` : '';
+
+                    const item = document.createElement('button');
+                    item.type = 'button';
+                    item.className = 'list-group-item list-group-item-action small';
+                    item.textContent = fullName + lrn;
+                    item.addEventListener('click', function () {
+                        selectEditStudent(student.id, fullName);
+                    });
+
+                    resultsContainer.appendChild(item);
+                });
+            }
+
+            resultsContainer.style.display = 'block';
+            if (warning) warning.style.display = 'none';
+        },
+        error: function () {
+            resultsContainer.innerHTML = '<div class="list-group-item text-danger small">Search error.</div>';
+            resultsContainer.style.display = 'block';
+        }
+    });
+}
+
+/**
+ * Select a student from edit modal search results
+ * @param {number} studentId
+ * @param {string} fullName
+ */
+function selectEditStudent(studentId, fullName) {
+    document.getElementById('edit_student_id').value = studentId;
+    document.getElementById('editStudentSearchInput').value = fullName;
+    document.getElementById('editStudentSearchResults').style.display = 'none';
+    document.getElementById('editStudentSearchResults').innerHTML = '';
+
+    // Double-check server-side for duplicate
+    $.ajax({
+        url: '../../../app/controllers/registrar/ParentGuardiansController.php',
+        type: 'POST',
+        data: {
+            check_guardian_exists: 1,
+            student_id: studentId
+        },
+        dataType: 'json',
+        success: function (data) {
+            const warning = document.getElementById('editDuplicateWarning');
+            const submitBtn = document.querySelector('#editGuardianModal button[name="update_guardian"]');
+
+            if (data.exists) {
+                if (warning) warning.style.display = 'block';
+                if (submitBtn) submitBtn.disabled = true;
+                document.getElementById('edit_student_id').value = '';
+            } else {
+                if (warning) warning.style.display = 'none';
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        }
+    });
+}
+
+/**
+ * Initialize student search inside Edit Guardian modal
+ */
+function initializeEditStudentSearch() {
+    const input = document.getElementById('editStudentSearchInput');
+    if (!input) return;
+
+    input.addEventListener('keyup', function () {
+        const keyword = this.value.trim();
+        clearTimeout(editStudentSearchTimer);
+
+        if (keyword === '') {
+            document.getElementById('edit_student_id').value = '';
+            document.getElementById('editStudentSearchResults').style.display = 'none';
+            return;
+        }
+
+        editStudentSearchTimer = setTimeout(function () {
+            searchStudentsForEdit(keyword);
+        }, 300);
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function (e) {
+        if (!input.contains(e.target)) {
+            document.getElementById('editStudentSearchResults').style.display = 'none';
+        }
+    });
+
+    // Reset on modal close
+    const modal = document.getElementById('editGuardianModal');
+    if (modal) {
+        modal.addEventListener('hidden.bs.modal', function () {
+            document.getElementById('editStudentSearchInput').value = '';
+            document.getElementById('edit_student_id').value = '';
+            document.getElementById('editStudentSearchResults').style.display = 'none';
+            document.getElementById('editStudentSearchResults').innerHTML = '';
+            const warning = document.getElementById('editDuplicateWarning');
+            if (warning) warning.style.display = 'none';
+            const submitBtn = document.querySelector('#editGuardianModal button[name="update_guardian"]');
+            if (submitBtn) submitBtn.disabled = false;
+        });
+    }
+}

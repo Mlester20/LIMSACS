@@ -104,7 +104,14 @@ require_once __DIR__ . '/Model.php';
                 
                 $result = $stmt->get_result();
                 $row = $result->fetch_assoc();
-                return $row['profile_picture'] ?? null;
+                $picturePath = $row['profile_picture'] ?? null;
+                
+                // Normalize path separators to forward slashes for consistency
+                if ($picturePath) {
+                    $picturePath = str_replace(DIRECTORY_SEPARATOR, '/', $picturePath);
+                }
+                
+                return $picturePath;
             } catch (Exception $e) {
                 error_log("Error fetching profile picture: " . $e->getMessage());
                 return null;
@@ -116,12 +123,24 @@ require_once __DIR__ . '/Model.php';
          */
         public function updateProfilePicture($id, $picturePath) {
             try {
-                
                 $sql = "UPDATE {$this->users} SET profile_picture = ?, updated_at = NOW() WHERE id = ?";
                 $stmt = $this->con->prepare($sql);
-                $stmt->bind_param("si", $picturePath, $id);
                 
-                return $stmt->execute();
+                if (!$stmt) {
+                    error_log("Profile picture update prepare failed: " . $this->con->error);
+                    return false;
+                }
+                
+                $stmt->bind_param("si", $picturePath, $id);
+                $result = $stmt->execute();
+                
+                if (!$result) {
+                    error_log("Profile picture update execute failed: " . $stmt->error);
+                    return false;
+                }
+                
+                $stmt->close();
+                return true;
             } catch (Exception $e) {
                 error_log("Error updating profile picture: " . $e->getMessage());
                 return false;

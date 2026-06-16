@@ -69,17 +69,32 @@ AuthRole::allowOnly(['registrar']);
                             </small>
                         </div>
 
-                        <div class="row align-items-center mb-2">
-                            <label for="student_id" class="col-sm-2 col-form-label col-form-label-sm fw-bold">Student:</label>
-                            <div class="col-sm-10">
-                                <select class="form-select form-select-sm" id="student_id" name="student_id" required>
-                                    <option value="" disabled selected>Select a student</option>
-                                    <?php foreach($students as $student): ?>
-                                        <option value="<?php echo $student['id']; ?>">
-                                            <?php echo htmlspecialchars($student['first_name'] . ' ' . $student['last_name']); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
+                        <div class="mb-2">
+                            <label class="form-label small mb-1 fw-bold">Student:</label>
+                            <!-- Hidden field — actual value submitted -->
+                            <input type="hidden" id="add_student_id" name="student_id" required>
+
+                            <!-- Search input -->
+                            <input
+                                type="text"
+                                class="form-control form-control-sm"
+                                id="studentSearchInput"
+                                placeholder="Search by name or LRN..."
+                                autocomplete="off"
+                            >
+
+                            <!-- Search results dropdown -->
+                            <div id="studentSearchResults" class="list-group list-group-sm mt-1" style="
+                                max-height: 200px;
+                                overflow-y: auto;
+                                display: none;
+                                border: 1px solid #dee2e6;
+                                border-top: none;
+                            "></div>
+
+                            <!-- Duplicate warning -->
+                            <div id="duplicateWarning" class="alert alert-warning py-1 px-2 mb-0 mt-1" style="display:none; font-size: 0.8rem;">
+                                <strong>⚠️ Warning:</strong> This student already has a guardian record.
                             </div>
                         </div>
 
@@ -174,17 +189,32 @@ AuthRole::allowOnly(['registrar']);
                             </small>
                         </div>
 
-                        <div class="row align-items-center mb-2">
-                            <label for="editStudentId" class="col-sm-2 col-form-label col-form-label-sm fw-bold">Student:</label>
-                            <div class="col-sm-10">
-                                <select class="form-select form-select-sm" id="editStudentId" name="student_id" required>
-                                    <option value="" disabled selected>Select a student</option>
-                                    <?php foreach($students as $student): ?>
-                                        <option value="<?php echo $student['id']; ?>">
-                                            <?php echo htmlspecialchars($student['first_name'] . ' ' . $student['last_name']); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
+                        <div class="mb-2">
+                            <label class="form-label small mb-1 fw-bold">Student:</label>
+                            <!-- Hidden field — actual value submitted -->
+                            <input type="hidden" id="edit_student_id" name="student_id" required>
+
+                            <!-- Search input -->
+                            <input
+                                type="text"
+                                class="form-control form-control-sm"
+                                id="editStudentSearchInput"
+                                placeholder="Search by name or LRN..."
+                                autocomplete="off"
+                            >
+
+                            <!-- Search results dropdown -->
+                            <div id="editStudentSearchResults" class="list-group list-group-sm mt-1" style="
+                                max-height: 200px;
+                                overflow-y: auto;
+                                display: none;
+                                border: 1px solid #dee2e6;
+                                border-top: none;
+                            "></div>
+
+                            <!-- Duplicate warning -->
+                            <div id="editDuplicateWarning" class="alert alert-warning py-1 px-2 mb-0 mt-1" style="display:none; font-size: 0.8rem;">
+                                <strong>⚠️ Warning:</strong> This student already has another guardian record.
                             </div>
                         </div>
 
@@ -294,6 +324,7 @@ AuthRole::allowOnly(['registrar']);
                                             onclick="editParentGuardian(
                                                 '<?php echo $parentGuardian['id']; ?>',
                                                 '<?php echo $parentGuardian['student_id']; ?>',
+                                                '<?php echo htmlspecialchars($parentGuardian['student_first_name']) . ' ' . htmlspecialchars($parentGuardian['student_last_name']); ?>',
                                                 '<?php echo addslashes($parentGuardian['father_name']); ?>',
                                                 '<?php echo addslashes($parentGuardian['father_occupation']); ?>',
                                                 '<?php echo addslashes($parentGuardian['father_contact']); ?>',
