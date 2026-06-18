@@ -1,6 +1,5 @@
 <?php
-session_start();
-
+require_once __DIR__ . '/../../../app/controllers/admin/DashboardController.php';
 require_once __DIR__ . '/../../../app/middleware/auth.php';
 AuthRole::allowOnly(['admin']); 
 ?>
@@ -17,7 +16,7 @@ AuthRole::allowOnly(['admin']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Student Records | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?> </title>
+    <title> Dashboard | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?> </title>
     <link rel="icon" type="image/x-icon" href="../../../public/assets/img/favicon/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

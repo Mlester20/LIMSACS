@@ -20,6 +20,7 @@ require_once __DIR__ . '/../Model.php';
                     LEFT JOIN {$this->students} s ON sd.student_id = s.id
                     LEFT JOIN {$this->document_types} dt ON sd.document_type_id = dt.id
                     LEFT JOIN {$this->user} u ON sd.uploaded_by = u.id
+                    ORDER BY s.last_name, s.first_name, sd.uploaded_at DESC
                 ";
                 $stmt = $this->con->prepare($query);
                 $stmt->execute();

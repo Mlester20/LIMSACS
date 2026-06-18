@@ -32,13 +32,13 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <li class="menu-header small text-uppercase">
           <span class="menu-header-text">Pages</span>
         </li>
-        <li class="menu-item <?php echo ($currentPage === 'student-records.php') ? 'active' : ''; ?>">
+        <li class="menu-item <?php echo ($currentPage === 'academic-history.php') ? 'active' : ''; ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
             <i class="menu-icon tf-icons bx bx-user"></i>
-            <div data-i18n="Account Settings">Enroll Students</div>
+            <div data-i18n="Account Settings">Enrolled Students</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="student-records.php" class="menu-link"><div data-i18n="Account">Students Information</div></a></li>
+            <li class="menu-item"><a href="academic-history.php" class="menu-link"><div data-i18n="Account">Academic History</div></a></li>
           </ul>
         </li>
         <li class="menu-item <?php echo ($currentPage === 'school-year.php') ? 'active' : ''; ?>">
