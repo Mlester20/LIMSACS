@@ -113,11 +113,13 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
                 // Create enrollment record
                 $enrollmentData = [
                     'student_id' => $student_id,
+                    'enrolled_by' => $_SESSION['id'] ?? null,
                     'school_year_id' => $school_year_id,
                     'grade_level' => $grade_level,
                     'section_id' => $section_id,
                     'enrollment_status' => 'Enrolled'
                 ];
+
 
                 if ($this->academicHistoryModel->create($enrollmentData)) {
                     // Log the action
@@ -395,6 +397,7 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
             // Enroll student
             if (isset($_POST['enroll_student'])) {
                 $student_id = $_POST['student_id'] ?? null;
+                $enrolled_by = $_SESSION['id'] ?? null;
                 $school_year_id = $_POST['school_year_id'] ?? null;
                 $grade_level = $_POST['grade_level'] ?? null;
                 $section_id = $_POST['section_id'] ?? null;

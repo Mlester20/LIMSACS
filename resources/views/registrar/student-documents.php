@@ -86,10 +86,34 @@ try {
                 </thead>
                 <tbody id="documentsTableBody">
                     <?php if(!empty($documents)): ?>
+                        <?php
+                            // Count how many document rows belong to each student so we
+                            // know the rowspan to use on that student's name cell.
+                            $studentRowspans = [];
+                            foreach($documents as $document){
+                                $studentRowspans[$document['student_id']] = ($studentRowspans[$document['student_id']] ?? 0) + 1;
+                            }
+                            $lastStudentId = null;
+                        ?>
                         <?php foreach($documents as $index => $document): ?>
-                            <tr>
+                            <?php
+                                $isNewStudentGroup = $document['student_id'] !== $lastStudentId;
+                                $lastStudentId = $document['student_id'];
+                                $studentFullName = $document['student_first_name'] . ' ' . $document['student_last_name'];
+                            ?>
+                            <tr
+                                class="document-row"
+                                <?php if($isNewStudentGroup && $index > 0): ?>style="border-top: 2px solid #e9ecef;"<?php endif; ?>
+                                data-student-id="<?php echo htmlspecialchars($document['student_id']); ?>"
+                                data-student-name="<?php echo htmlspecialchars(strtolower($studentFullName)); ?>"
+                                data-document-type="<?php echo htmlspecialchars(strtolower($document['document_type_name'])); ?>"
+                            >
                                 <td><?php echo $index + 1; ?></td>
-                                <td><?php echo htmlspecialchars($document['student_first_name'] . ' ' . $document['student_last_name']); ?></td>
+                                <?php if($isNewStudentGroup): ?>
+                                    <td rowspan="<?php echo $studentRowspans[$document['student_id']]; ?>" class="align-middle">
+                                        <?php echo htmlspecialchars($studentFullName); ?>
+                                    </td>
+                                <?php endif; ?>
                                 <td><?php echo htmlspecialchars($document['document_type_name']); ?></td>
                                 <td>
                                     <?php 
@@ -123,6 +147,32 @@ try {
                     <?php endif; ?>
                 </tbody>
             </table>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div class="card-footer py-3" id="paginationContainer">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center gap-2">
+                        <label for="itemsPerPage" class="mb-0 text-muted small">Show:</label>
+                        <select id="itemsPerPage" class="form-select form-select-sm" style="width: auto;">
+                            <option value="10">10</option>
+                            <option value="15" selected>15</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                        <span class="text-muted small ms-2">entries | Showing <strong id="showingStart">1</strong> to <strong id="showingEnd">15</strong> of <strong id="totalEntries">0</strong></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <nav aria-label="Pagination Navigation">
+                        <ul class="pagination justify-content-end mb-0" id="paginationList">
+                            <!-- Pagination buttons will be generated here by JavaScript -->
+                        </ul>
+                    </nav>
+                </div>
+            </div>
         </div>
     </div>
 

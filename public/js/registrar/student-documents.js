@@ -1,4 +1,3 @@
-// Debounce utility function
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -9,6 +8,142 @@ function debounce(func, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
     };
+}
+
+// ============== PAGINATION VARIABLES ==============
+let allDocumentRows = [];
+let filteredRows = [];
+let currentPage = 1;
+let itemsPerPage = 15;
+
+// ============== PAGINATION FUNCTIONS ==============
+
+function initializePagination() {
+    allDocumentRows = Array.from(document.querySelectorAll('#documentsTableBody tr.document-row'));
+    filteredRows = [...allDocumentRows];
+    
+    // Set initial items per page
+    const itemsPerPageSelect = document.getElementById('itemsPerPage');
+    if (itemsPerPageSelect) {
+        itemsPerPageSelect.addEventListener('change', function() {
+            itemsPerPage = parseInt(this.value);
+            currentPage = 1;
+            updatePagination();
+        });
+    }
+    
+    updatePagination();
+}
+
+function updatePagination() {
+    const totalPages = Math.max(1, Math.ceil(filteredRows.length / itemsPerPage));
+    
+    // Ensure current page is valid
+    if (currentPage > totalPages) {
+        currentPage = totalPages;
+    }
+    if (currentPage < 1) {
+        currentPage = 1;
+    }
+    
+    // Hide all rows first
+    allDocumentRows.forEach(row => {
+        row.style.display = 'none';
+    });
+    
+    // Show only rows for current page
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    const endIdx = startIdx + itemsPerPage;
+    
+    for (let i = startIdx; i < endIdx && i < filteredRows.length; i++) {
+        filteredRows[i].style.display = '';
+    }
+    
+    // Update pagination info
+    const totalFilteredRows = filteredRows.length;
+    const showingStart = totalFilteredRows === 0 ? 0 : startIdx + 1;
+    const showingEnd = Math.min(endIdx, totalFilteredRows);
+    
+    document.getElementById('showingStart').textContent = showingStart;
+    document.getElementById('showingEnd').textContent = showingEnd;
+    document.getElementById('totalEntries').textContent = totalFilteredRows;
+    
+    // Generate pagination buttons
+    generatePaginationButtons(totalPages);
+}
+
+function generatePaginationButtons(totalPages) {
+    const paginationList = document.getElementById('paginationList');
+    paginationList.innerHTML = '';
+    
+    // Handle no results case
+    if (totalPages === 0) {
+        return;
+    }
+    
+    // Previous button
+    const prevLi = document.createElement('li');
+    prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+    prevLi.innerHTML = `<a class="page-link" href="#" onclick="goToPage(${currentPage - 1}); return false;">Previous</a>`;
+    paginationList.appendChild(prevLi);
+    
+    // Determine which page numbers to show
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, currentPage + 2);
+    
+    // Show "first page" link if we're not showing page 1
+    if (startPage > 1) {
+        const firstLi = document.createElement('li');
+        firstLi.className = 'page-item';
+        firstLi.innerHTML = `<a class="page-link" href="#" onclick="goToPage(1); return false;">1</a>`;
+        paginationList.appendChild(firstLi);
+        
+        if (startPage > 2) {
+            const dotsLi = document.createElement('li');
+            dotsLi.className = 'page-item disabled';
+            dotsLi.innerHTML = `<span class="page-link">...</span>`;
+            paginationList.appendChild(dotsLi);
+        }
+    }
+    
+    // Page numbers
+    for (let i = startPage; i <= endPage; i++) {
+        const li = document.createElement('li');
+        li.className = `page-item ${i === currentPage ? 'active' : ''}`;
+        li.innerHTML = `<a class="page-link" href="#" onclick="goToPage(${i}); return false;">${i}</a>`;
+        paginationList.appendChild(li);
+    }
+    
+    // Show "last page" link if we're not showing the last page
+    if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+            const dotsLi = document.createElement('li');
+            dotsLi.className = 'page-item disabled';
+            dotsLi.innerHTML = `<span class="page-link">...</span>`;
+            paginationList.appendChild(dotsLi);
+        }
+        
+        const lastLi = document.createElement('li');
+        lastLi.className = 'page-item';
+        lastLi.innerHTML = `<a class="page-link" href="#" onclick="goToPage(${totalPages}); return false;">${totalPages}</a>`;
+        paginationList.appendChild(lastLi);
+    }
+    
+    // Next button
+    const nextLi = document.createElement('li');
+    nextLi.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+    nextLi.innerHTML = `<a class="page-link" href="#" onclick="goToPage(${currentPage + 1}); return false;">Next</a>`;
+    paginationList.appendChild(nextLi);
+}
+
+function goToPage(pageNumber) {
+    const totalPages = Math.max(1, Math.ceil(filteredRows.length / itemsPerPage));
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+        currentPage = pageNumber;
+        updatePagination();
+        // Scroll to top of table
+        document.querySelector('.table-responsive')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 // ============== ADD DOCUMENT MODAL ==============
@@ -359,6 +494,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+    
+    // Initialize pagination
+    initializePagination();
 });
 
 // Clear edit modal when it's hidden
@@ -381,20 +519,41 @@ function deleteDocument(documentId) {
     }
 }
 
-// ============== TABLE SEARCH FUNCTIONALITY ==============
+// ============== TABLE SEARCH FUNCTIONALITY WITH PAGINATION ==============
 
 document.getElementById('searchInput').addEventListener('keyup', function() {
-    const searchTerm = this.value.toLowerCase();
+    const searchTerm = this.value.toLowerCase().trim();
     const tableBody = document.getElementById('documentsTableBody');
-    const rows = tableBody.querySelectorAll('tr');
+    const rows = Array.from(tableBody.querySelectorAll('tr.document-row'));
 
+    // Rows are grouped by student via rowspan, so the student-name cell only
+    // exists on the first row of each group. We can't filter row-by-row using
+    // cell index (it shifts depending on whether the row has that cell), and
+    // we can't hide a group's first row independently of its sibling rows or
+    // the rowspanned name cell disappears for the rows left visible. Instead,
+    // group rows by data-student-id and show/hide the whole group together.
+    const groups = new Map();
     rows.forEach(row => {
-        const studentName = row.cells[1].textContent.toLowerCase();
-        const documentType = row.cells[2].textContent.toLowerCase();
-        const isMatch = studentName.includes(searchTerm) || documentType.includes(searchTerm);
-        
-        row.style.display = isMatch ? '' : 'none';
+        const studentId = row.dataset.studentId;
+        if (!groups.has(studentId)) groups.set(studentId, []);
+        groups.get(studentId).push(row);
     });
+
+    filteredRows = [];
+    groups.forEach(groupRows => {
+        const studentName = groupRows[0].dataset.studentName || '';
+        const groupMatches = !searchTerm ||
+            studentName.includes(searchTerm) ||
+            groupRows.some(row => (row.dataset.documentType || '').includes(searchTerm));
+
+        if (groupMatches) {
+            filteredRows.push(...groupRows);
+        }
+    });
+
+    // Reset to page 1 when searching
+    currentPage = 1;
+    updatePagination();
 });
 
 // Close search results when clicking outside

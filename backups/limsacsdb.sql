@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 14, 2026 at 06:42 PM
+-- Generation Time: Jun 17, 2026 at 08:59 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -30,6 +30,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `academic_history` (
   `id` int(11) NOT NULL,
   `student_id` int(11) NOT NULL,
+  `enrolled_by` int(11) DEFAULT NULL,
   `school_year_id` int(11) NOT NULL,
   `grade_level` varchar(50) NOT NULL,
   `section_id` int(11) DEFAULT NULL,
@@ -41,37 +42,8 @@ CREATE TABLE `academic_history` (
 -- Dumping data for table `academic_history`
 --
 
-INSERT INTO `academic_history` (`id`, `student_id`, `school_year_id`, `grade_level`, `section_id`, `enrollment_status`, `created_at`) VALUES
-(86, 12, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 13:47:42'),
-(87, 11, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 13:47:59'),
-(88, 15, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 13:48:14'),
-(89, 41, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 13:48:26'),
-(90, 42, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 13:51:46'),
-(91, 27, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 13:52:26'),
-(92, 23, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 13:53:22'),
-(93, 14, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 13:54:16'),
-(94, 39, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 13:54:32'),
-(95, 35, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 13:55:00'),
-(96, 30, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 13:55:19'),
-(97, 34, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 13:56:33'),
-(98, 24, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:00:02'),
-(99, 28, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:01:54'),
-(100, 31, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:02:34'),
-(101, 25, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:03:11'),
-(102, 17, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:04:05'),
-(103, 16, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:05:48'),
-(104, 19, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:07:53'),
-(105, 21, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:11:03'),
-(106, 29, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:12:33'),
-(107, 32, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:13:24'),
-(108, 40, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:14:33'),
-(109, 37, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:16:07'),
-(110, 36, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:17:37'),
-(111, 33, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:18:45'),
-(112, 22, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:20:48'),
-(113, 13, 3, 'Grade 1', 4, 'Enrolled', '2026-06-12 14:23:38'),
-(114, 43, 3, 'Grade 1', 4, 'Enrolled', '2026-06-14 15:01:25'),
-(115, 44, 3, 'Grade 1', 4, 'Enrolled', '2026-06-14 15:34:53');
+INSERT INTO `academic_history` (`id`, `student_id`, `enrolled_by`, `school_year_id`, `grade_level`, `section_id`, `enrollment_status`, `created_at`) VALUES
+(2, 12, 3, 3, 'Grade 1', 4, 'Enrolled', '2026-06-17 06:51:37');
 
 -- --------------------------------------------------------
 
@@ -217,7 +189,46 @@ INSERT INTO `audit_logs` (`id`, `user_id`, `role`, `action`, `module`, `referenc
 (120, 3, 'registrar', 'DELETE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar deleted parent/guardian record with ID: 8', '::1', 'success', '2026-06-14 16:19:47'),
 (121, 3, 'registrar', 'DELETE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar deleted parent/guardian record with ID: 7', '::1', 'success', '2026-06-14 16:19:51'),
 (122, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Pogi si Lester logged in', '::1', 'success', '2026-06-14 16:30:40'),
-(123, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-14 16:39:59');
+(123, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-14 16:39:59'),
+(124, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-15 06:30:31'),
+(125, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-16 05:51:21'),
+(126, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-16 11:53:30'),
+(127, 3, 'registrar', 'UPLOAD DOCUMENT', 'STUDENT_DOCUMENTS', NULL, 'student_documents', 'Document uploaded for student ID 13', '::1', 'success', '2026-06-16 12:49:47'),
+(128, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-16 13:35:40'),
+(129, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 12', '::1', 'success', '2026-06-16 14:10:28'),
+(130, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 2', '::1', 'success', '2026-06-16 14:20:55'),
+(131, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 1', '::1', 'success', '2026-06-16 14:20:58'),
+(132, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 11', '::1', 'success', '2026-06-16 14:22:09'),
+(133, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 11', '::1', 'success', '2026-06-16 14:23:24'),
+(134, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 4', '::1', 'success', '2026-06-16 14:23:29'),
+(135, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 3', '::1', 'success', '2026-06-16 14:24:23'),
+(136, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 3', '::1', 'success', '2026-06-16 14:29:10'),
+(137, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-16 14:31:53'),
+(138, 3, 'registrar', 'ADD STUDENT', 'STUDENT', NULL, 'students', 'Registrar added student record', '::1', 'success', '2026-06-16 14:33:24'),
+(139, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-16 14:33:50'),
+(140, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 3', '::1', 'success', '2026-06-16 15:04:48'),
+(141, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 12', '::1', 'success', '2026-06-16 15:05:25'),
+(142, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 44', '::1', 'success', '2026-06-16 15:10:16'),
+(143, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 5', '::1', 'success', '2026-06-16 15:14:42'),
+(144, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 6', '::1', 'success', '2026-06-16 15:22:05'),
+(145, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 5', '::1', 'success', '2026-06-16 15:22:08'),
+(146, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 43', '::1', 'success', '2026-06-16 15:23:08'),
+(147, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 1', '::1', 'success', '2026-06-16 15:24:19'),
+(148, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 1', '::1', 'success', '2026-06-16 15:25:32'),
+(149, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-16 15:26:04'),
+(150, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 11', '::1', 'success', '2026-06-16 15:26:31'),
+(151, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 2', '::1', 'success', '2026-06-16 15:31:43'),
+(152, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 2', '::1', 'success', '2026-06-16 15:35:30'),
+(153, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 22', '::1', 'success', '2026-06-16 15:35:51'),
+(154, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 3', '::1', 'success', '2026-06-16 15:36:15'),
+(155, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 3', '::1', 'success', '2026-06-16 15:36:42'),
+(156, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 3', '::1', 'success', '2026-06-16 15:36:50'),
+(157, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-17 06:37:43'),
+(158, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-17 06:38:04'),
+(159, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-17 06:42:59'),
+(160, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-17 06:44:10'),
+(161, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-17 06:49:24'),
+(162, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-17 06:51:37');
 
 -- --------------------------------------------------------
 
@@ -432,7 +443,8 @@ ALTER TABLE `academic_history`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_ah_school_year` (`school_year_id`),
   ADD KEY `fk_ah_section` (`section_id`),
-  ADD KEY `fk_ah_student` (`student_id`);
+  ADD KEY `fk_ah_student` (`student_id`),
+  ADD KEY `fk_academic_history_enrolled_by` (`enrolled_by`);
 
 --
 -- Indexes for table `audit_logs`
@@ -497,13 +509,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `academic_history`
 --
 ALTER TABLE `academic_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=116;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=124;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=163;
 
 --
 -- AUTO_INCREMENT for table `document_types`
@@ -533,13 +545,13 @@ ALTER TABLE `sections`
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- AUTO_INCREMENT for table `student_documents`
 --
 ALTER TABLE `student_documents`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -555,6 +567,7 @@ ALTER TABLE `users`
 -- Constraints for table `academic_history`
 --
 ALTER TABLE `academic_history`
+  ADD CONSTRAINT `fk_academic_history_enrolled_by` FOREIGN KEY (`enrolled_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_ah_school_year` FOREIGN KEY (`school_year_id`) REFERENCES `school_year` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_ah_section` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_ah_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE;
