@@ -71,6 +71,18 @@
             <li class="menu-item"><a href="parent-guardians.php" class="menu-link"><div data-i18n="Parents & Guardians">Parents & Guardians</div></a></li>
           </ul>
         </li>
+
+          <!-- Audits -->
+        <li class="menu-header small text-uppercase"><span class="menu-header-text">Audits</span></li>
+          <li class="menu-item <?php echo ($currentPage === 'logs.php') ? 'active' : '' ?> ">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+              <i class="menu-icon tf-icons bx bx-file"></i>
+              <div data-i18n="Logs">Logs</div>
+            </a>
+            <ul class="menu-sub">
+              <li class="menu-item"><a href="logs.php" class="menu-link"><div data-i18n="Activity Logs">Activity Logs</div></a></li>
+            </ul>
+        </li>
       </ul>
     </aside>
     <!-- / Menu -->

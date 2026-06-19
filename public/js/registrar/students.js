@@ -397,13 +397,17 @@ function renderSearchResults(results){
                     >
                         Edit
                     </button>
-                    <button 
-                        class="btn btn-sm btn-danger" 
-                        title="Delete Student"
-                        onclick="event.stopPropagation(); if(confirm('Are you sure you want to delete this student? This action cannot be undone.')) deleteStudentAjax(${student.id})"
-                    >
-                        Delete
-                    </button>
+                    <form method="POST" action="../../../app/controllers/registrar/StudentsController.php" style="display: inline;">
+                        <input type="hidden" name="student_id" value="${student.id}">
+                        <button 
+                            type="submit" 
+                            class="btn btn-sm btn-danger" 
+                            onclick="return confirm('Are you sure you want to delete this student? This action cannot be undone.');"
+                            name="delete_student"
+                        >
+                            Delete
+                        </button>
+                    </form>
                 </td>
             </tr>`;
     }).join('');

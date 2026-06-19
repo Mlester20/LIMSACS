@@ -129,4 +129,31 @@ require_once __DIR__ . '/../../models/Model.php';
             ");
             return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
         }
+
+        public function getMonthlyRegistrationTrend(int $months = 6): array
+        {
+            $months = max(1, $months);
+
+            // Aggregate actual counts per year-month bucket.
+            $result = $this->con->query("
+                SELECT DATE_FORMAT(created_at, '%Y-%m') AS ym,
+                    COUNT(*) AS total
+                FROM   students
+                WHERE  created_at >= DATE_SUB(CURDATE(), INTERVAL {$months} MONTH)
+                GROUP  BY ym
+            ");
+            $rows   = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+            $counts = array_column($rows, 'total', 'ym');
+
+            // Backfill every month in the window so gaps render as zero, not gaps.
+            $trend = [];
+            for ($i = $months - 1; $i >= 0; $i--) {
+                $ym = date('Y-m', strtotime("-{$i} months"));
+                $trend[] = [
+                    'month' => date('M Y', strtotime($ym . '-01')),
+                    'total' => (int) ($counts[$ym] ?? 0),
+                ];
+            }
+            return $trend;
+        }
     }

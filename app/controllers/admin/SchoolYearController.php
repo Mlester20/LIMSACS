@@ -44,6 +44,16 @@ require_once __DIR__ . '/../../helpers/flashMessage.php';
             return true;
         }
 
+        /**
+         * Function to check if an active school year already exists
+         * @param string $status
+         * @param int|null $except_id
+         * @return bool
+         */
+        public function checkActiveSy($status, $except_id = null) {
+            return $this->model->activeSy($status, $except_id);
+        }
+
         public function update($id, $data){
             try{
                 if($this->model->update($id, $data)){
@@ -98,15 +108,27 @@ require_once __DIR__ . '/../../helpers/flashMessage.php';
                     'status' => $_POST['status']
                 ]);
             }
-            if(isset($_POST['update_sy'])){
+            if (isset($_POST['update_sy'])) {
                 $sy_id = $_POST['id'] ?? null;
+                $new_status = $_POST['status'] ?? 'inactive';
+
+                if ($new_status === 'active') {
+                    //Check if ANOTHER school year is already active
+                    if ($controller->checkActiveSy('active', $sy_id)) {
+                        FlashMessage::setFlash("error", "Another School Year is already active. ");
+                        header("Location: ../../../resources/views/admin/school-year.php");
+                        exit; 
+                    }
+                }
+
+                // 3. If it passes the check, proceed with update
                 $controller->update(
                     $sy_id,
                     [
                         'school_year' => $_POST['school_year'],
-                        'start_date' => $_POST['start_date'],
-                        'end_date' => $_POST['end_date'],
-                        'status' => $_POST['status'] ?? 'inactive'
+                        'start_date'  => $_POST['start_date'],
+                        'end_date'    => $_POST['end_date'],
+                        'status'      => $new_status
                     ]
                 );
             }

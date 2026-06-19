@@ -16,6 +16,28 @@ $statusBadge = static function (string $status): string {
         default    => 'bg-label-secondary',
     };
 };
+
+$statusColor = static function (string $status): string {
+    return match ($status) {
+        'Verified' => '#71dd37',
+        'Pending'  => '#ffab00',
+        'Rejected' => '#ff3e1d',
+        default    => '#8592a3',
+    };
+};
+
+// ── Chart.js data prep ──────────────────────────────────────────────────────
+$gradeLevelLabels = array_column($data['grade_level_summary'] ?? [], 'grade_level');
+$gradeLevelData   = array_map('intval', array_column($data['grade_level_summary'] ?? [], 'total_students'));
+
+$docStatusLabels = array_column($data['document_status_summary'] ?? [], 'status');
+$docStatusData   = array_map('intval', array_column($data['document_status_summary'] ?? [], 'total'));
+$docStatusColors = array_map($statusColor, $docStatusLabels);
+
+$trendLabels = array_column($data['registration_trend'] ?? [], 'month');
+$trendData   = array_map('intval', array_column($data['registration_trend'] ?? [], 'total'));
+
+$jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
 ?>
 
 <!DOCTYPE html>
@@ -301,25 +323,11 @@ $statusBadge = static function (string $status): string {
                 <h6 class="mb-0 fw-bold">Enrollment by Grade Level</h6>
                 <small class="text-muted">All academic history records</small>
               </div>
-              <div class="card-body p-0">
+              <div class="card-body">
                 <?php if (!empty($data['grade_level_summary'])): ?>
-                  <?php
-                    $maxGrade = max(array_column($data['grade_level_summary'], 'total_students'));
-                  ?>
-                  <ul class="list-group list-group-flush">
-                    <?php foreach ($data['grade_level_summary'] as $level): ?>
-                      <?php $bar = $maxGrade > 0 ? round($level['total_students'] / $maxGrade * 100) : 0; ?>
-                      <li class="list-group-item px-3 py-3">
-                        <div class="d-flex justify-content-between mb-1">
-                          <span class="fw-semibold"><?= $e($level['grade_level']) ?></span>
-                          <span class="badge bg-label-primary"><?= $int($level['total_students']) ?></span>
-                        </div>
-                        <div class="progress" style="height:5px;">
-                          <div class="progress-bar" style="width:<?= $bar ?>%"></div>
-                        </div>
-                      </li>
-                    <?php endforeach; ?>
-                  </ul>
+                  <div style="height: 280px;">
+                    <canvas id="gradeLevelChart"></canvas>
+                  </div>
                 <?php else: ?>
                   <div class="text-center text-muted py-5">
                     <i class="bx bx-chart fs-3 d-block mb-1"></i>
@@ -394,28 +402,11 @@ $statusBadge = static function (string $status): string {
               </div>
               <div class="card-body">
                 <?php if (!empty($data['document_status_summary'])): ?>
-                  <?php
-                    $sumTotal = array_sum(array_column($data['document_status_summary'], 'total'));
-                  ?>
-                  <?php foreach ($data['document_status_summary'] as $row): ?>
-                    <?php
-                      $share = $sumTotal > 0 ? round((int)$row['total'] / $sumTotal * 100) : 0;
-                      $cls   = $statusBadge($row['status']);
-                      $barColor = str_replace('bg-label-', '', $cls);
-                    ?>
-                    <div class="mb-4">
-                      <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="badge <?= $cls ?>"><?= $e($row['status']) ?></span>
-                        <span class="fw-bold"><?= $int($row['total']) ?>
-                          <small class="text-muted fw-normal">(<?= $share ?>%)</small>
-                        </span>
-                      </div>
-                      <div class="progress" style="height:6px;">
-                        <div class="progress-bar bg-<?= $barColor ?>" style="width:<?= $share ?>%"></div>
-                      </div>
-                    </div>
-                  <?php endforeach; ?>
-                  <hr class="my-2">
+                  <?php $sumTotal = array_sum(array_column($data['document_status_summary'], 'total')); ?>
+                  <div style="height: 220px;">
+                    <canvas id="docStatusChart"></canvas>
+                  </div>
+                  <hr class="my-3">
                   <div class="d-flex justify-content-between">
                     <span class="text-muted small">Total Submissions</span>
                     <strong><?= $int($sumTotal) ?></strong>
@@ -429,9 +420,33 @@ $statusBadge = static function (string $status): string {
               </div>
             </div>
           </div>
-    
+
         </div><!-- /Row 4 -->
-    
+
+        <!-- ── Row 5: Registration trend ───────────────────────────────────────── -->
+        <div class="row g-4 mt-4">
+          <div class="col-12">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header py-3">
+                <h6 class="mb-0 fw-bold">Student Registration Trend</h6>
+                <small class="text-muted">New student records over the last 6 months</small>
+              </div>
+              <div class="card-body">
+                <?php if (!empty($data['registration_trend'])): ?>
+                  <div style="height: 300px;">
+                    <canvas id="registrationTrendChart"></canvas>
+                  </div>
+                <?php else: ?>
+                  <div class="text-center text-muted py-5">
+                    <i class="bx bx-trending-up fs-3 d-block mb-1"></i>
+                    No registration data
+                  </div>
+                <?php endif; ?>
+              </div>
+            </div>
+          </div>
+        </div><!-- /Row 5 -->
+
       </div><!-- /container-xxl -->
     </div><!-- /content-wrapper -->
 
@@ -445,5 +460,100 @@ $statusBadge = static function (string $status): string {
     <script src="../../../public/assets/vendor/js/menu.js"></script>
     <script src="../../../public/assets/js/main.js"></script>
     <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+    <!-- Chart.js (dashboard graphs) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script>
+      const gradeLevelLabels = <?= json_encode($gradeLevelLabels, $jsonOpts) ?>;
+      const gradeLevelData   = <?= json_encode($gradeLevelData, $jsonOpts) ?>;
+
+      const docStatusLabels = <?= json_encode($docStatusLabels, $jsonOpts) ?>;
+      const docStatusData   = <?= json_encode($docStatusData, $jsonOpts) ?>;
+      const docStatusColors = <?= json_encode($docStatusColors, $jsonOpts) ?>;
+
+      const trendLabels = <?= json_encode($trendLabels, $jsonOpts) ?>;
+      const trendData    = <?= json_encode($trendData, $jsonOpts) ?>;
+
+      document.addEventListener('DOMContentLoaded', function () {
+        const gradeLevelCtx = document.getElementById('gradeLevelChart');
+        if (gradeLevelCtx && gradeLevelLabels.length) {
+          new Chart(gradeLevelCtx, {
+            type: 'line',
+            data: {
+              labels: gradeLevelLabels,
+              datasets: [{
+                label: 'Students',
+                data: gradeLevelData,
+                borderColor: '#696cff',
+                backgroundColor: 'rgba(105, 108, 255, 0.15)',
+                fill: true,
+                tension: 0.35,
+                pointRadius: 4,
+                pointBackgroundColor: '#696cff',
+              }],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+            },
+          });
+        }
+
+        const docStatusCtx = document.getElementById('docStatusChart');
+        if (docStatusCtx && docStatusLabels.length) {
+          new Chart(docStatusCtx, {
+            type: 'line',
+            data: {
+              labels: docStatusLabels,
+              datasets: [{
+                label: 'Submissions',
+                data: docStatusData,
+                borderColor: '#696cff',
+                backgroundColor: 'rgba(105, 108, 255, 0.15)',
+                fill: true,
+                tension: 0.35,
+                pointRadius: 5,
+                pointBackgroundColor: docStatusColors,
+                pointBorderColor: docStatusColors,
+              }],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+            },
+          });
+        }
+
+        const trendCtx = document.getElementById('registrationTrendChart');
+        if (trendCtx && trendLabels.length) {
+          new Chart(trendCtx, {
+            type: 'line',
+            data: {
+              labels: trendLabels,
+              datasets: [{
+                label: 'New Registrations',
+                data: trendData,
+                borderColor: '#696cff',
+                backgroundColor: 'rgba(105, 108, 255, 0.15)',
+                fill: true,
+                tension: 0.35,
+                pointRadius: 4,
+                pointBackgroundColor: '#696cff',
+              }],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+            },
+          });
+        }
+      });
+    </script>
 </body>
 </html>
