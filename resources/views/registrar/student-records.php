@@ -422,71 +422,90 @@ AuthRole::allowOnly(['registrar']);
 
                 <div class="modal-body p-4">
 
-                    <p class="text-muted small text-uppercase mb-3" style="letter-spacing: 0.5px;">Student Identity</p>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-3">
-                            <label class="d-block small text-muted mb-1">LRN</label>
-                            <div id="modalLrn">-</div>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="d-block small text-muted mb-1">Status</label>
-                            <span id="modalStatusBadge" class="badge bg-success">Active</span>
-                        </div>
-                    </div>
+                    <ul class="nav nav-tabs mb-3" id="studentDetailsTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="studentProfileTab-tab" data-bs-toggle="tab" data-bs-target="#studentProfileTab" type="button" role="tab" aria-controls="studentProfileTab" aria-selected="true">Profile</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="studentAcademicHistoryTab-tab" data-bs-toggle="tab" data-bs-target="#studentAcademicHistoryTab" type="button" role="tab" aria-controls="studentAcademicHistoryTab" aria-selected="false">Academic History</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="studentParentGuardiansTab-tab" data-bs-toggle="tab" data-bs-target="#studentParentGuardiansTab" type="button" role="tab" aria-controls="studentParentGuardiansTab" aria-selected="false">Parents / Guardians</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="studentDocumentsTab-tab" data-bs-toggle="tab" data-bs-target="#studentDocumentsTab" type="button" role="tab" aria-controls="studentDocumentsTab" aria-selected="false">Documents</button>
+                        </li>
+                    </ul>
 
-                    <p class="text-muted small text-uppercase mb-3 pt-3 border-top" style="letter-spacing: 0.5px;">Personal Information</p>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-3">
-                            <label class="d-block small text-muted mb-1">First Name</label>
-                            <div id="modalFirstName">-</div>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="d-block small text-muted mb-1">Middle Name</label>
-                            <div id="modalMiddleName">-</div>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="d-block small text-muted mb-1">Last Name</label>
-                            <div id="modalLastName">-</div>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="d-block small text-muted mb-1">Gender</label>
-                            <div id="modalGender">-</div>
+                    <div class="tab-content" id="studentDetailsTabContent">
+
+                        <div class="tab-pane fade show active" id="studentProfileTab" role="tabpanel" aria-labelledby="studentProfileTab-tab">
+
+                            <p class="text-muted small text-uppercase mb-3" style="letter-spacing: 0.5px;">Student Identity</p>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-3">
+                                    <label class="d-block small text-muted mb-1">LRN</label>
+                                    <div id="modalLrn">-</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="d-block small text-muted mb-1">Status</label>
+                                    <span id="modalStatusBadge" class="badge bg-success">Active</span>
+                                </div>
+                            </div>
+
+                            <p class="text-muted small text-uppercase mb-3 pt-3 border-top" style="letter-spacing: 0.5px;">Personal Information</p>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-3">
+                                    <label class="d-block small text-muted mb-1">First Name</label>
+                                    <div id="modalFirstName">-</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="d-block small text-muted mb-1">Middle Name</label>
+                                    <div id="modalMiddleName">-</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="d-block small text-muted mb-1">Last Name</label>
+                                    <div id="modalLastName">-</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="d-block small text-muted mb-1">Gender</label>
+                                    <div id="modalGender">-</div>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="d-block small text-muted mb-1">Birth Date</label>
+                                    <div id="modalBirthDate">-</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="d-block small text-muted mb-1">Age</label>
+                                    <div id="modalAge">-</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="d-block small text-muted mb-1">Place of Birth</label>
+                                    <div id="modalPlaceOfBirth">-</div>
+                                </div>
+                            </div>
+
+                            <p class="text-muted small text-uppercase mb-3 pt-3 border-top" style="letter-spacing: 0.5px;">Demographics & Contact</p>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-3">
+                                    <label class="d-block small text-muted mb-1">Religion</label>
+                                    <div id="modalReligion">-</div>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="d-block small text-muted mb-1">Contact Number</label>
+                                    <div id="modalContactNumber">-</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="d-block small text-muted mb-1">Address</label>
+                                    <div id="modalAddress" class="text-break">-</div>
+                                </div>
+                            </div>
+
                         </div>
 
-                        <div class="col-md-3">
-                            <label class="d-block small text-muted mb-1">Birth Date</label>
-                            <div id="modalBirthDate">-</div>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="d-block small text-muted mb-1">Age</label>
-                            <div id="modalAge">-</div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="d-block small text-muted mb-1">Place of Birth</label>
-                            <div id="modalPlaceOfBirth">-</div>
-                        </div>
-                    </div>
-
-                    <p class="text-muted small text-uppercase mb-3 pt-3 border-top" style="letter-spacing: 0.5px;">Demographics & Contact</p>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-3">
-                            <label class="d-block small text-muted mb-1">Religion</label>
-                            <div id="modalReligion">-</div>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="d-block small text-muted mb-1">Contact Number</label>
-                            <div id="modalContactNumber">-</div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="d-block small text-muted mb-1">Address</label>
-                            <div id="modalAddress" class="text-break">-</div>
-                        </div>
-                    </div>
-
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <p class="text-muted small text-uppercase mb-3 pt-3 border-top" style="letter-spacing: 0.5px;">Academic History</p>
-                            <div class="table-responsive" style="max-height: 220px; overflow-y: auto;">
+                        <div class="tab-pane fade" id="studentAcademicHistoryTab" role="tabpanel" aria-labelledby="studentAcademicHistoryTab-tab">
+                            <div class="table-responsive">
                                 <table class="table table-sm mb-0">
                                     <thead>
                                         <tr>
@@ -505,12 +524,33 @@ AuthRole::allowOnly(['registrar']);
                             </div>
                         </div>
 
-                        <div class="col-md-6">
-                            <p class="text-muted small text-uppercase mb-3 pt-3 border-top" style="letter-spacing: 0.5px;">Parent/Guardians Information</p>
+                        <div class="tab-pane fade" id="studentParentGuardiansTab" role="tabpanel" aria-labelledby="studentParentGuardiansTab-tab">
                             <div id="parentGuardiansInfo">
                                 <p class="text-center text-muted">Loading...</p>
                             </div>
                         </div>
+
+                        <div class="tab-pane fade" id="studentDocumentsTab" role="tabpanel" aria-labelledby="studentDocumentsTab-tab">
+                            <p class="small text-muted mb-3" id="documentChecklistSummary">Loading documents...</p>
+                            <div class="table-responsive">
+                                <table class="table table-sm mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Document Type</th>
+                                            <th>Status</th>
+                                            <th>Remarks</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="documentChecklistBody">
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted">Loading...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
                     </div>
 
                 </div>

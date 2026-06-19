@@ -8,12 +8,16 @@ require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../models/registrar/StudentsModel.php';
 require_once __DIR__ . '/../../models/registrar/AcademicHistoryModel.php';
 require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
+require_once __DIR__ . '/../../models/registrar/StudentsDocumentModel.php';
+require_once __DIR__ . '/../../models/registrar/DocumentTypesModel.php';
 require_once __DIR__ . '/../../services/StudentsService.php';
 
     class StudentsController extends Controller{
         private $itemsPerPage = 10;
         protected $academicHistory;
         protected $parentGuardians;
+        protected $studentsDocuments;
+        protected $documentTypes;
         protected $auditLogs;
 
         public function __construct($con){
@@ -22,6 +26,8 @@ require_once __DIR__ . '/../../services/StudentsService.php';
             );
             $this->academicHistory = new AcademicHistoryModel($con);
             $this->parentGuardians = new ParentGuardiansModel($con);
+            $this->studentsDocuments = new StudentsDocumentModel($con);
+            $this->documentTypes = new DocumentTypesModel($con);
             $this->auditLogs = new AuditLogs($con);
         }
 
@@ -153,18 +159,28 @@ require_once __DIR__ . '/../../services/StudentsService.php';
                 // Get parents/guardians
                 $parentGuardians = $parentGuardiansModel->getByStudentId($student_id);
 
+                // Get the student's submitted documents
+                $studentDocuments = $this->studentsDocuments->getByStudentId($student_id);
+
+                // Get all document types for the checklist
+                $documentTypes = $this->documentTypes->index();
+
                 return [
                     'student' => $student,
                     'academic_history' => $academicHistory ?: [],
-                    
-                    'parent_guardians' => $parentGuardians ?: []
+
+                    'parent_guardians' => $parentGuardians ?: [],
+                    'student_documents' => $studentDocuments ?: [],
+                    'document_types' => $documentTypes ?: []
                 ];
             } catch (Exception $e) {
                 error_log("Get student profile error: " . $e->getMessage());
                 return [
                     'student' => null,
                     'academic_history' => [],
-                    'parent_guardians' => []
+                    'parent_guardians' => [],
+                    'student_documents' => [],
+                    'document_types' => []
                 ];
             }
         }

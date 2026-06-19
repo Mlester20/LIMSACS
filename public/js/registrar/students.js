@@ -13,6 +13,8 @@ function populateStudentModal(student) {
             const studentData = response.student || student;
             const academicHistory = response.academic_history || [];
             const parentGuardians = response.parent_guardians || {};
+            const studentDocuments = response.student_documents || [];
+            const documentTypes = response.document_types || [];
 
             // Personal Information
             document.getElementById('modalLrn').textContent = studentData.lrn || '-';
@@ -67,6 +69,9 @@ function populateStudentModal(student) {
 
             // Render Parent/Guardians Information
             renderParentGuardians(parentGuardians);
+
+            // Render Documents Checklist
+            renderDocumentChecklist(studentDocuments, documentTypes);
         },
         error: function(error) {
             console.error('Error fetching student profile:', error);
@@ -176,6 +181,72 @@ function renderParentGuardians(parentGuardians) {
 
     html += '</div>';
     container.innerHTML = html;
+}
+
+/**
+ * Render the documents checklist tab
+ * @param {Array} studentDocs - Documents submitted by the student
+ * @param {Array} docTypes - All available document types
+ */
+function renderDocumentChecklist(studentDocs, docTypes) {
+    const tableBody = document.getElementById('documentChecklistBody');
+    const summary = document.getElementById('documentChecklistSummary');
+    if (!tableBody) return;
+
+    if (!docTypes || docTypes.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No document types configured</td></tr>';
+        if (summary) summary.textContent = '';
+        return;
+    }
+
+    const docsByTypeId = new Map();
+    (studentDocs || []).forEach(doc => {
+        docsByTypeId.set(String(doc.document_type_id), doc);
+    });
+
+    const statusBadgeClass = {
+        Submitted: 'bg-info',
+        Verified: 'bg-success',
+        Rejected: 'bg-danger',
+        Pending: 'bg-warning'
+    };
+
+    let submittedCount = 0;
+    let html = '';
+
+    docTypes.forEach(docType => {
+        const doc = docsByTypeId.get(String(docType.id));
+
+        if (doc) {
+            submittedCount++;
+            const badgeClass = statusBadgeClass[doc.status] || 'bg-secondary';
+            html += `
+                <tr>
+                    <td>${escapeHtml(docType.document_name)}</td>
+                    <td><span class="badge ${badgeClass}">${escapeHtml(doc.status || 'N/A')}</span></td>
+                    <td>${escapeHtml(doc.remarks || '-')}</td>
+                    <td>
+                        ${doc.file_path ? `<a href="${escapeHtml(doc.file_path)}" target="_blank" class="btn btn-sm btn-outline-primary">View</a>` : '-'}
+                    </td>
+                </tr>
+            `;
+        } else {
+            html += `
+                <tr>
+                    <td>${escapeHtml(docType.document_name)}</td>
+                    <td><span class="badge bg-danger">✗ Missing</span></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            `;
+        }
+    });
+
+    tableBody.innerHTML = html;
+
+    if (summary) {
+        summary.textContent = `${submittedCount} of ${docTypes.length} documents submitted`;
+    }
 }
 
 /**

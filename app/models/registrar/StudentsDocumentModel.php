@@ -104,6 +104,27 @@ require_once __DIR__ . '/../Model.php';
             }
         }
 
+        public function getByStudentId($student_id){
+            try{
+                $query ="SELECT
+                    sd.*,
+                    dt.document_name
+                    FROM {$this->student_documents} sd
+                    LEFT JOIN {$this->document_types} dt ON sd.document_type_id = dt.id
+                    WHERE sd.student_id = ?
+                    ORDER BY dt.document_name ASC
+                ";
+                $stmt = $this->con->prepare($query);
+                $stmt->bind_param("i", $student_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                return $result->fetch_all(MYSQLI_ASSOC);
+            }catch(Exception $e){
+                error_log("Error " . $e->getMessage());
+                return [];
+            }
+        }
+
         public function find($id){
             try{
                 $query ="SELECT
