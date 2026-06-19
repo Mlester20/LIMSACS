@@ -10,17 +10,25 @@ try {
     $controller = new EnrollmentController($con);
     $schoolYears = $controller->getSchoolYears();
     $gradeLevels = $controller->getGradeLevels();
-    
+
     // Get current page from query parameter
     $currentPage = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-    
+
+    // Get current status filter from query parameter
+    $allowedStatusFilters = ['Enrolled', 'Transferred', 'Dropped', 'Graduated', 'All'];
+    $statusFilter = $_GET['status'] ?? 'Enrolled';
+    if (!in_array($statusFilter, $allowedStatusFilters, true)) {
+        $statusFilter = 'Enrolled';
+    }
+
     // Get enrolled students with pagination
-    $paginatedData = $controller->getEnrolledStudentsWithPagination($currentPage, 10);
+    $paginatedData = $controller->getEnrolledStudentsWithPagination($currentPage, 10, $statusFilter);
     $enrollments = $paginatedData['enrollments'];
     $pagination = $paginatedData['pagination'];
 } catch (Exception $e) {
     error_log($e->getMessage());
     $enrollments = [];
+    $statusFilter = $statusFilter ?? 'Enrolled';
     $pagination = [
         'currentPage' => 1,
         'itemsPerPage' => 10,
@@ -73,7 +81,7 @@ try {
         <div class="row mb-3 align-items-center">
             <div class="col-md-6">
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search Enrolled Students..." id="searchInput">
+                    <input type="text" class="form-control" placeholder="Search Students..." id="searchInput" data-status-filter="<?= htmlspecialchars($statusFilter) ?>">
                 </div>
             </div>
             <div class="col-md-6 text-end mt-2 mt-md-0">
@@ -83,8 +91,29 @@ try {
             </div>
         </div>
 
+        <ul class="nav nav-pills mb-3" id="statusFilterTabs">
+            <?php
+                $statusTabs = [
+                    'Enrolled' => 'Enrolled',
+                    'Transferred' => 'Transferred',
+                    'Dropped' => 'Dropped',
+                    'Graduated' => 'Graduated',
+                    'All' => 'All'
+                ];
+            ?>
+            <?php foreach ($statusTabs as $tabStatus => $tabLabel): ?>
+                <li class="nav-item">
+                    <a class="nav-link <?= $statusFilter === $tabStatus ? 'active' : '' ?>" href="?status=<?= urlencode($tabStatus) ?>&page=1">
+                        <?= htmlspecialchars($tabLabel) ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+
         <div class="card">
-            <h5 class="card-header">Enrolled Students</h5>
+            <h5 class="card-header">
+                <?= htmlspecialchars($statusTabs[$statusFilter] ?? 'Enrolled') ?> Students
+            </h5>
             <div class="table-responsive nowrap">
                 <table class="table">
                     <thead>
@@ -99,7 +128,7 @@ try {
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="enrolledStudentsBody">
+                    <tbody id="enrolledStudentsBody" data-terminal-grade="<?= htmlspecialchars(EnrollmentController::TERMINAL_GRADE_LEVEL) ?>">
                         <?php if(!empty($enrollments)): ?>
                             <?php foreach($enrollments as $index => $enrollment): ?>
                                 <tr>
@@ -110,21 +139,42 @@ try {
                                     <td><?php echo htmlspecialchars($enrollment['grade_level']); ?></td>
                                     <td><?php echo htmlspecialchars($enrollment['section_name']); ?></td>
                                     <td>
-                                        <span class="badge bg-success"><?php echo htmlspecialchars($enrollment['enrollment_status']); ?></span>
+                                        <?php
+                                            $badgeColors = ['Enrolled' => 'success', 'Graduated' => 'primary', 'Transferred' => 'warning', 'Dropped' => 'danger'];
+                                            $rowBadgeColor = $badgeColors[$enrollment['enrollment_status']] ?? 'secondary';
+                                        ?>
+                                        <span class="badge bg-<?php echo $rowBadgeColor; ?>"><?php echo htmlspecialchars($enrollment['enrollment_status']); ?></span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-info" title="View History" data-bs-toggle="modal" data-bs-target="#enrollmentHistoryModal" onclick="enrollmentController.showEnrollmentHistory(<?php echo $enrollment['student_id']; ?>, '<?php echo htmlspecialchars($enrollment['first_name'] . ' ' . $enrollment['last_name']); ?>')">
+                                        <?php $fullNameJs = htmlspecialchars($enrollment['first_name'] . ' ' . $enrollment['last_name'], ENT_QUOTES); ?>
+                                        <button class="btn btn-sm btn-info" title="View History" data-bs-toggle="modal" data-bs-target="#enrollmentHistoryModal" onclick="enrollmentController.showEnrollmentHistory(<?php echo $enrollment['student_id']; ?>, '<?php echo $fullNameJs; ?>')">
                                             <i class="bx bx-history"></i>
                                         </button>
-                                        <!-- <button class="btn btn-sm btn-warning" title="Edit">
-                                            <i class="bx bx-edit"></i>
-                                        </button> -->
+                                        <?php if ($enrollment['enrollment_status'] === 'Enrolled'): ?>
+                                            <button class="btn btn-sm btn-danger" title="Mark as Dropped" onclick="enrollmentController.dropStudent(<?php echo $enrollment['enrollment_id']; ?>, '<?php echo $fullNameJs; ?>')">
+                                                <i class="bx bx-x-circle"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-warning" title="Mark as Transferred" onclick="enrollmentController.transferStudent(<?php echo $enrollment['enrollment_id']; ?>, '<?php echo $fullNameJs; ?>')">
+                                                <i class="bx bx-transfer"></i>
+                                            </button>
+                                            <?php if ($enrollment['grade_level'] === EnrollmentController::TERMINAL_GRADE_LEVEL): ?>
+                                                <button class="btn btn-sm btn-primary" title="Mark as Graduated" onclick="enrollmentController.graduateStudent(<?php echo $enrollment['enrollment_id']; ?>, '<?php echo $fullNameJs; ?>')">
+                                                    <i class="bx bx-medal"></i>
+                                                </button>
+                                            <?php else: ?>
+                                                <button class="btn btn-sm btn-outline-secondary" disabled title="Not yet eligible to graduate (must reach <?php echo htmlspecialchars(EnrollmentController::TERMINAL_GRADE_LEVEL); ?>)">
+                                                    <i class="bx bx-medal"></i>
+                                                </button>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <span class="badge bg-<?php echo $rowBadgeColor; ?>"><?php echo htmlspecialchars($enrollment['enrollment_status']); ?></span>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="8" class="text-center text-muted py-3">No enrolled students found.</td>
+                                <td colspan="8" class="text-center text-muted py-3">No students found.</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -147,7 +197,7 @@ try {
                             <!-- Previous Button -->
                             <?php if($pagination['hasPrevPage']): ?>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=<?php echo $pagination['currentPage'] - 1; ?>">Previous</a>
+                                    <a class="page-link" href="?status=<?php echo urlencode($statusFilter); ?>&page=<?php echo $pagination['currentPage'] - 1; ?>">Previous</a>
                                 </li>
                             <?php else: ?>
                                 <li class="page-item disabled">
@@ -163,7 +213,7 @@ try {
                                 if($startPage > 1): 
                             ?>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=1">1</a>
+                                    <a class="page-link" href="?status=<?php echo urlencode($statusFilter); ?>&page=1">1</a>
                                 </li>
                                 <?php if($startPage > 2): ?>
                                     <li class="page-item disabled">
@@ -179,7 +229,7 @@ try {
                                     </li>
                                 <?php else: ?>
                                     <li class="page-item">
-                                        <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                                        <a class="page-link" href="?status=<?php echo urlencode($statusFilter); ?>&page=<?php echo $i; ?>"><?php echo $i; ?></a>
                                     </li>
                                 <?php endif; ?>
                             <?php endfor; ?>
@@ -191,14 +241,14 @@ try {
                                     </li>
                                 <?php endif; ?>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=<?php echo $pagination['totalPages']; ?>"><?php echo $pagination['totalPages']; ?></a>
+                                    <a class="page-link" href="?status=<?php echo urlencode($statusFilter); ?>&page=<?php echo $pagination['totalPages']; ?>"><?php echo $pagination['totalPages']; ?></a>
                                 </li>
                             <?php endif; ?>
 
                             <!-- Next Button -->
                             <?php if($pagination['hasNextPage']): ?>
                                 <li class="page-item">
-                                    <a class="page-link" href="?page=<?php echo $pagination['currentPage'] + 1; ?>">Next</a>
+                                    <a class="page-link" href="?status=<?php echo urlencode($statusFilter); ?>&page=<?php echo $pagination['currentPage'] + 1; ?>">Next</a>
                                 </li>
                             <?php else: ?>
                                 <li class="page-item disabled">
@@ -312,6 +362,50 @@ try {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Graduate Student -->
+    <div class="modal fade" id="graduateModal" tabindex="-1" aria-labelledby="graduateModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="graduateModalLabel">
+                        <i class="bx bx-medal"></i> Mark Student as Graduated
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-3">Recording graduation for <strong id="graduateStudentName"></strong></p>
+                    <form id="graduateForm">
+                        <input type="hidden" id="graduateEnrollmentId" name="enrollment_id">
+
+                        <div class="mb-3">
+                            <label class="form-label form-label-sm mb-1">Graduation Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control form-control-sm" id="graduationDate" name="graduation_date" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label form-label-sm mb-1">Honors</label>
+                            <input type="text" class="form-control form-control-sm" id="graduateHonors" name="honors" placeholder="e.g. With Honors">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label form-label-sm mb-1">Remarks</label>
+                            <textarea class="form-control form-control-sm" id="graduateRemarks" name="remarks" rows="3"></textarea>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bx bx-check"></i> Confirm Graduation
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

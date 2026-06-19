@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 19, 2026 at 02:36 PM
+-- Generation Time: Jun 19, 2026 at 03:57 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -43,8 +43,8 @@ CREATE TABLE `academic_history` (
 --
 
 INSERT INTO `academic_history` (`id`, `student_id`, `enrolled_by`, `school_year_id`, `grade_level`, `section_id`, `enrollment_status`, `created_at`) VALUES
-(2, 12, 3, 3, 'Grade 1', 4, 'Enrolled', '2026-06-17 06:51:37'),
-(3, 11, 3, 3, 'Grade 1', 4, 'Enrolled', '2026-06-18 14:36:12');
+(5, 11, 3, 3, 'Grade 6', 4, 'Graduated', '2026-06-19 13:31:20'),
+(6, 42, 3, 3, 'Grade 1', 5, 'Enrolled', '2026-06-19 13:53:38');
 
 -- --------------------------------------------------------
 
@@ -271,7 +271,15 @@ INSERT INTO `audit_logs` (`id`, `user_id`, `role`, `action`, `module`, `referenc
 (201, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-19 06:55:54'),
 (202, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-19 07:06:05'),
 (203, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-19 11:57:54'),
-(204, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-19 12:17:03');
+(204, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-19 12:17:03'),
+(205, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-19 12:56:05'),
+(206, 3, 'registrar', 'DROP STUDENT', 'ENROLLMENT', 3, 'academic_history', 'Marked Mark Lester  Raguindin as Dropped', '::1', 'success', '2026-06-19 13:03:26'),
+(207, 3, 'registrar', 'GRADUATE STUDENT', 'ENROLLMENT', 2, 'academic_history', 'Marked Armando Raguindin as Graduated', '::1', 'success', '2026-06-19 13:14:40'),
+(208, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-19 13:28:34'),
+(209, 3, 'registrar', 'UPDATE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar updated section: Mahogani', '::1', 'success', '2026-06-19 13:30:31'),
+(210, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 6', '::1', 'success', '2026-06-19 13:31:20'),
+(211, 3, 'registrar', 'GRADUATE STUDENT', 'ENROLLMENT', 5, 'academic_history', 'Marked Mark Lester  Raguindin as Graduated', '::1', 'success', '2026-06-19 13:32:39'),
+(212, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-19 13:53:38');
 
 -- --------------------------------------------------------
 
@@ -297,6 +305,30 @@ INSERT INTO `document_types` (`id`, `document_name`, `is_required`, `is_active`)
 (14, 'Good Moral Certificate', 1, 1),
 (15, 'Medical Certificate', 1, 1),
 (17, 'Certificate of Completion', 1, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `graduates`
+--
+
+CREATE TABLE `graduates` (
+  `id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `academic_history_id` int(11) NOT NULL,
+  `graduation_date` date NOT NULL,
+  `honors` varchar(100) DEFAULT NULL,
+  `remarks` text DEFAULT NULL,
+  `recorded_by` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `graduates`
+--
+
+INSERT INTO `graduates` (`id`, `student_id`, `academic_history_id`, `graduation_date`, `honors`, `remarks`, `recorded_by`, `created_at`) VALUES
+(2, 11, 5, '2027-04-05', NULL, 'Test', 3, '2026-06-19 13:32:39');
 
 -- --------------------------------------------------------
 
@@ -364,7 +396,7 @@ CREATE TABLE `sections` (
 --
 
 INSERT INTO `sections` (`id`, `section_name`, `grade_level`, `adviser_id`, `school_year_id`, `max_students`, `created_at`) VALUES
-(4, 'Mahogani', 'Grade 1', 8, 3, 35, '2026-06-09 13:29:58'),
+(4, 'Mahogani', 'Grade 6', 8, 3, 35, '2026-06-09 13:29:58'),
 (5, 'Pine', 'Grade 1', 7, 3, 35, '2026-06-12 13:34:47');
 
 -- --------------------------------------------------------
@@ -509,6 +541,15 @@ ALTER TABLE `document_types`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `graduates`
+--
+ALTER TABLE `graduates`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `uq_academic_history_id` (`academic_history_id`),
+  ADD KEY `student_id` (`student_id`),
+  ADD KEY `recorded_by` (`recorded_by`);
+
+--
 -- Indexes for table `parents_guardians`
 --
 ALTER TABLE `parents_guardians`
@@ -559,19 +600,25 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `academic_history`
 --
 ALTER TABLE `academic_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=205;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=213;
 
 --
 -- AUTO_INCREMENT for table `document_types`
 --
 ALTER TABLE `document_types`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+--
+-- AUTO_INCREMENT for table `graduates`
+--
+ALTER TABLE `graduates`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `parents_guardians`
@@ -621,6 +668,14 @@ ALTER TABLE `academic_history`
   ADD CONSTRAINT `fk_ah_school_year` FOREIGN KEY (`school_year_id`) REFERENCES `school_year` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_ah_section` FOREIGN KEY (`section_id`) REFERENCES `sections` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_ah_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `graduates`
+--
+ALTER TABLE `graduates`
+  ADD CONSTRAINT `graduates_academic_history_id_fk` FOREIGN KEY (`academic_history_id`) REFERENCES `academic_history` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `graduates_recorded_by_fk` FOREIGN KEY (`recorded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `graduates_student_id_fk` FOREIGN KEY (`student_id`) REFERENCES `students` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `parents_guardians`

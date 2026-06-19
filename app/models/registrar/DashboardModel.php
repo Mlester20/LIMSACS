@@ -129,4 +129,77 @@ require_once __DIR__ . '/../../models/Model.php';
             ");
             return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
         }
+
+        public function getMonthlyRegistrationTrend(int $months = 6): array
+        {
+            $months = max(1, $months);
+
+            // Aggregate actual counts per year-month bucket.
+            $result = $this->con->query("
+                SELECT DATE_FORMAT(created_at, '%Y-%m') AS ym,
+                    COUNT(*) AS total
+                FROM   students
+                WHERE  created_at >= DATE_SUB(CURDATE(), INTERVAL {$months} MONTH)
+                GROUP  BY ym
+            ");
+            $rows   = $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+            $counts = array_column($rows, 'total', 'ym');
+
+            // Backfill every month in the window so gaps render as zero, not gaps.
+            $trend = [];
+            for ($i = $months - 1; $i >= 0; $i--) {
+                $ym = date('Y-m', strtotime("-{$i} months"));
+                $trend[] = [
+                    'month' => date('M Y', strtotime($ym . '-01')),
+                    'total' => (int) ($counts[$ym] ?? 0),
+                ];
+            }
+            return $trend;
+        }
+
+        public function getEnrollmentStatusBreakdown(): array
+        {
+            $result = $this->con->query("
+                SELECT enrollment_status AS status,
+                    COUNT(*) AS total
+                FROM   academic_history
+                GROUP  BY enrollment_status
+            ");
+            return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+        }
+
+        public function getTotalGraduates(): int
+        {
+            $row = $this->con->query("SELECT COUNT(*) AS total FROM graduates")->fetch_assoc();
+            return (int) ($row['total'] ?? 0);
+        }
+
+        public function getGraduatesActiveSchoolYear(): int
+        {
+            $row = $this->con->query("
+                SELECT COUNT(*) AS total
+                FROM   graduates g
+                INNER JOIN academic_history ah ON ah.id = g.academic_history_id
+                INNER JOIN school_year      sy ON sy.id = ah.school_year_id
+                WHERE  sy.status = 'active'
+            ")->fetch_assoc();
+            return (int) ($row['total'] ?? 0);
+        }
+
+        public function getSectionCapacityUtilization(): array
+        {
+            $result = $this->con->query("
+                SELECT sec.section_name,
+                    sec.grade_level,
+                    sec.max_students,
+                    COUNT(ah.id) AS enrolled_count
+                FROM   sections sec
+                INNER JOIN school_year sy ON sy.id = sec.school_year_id AND sy.status = 'active'
+                LEFT  JOIN academic_history ah
+                       ON ah.section_id = sec.id AND ah.enrollment_status = 'Enrolled'
+                GROUP  BY sec.id, sec.section_name, sec.grade_level, sec.max_students
+                ORDER  BY (COUNT(ah.id) / NULLIF(sec.max_students, 0)) DESC
+            ");
+            return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+        }
     }

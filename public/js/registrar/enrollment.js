@@ -242,9 +242,18 @@ const enrollmentController = {
             '📋 ' + selectedOption.text;
     },
 
-    searchEnrolled: function (keyword, page = 1) {
+    getCurrentStatusFilter: function () {
+        const input = document.getElementById('searchInput');
+        return (input && input.dataset.statusFilter) || 'Enrolled';
+    },
+
+    searchEnrolled: function (keyword, page = 1, status = null) {
         const tbody = document.querySelector('.table tbody');
         if (!tbody) return;
+
+        if (status === null) {
+            status = enrollmentController.getCurrentStatusFilter();
+        }
 
         // Show loading state
         tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-3">Searching...</td></tr>';
@@ -256,7 +265,8 @@ const enrollmentController = {
                 search_enrolled: 1,
                 keyword: keyword,
                 page: page,
-                items_per_page: 10
+                items_per_page: 10,
+                status: status
             },
             dataType: 'json',
             success: function (data) {
@@ -267,6 +277,7 @@ const enrollmentController = {
                 if (enrollments.length > 0) {
                     enrollments.forEach((enrollment, index) => {
                         const rowNum = (pagination.itemsPerPage * (pagination.currentPage - 1)) + (index + 1);
+                        const badgeColor = enrollmentController.getStatusBadgeColor(enrollment.enrollment_status);
                         html += `
                             <tr>
                                 <td>${rowNum}</td>
@@ -275,15 +286,8 @@ const enrollmentController = {
                                 <td>${enrollment.school_year || 'N/A'}</td>
                                 <td>${enrollment.grade_level || 'N/A'}</td>
                                 <td>${enrollment.section_name || 'N/A'}</td>
-                                <td><span class="badge bg-success">${enrollment.enrollment_status}</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" title="View History"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#enrollmentHistoryModal"
-                                        onclick="enrollmentController.showEnrollmentHistory(${enrollment.student_id}, '${enrollment.first_name} ${enrollment.last_name}')">
-                                        <i class="bx bx-history"></i>
-                                    </button>
-                                </td>
+                                <td><span class="badge bg-${badgeColor}">${enrollment.enrollment_status}</span></td>
+                                <td>${enrollmentController.renderActionsCell(enrollment)}</td>
                             </tr>
                         `;
                     });
@@ -294,7 +298,7 @@ const enrollmentController = {
                 tbody.innerHTML = html;
 
                 // Update pagination UI
-                enrollmentController.updateSearchPagination(keyword, pagination);
+                enrollmentController.updateSearchPagination(keyword, pagination, status);
             },
             error: function () {
                 tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger py-3">Search error. Please try again.</td></tr>';
@@ -302,13 +306,15 @@ const enrollmentController = {
         });
     },
 
-    updateSearchPagination: function (keyword, pagination) {
+    updateSearchPagination: function (keyword, pagination, status) {
         const paginationEl = document.querySelector('.pagination');
         if (!paginationEl) return;
 
+        status = status || enrollmentController.getCurrentStatusFilter();
+
         if (!keyword || keyword.trim() === '') {
             // Reload the page to restore PHP pagination when search is cleared
-            window.location.href = '?page=1';
+            window.location.href = '?status=' + encodeURIComponent(status) + '&page=1';
             return;
         }
 
@@ -316,7 +322,7 @@ const enrollmentController = {
 
         // Previous
         html += pagination.hasPrevPage
-            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage - 1}); return false;">Previous</a></li>`
+            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage - 1}, '${status}'); return false;">Previous</a></li>`
             : `<li class="page-item disabled"><span class="page-link">Previous</span></li>`;
 
         // Page numbers
@@ -326,17 +332,174 @@ const enrollmentController = {
         for (let i = start; i <= end; i++) {
             html += i === pagination.currentPage
                 ? `<li class="page-item active"><span class="page-link">${i}</span></li>`
-                : `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${i}); return false;">${i}</a></li>`;
+                : `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${i}, '${status}'); return false;">${i}</a></li>`;
         }
 
         // Next
         html += pagination.hasNextPage
-            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage + 1}); return false;">Next</a></li>`
+            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage + 1}, '${status}'); return false;">Next</a></li>`
             : `<li class="page-item disabled"><span class="page-link">Next</span></li>`;
 
         paginationEl.innerHTML = html;
     },
 
+
+    getStatusBadgeColor: function(status) {
+        switch (status) {
+            case 'Enrolled': return 'success';
+            case 'Graduated': return 'primary';
+            case 'Transferred': return 'warning';
+            case 'Dropped': return 'danger';
+            default: return 'secondary';
+        }
+    },
+
+    getTerminalGradeLevel: function () {
+        const tbody = document.getElementById('enrolledStudentsBody');
+        return (tbody && tbody.dataset.terminalGrade) || 'Grade 6';
+    },
+
+    renderActionsCell: function(enrollment) {
+        const fullName = `${enrollment.first_name} ${enrollment.last_name}`;
+
+        const historyBtn = `
+            <button class="btn btn-sm btn-info" title="View History"
+                data-bs-toggle="modal"
+                data-bs-target="#enrollmentHistoryModal"
+                onclick="enrollmentController.showEnrollmentHistory(${enrollment.student_id}, '${fullName}')">
+                <i class="bx bx-history"></i>
+            </button>
+        `;
+
+        if (enrollment.enrollment_status !== 'Enrolled') {
+            const badgeColor = enrollmentController.getStatusBadgeColor(enrollment.enrollment_status);
+            return historyBtn + `<span class="badge bg-${badgeColor}">${enrollment.enrollment_status}</span>`;
+        }
+
+        const terminalGrade = enrollmentController.getTerminalGradeLevel();
+        const graduateBtn = enrollment.grade_level === terminalGrade
+            ? `
+                <button class="btn btn-sm btn-primary" title="Mark as Graduated"
+                    onclick="enrollmentController.graduateStudent(${enrollment.enrollment_id}, '${fullName}')">
+                    <i class="bx bx-medal"></i>
+                </button>
+            `
+            : `
+                <button class="btn btn-sm btn-outline-secondary" disabled
+                    title="Not yet eligible to graduate (must reach ${terminalGrade})">
+                    <i class="bx bx-medal"></i>
+                </button>
+            `;
+
+        return historyBtn + `
+            <button class="btn btn-sm btn-danger" title="Mark as Dropped"
+                onclick="enrollmentController.dropStudent(${enrollment.enrollment_id}, '${fullName}')">
+                <i class="bx bx-x-circle"></i>
+            </button>
+            <button class="btn btn-sm btn-warning" title="Mark as Transferred"
+                onclick="enrollmentController.transferStudent(${enrollment.enrollment_id}, '${fullName}')">
+                <i class="bx bx-transfer"></i>
+            </button>
+            ${graduateBtn}
+        `;
+    },
+
+    dropStudent: function(enrollmentId, studentName) {
+        if (!confirm(`Are you sure you want to mark ${studentName} as Dropped?`)) {
+            return;
+        }
+
+        $.ajax({
+            url: '../../../app/controllers/registrar/EnrollmentController.php',
+            type: 'POST',
+            data: {
+                update_status: 1,
+                enrollment_id: enrollmentId,
+                new_status: 'Dropped'
+            },
+            dataType: 'json',
+            success: function(response) {
+                alert(response.message);
+                if (response.success) {
+                    window.location.reload();
+                }
+            },
+            error: function() {
+                alert('Error updating student status.');
+            }
+        });
+    },
+
+    transferStudent: function(enrollmentId, studentName) {
+        if (!confirm(`Are you sure you want to mark ${studentName} as Transferred?`)) {
+            return;
+        }
+
+        $.ajax({
+            url: '../../../app/controllers/registrar/EnrollmentController.php',
+            type: 'POST',
+            data: {
+                update_status: 1,
+                enrollment_id: enrollmentId,
+                new_status: 'Transferred'
+            },
+            dataType: 'json',
+            success: function(response) {
+                alert(response.message);
+                if (response.success) {
+                    window.location.reload();
+                }
+            },
+            error: function() {
+                alert('Error updating student status.');
+            }
+        });
+    },
+
+    graduateStudent: function(enrollmentId, studentName) {
+        document.getElementById('graduateForm').reset();
+        document.getElementById('graduateEnrollmentId').value = enrollmentId;
+        document.getElementById('graduateStudentName').textContent = studentName;
+
+        const modal = new bootstrap.Modal(document.getElementById('graduateModal'));
+        modal.show();
+    },
+
+    submitGraduation: function() {
+        const enrollmentId = document.getElementById('graduateEnrollmentId').value;
+        const graduationDate = document.getElementById('graduationDate').value;
+        const honors = document.getElementById('graduateHonors').value;
+        const remarks = document.getElementById('graduateRemarks').value;
+
+        if (!graduationDate) {
+            alert('Graduation date is required.');
+            return;
+        }
+
+        $.ajax({
+            url: '../../../app/controllers/registrar/EnrollmentController.php',
+            type: 'POST',
+            data: {
+                update_status: 1,
+                enrollment_id: enrollmentId,
+                new_status: 'Graduated',
+                graduation_date: graduationDate,
+                honors: honors,
+                remarks: remarks
+            },
+            dataType: 'json',
+            success: function(response) {
+                alert(response.message);
+                if (response.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('graduateModal')).hide();
+                    window.location.reload();
+                }
+            },
+            error: function() {
+                alert('Error recording graduation.');
+            }
+        });
+    },
 
     showEnrollmentHistory: function(studentId, studentName) {
         $.ajax({
@@ -358,8 +521,7 @@ const enrollmentController = {
                     html += '<div class="timeline">';
                     
                     data.forEach((enrollment, index) => {
-                        const statusColor = enrollment.enrollment_status === 'Enrolled' 
-                            ? 'success' : 'warning';
+                        const statusColor = enrollmentController.getStatusBadgeColor(enrollment.enrollment_status);
 
                         html += `
                             <div class="mb-3 pb-3" style="border-left: 2px solid #ddd; padding-left: 15px;">
@@ -441,7 +603,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (keyword === '') {
             // Restore PHP-rendered table by reloading page
-            window.location.href = '?page=1';
+            window.location.href = '?status=' + encodeURIComponent(enrollmentController.getCurrentStatusFilter()) + '&page=1';
             return;
         }
 
@@ -450,5 +612,12 @@ document.addEventListener('DOMContentLoaded', function () {
             enrollmentController.searchEnrolled(keyword, 1);
         }, 400);
     });
+
+    // Graduate modal: submit graduation details via AJAX
+    document.getElementById('graduateForm')
+        .addEventListener('submit', function (e) {
+            e.preventDefault();
+            enrollmentController.submitGraduation();
+        });
 
 });
