@@ -5,8 +5,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../helpers/password.php';
+require_once __DIR__ . '/../../helpers/csrf.php';
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../models/admin/UsersModel.php';
+
+const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
 
 
     class UsersController extends Controller{
@@ -19,15 +22,61 @@ require_once __DIR__ . '/../../models/admin/UsersModel.php';
             $this->auditLogs = new AuditLogs($con);
         }
 
-        public function index(){
-            return $this->model->index();
+        public function index($search = '', $role = '', $page = 1){
+            $limit = 10;
+            $page = max(1, (int)$page);
+
+            $totalRecords = $this->model->count($search, $role);
+            $totalPages = $totalRecords > 0 ? (int)ceil($totalRecords / $limit) : 1;
+            $page = min($page, $totalPages);
+            $offset = ($page - 1) * $limit;
+
+            return [
+                'records'       => $this->model->index($search, $role, $limit, $offset) ?: [],
+                'current_page'  => $page,
+                'total_pages'   => $totalPages,
+                'total_records' => $totalRecords,
+                'limit'         => $limit,
+            ];
+        }
+
+        /**
+         * @return string[] validation error messages, empty if valid
+         */
+        public function validate($data, $requirePassword = true){
+            $errors = [];
+
+            if(empty(trim($data['full_name'] ?? ''))){
+                $errors[] = 'Full name is required.';
+            }
+
+            if(empty($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)){
+                $errors[] = 'A valid email address is required.';
+            }
+
+            if($requirePassword && strlen($data['password'] ?? '') < 8){
+                $errors[] = 'Password must be at least 8 characters.';
+            }
+
+            if(!in_array($data['role'] ?? '', VALID_USER_ROLES, true)){
+                $errors[] = 'Please select a valid role.';
+            }
+
+            return $errors;
         }
 
         public function create($data){
             try{
+                $errors = $this->validate($data, true);
+                if(!empty($errors)){
+                    FlashMessage::setFlash('error', implode(' ', $errors));
+                    header('Location: ../../../resources/views/admin/users.php');
+                    exit();
+                }
+
                 // Hash the password
                 $data['password'] = hashPassword($data['password']);
-                
+
                 if($this->model->create($data)){
                     $this->auditLogs->log(
                         $_SESSION['id'] ?? null,
@@ -53,6 +102,13 @@ require_once __DIR__ . '/../../models/admin/UsersModel.php';
 
         public function update($id, $data){
             try{
+                $errors = $this->validate($data, false);
+                if(!empty($errors)){
+                    FlashMessage::setFlash('error', implode(' ', $errors));
+                    header('Location: ../../../resources/views/admin/users.php');
+                    exit();
+                }
+
                 if($this->model->update($id, $data)){
                     $this->auditLogs->log(
                         $_SESSION['id'] ?? null,
@@ -78,6 +134,12 @@ require_once __DIR__ . '/../../models/admin/UsersModel.php';
 
         public function delete($id){
             try{
+                if((int)$id === (int)($_SESSION['id'] ?? 0)){
+                    FlashMessage::setFlash('error', 'You cannot delete your own account while logged in.');
+                    header('Location: ../../../resources/views/admin/users.php');
+                    exit();
+                }
+
                 if($this->model->delete($id)){
                     $this->auditLogs->log(
                         $_SESSION['id'] ?? null,
@@ -106,9 +168,10 @@ require_once __DIR__ . '/../../models/admin/UsersModel.php';
     //============ bootstrap ============//
     try{
         $controller = new UsersController($con);
-        $users = $controller->index();
 
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
+            Csrf::requireValidOnPost('../../../resources/views/admin/users.php');
+
             if(isset($_POST['create_user'])){
                 $controller->create(
                     [
@@ -138,6 +201,16 @@ require_once __DIR__ . '/../../models/admin/UsersModel.php';
                 $controller->delete($user_id);
             }
         }
+
+        $search_term = trim($_GET['search'] ?? '');
+        $role_filter = $_GET['role'] ?? '';
+        $page = $_GET['page'] ?? 1;
+
+        $listing = $controller->index($search_term, $role_filter, $page);
+        $users = $listing['records'];
+        $current_page = $listing['current_page'];
+        $total_pages = $listing['total_pages'];
+        $total_records = $listing['total_records'];
     }catch(Exception $e){
         error_log($e->getMessage());
         exit();

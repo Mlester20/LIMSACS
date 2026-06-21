@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LIMSACS — System Overview (DFD)</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+<style>
+    :root {
+        --bg: #0f172a;
+        --panel: #1e293b;
+        --panel-border: #334155;
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #38bdf8;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+        margin: 0;
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+    }
+    header {
+        flex: 0 0 auto;
+        padding: 12px 28px;
+        border-bottom: 1px solid var(--panel-border);
+    }
+    header h1 {
+        margin: 0 0 2px;
+        font-size: 1.15rem;
+        font-weight: 600;
+    }
+    header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.82rem;
+    }
+    .toolbar {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 8px 28px;
+        background: var(--panel);
+        border-bottom: 1px solid var(--panel-border);
+        flex-wrap: wrap;
+    }
+    .toolbar button {
+        background: #0ea5e9;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 0.82rem;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+    .toolbar button:hover { background: #0284c7; }
+    .toolbar button.secondary {
+        background: transparent;
+        border: 1px solid var(--panel-border);
+        color: var(--text);
+    }
+    .toolbar button.secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .legend {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        font-size: 0.78rem;
+        margin-left: auto;
+    }
+    .legend-item { display: flex; align-items: center; gap: 6px; color: var(--muted); white-space: nowrap; }
+    .swatch { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+    #diagram-wrap {
+        position: relative;
+        flex: 1 1 auto;
+        min-height: 0;
+        width: 100%;
+        overflow: hidden;
+        background:
+            linear-gradient(var(--panel-border) 1px, transparent 1px) 0 0 / 24px 24px,
+            linear-gradient(90deg, var(--panel-border) 1px, transparent 1px) 0 0 / 24px 24px,
+            var(--bg);
+        background-color: #0b1222;
+    }
+    #diagram-wrap svg { width: 100%; height: 100%; display: block; }
+    .mermaid { display: flex; justify-content: center; }
+    footer {
+        flex: 0 0 auto;
+        padding: 8px 28px;
+        font-size: 0.76rem;
+        color: var(--muted);
+        border-top: 1px solid var(--panel-border);
+    }
+    footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>LIMSACS — Quick-Reference System Overview</h1>
+    <p>Login → RBAC → CSRF → Admin / Registrar modules → Data stores → Output · Admin Module = Users, School Years, Academic History, Audit Logs, Dashboard · Registrar Module = Students, Enrollment, Sections, Documents, Parents/Guardians, Dashboard</p>
+</header>
+
+<div class="toolbar">
+    <button id="zoomIn">+ Zoom In</button>
+    <button id="zoomOut">− Zoom Out</button>
+    <button id="fit" class="secondary">Fit to Screen</button>
+    <div class="legend">
+        <div class="legend-item"><span class="swatch" style="background:#e1f5fe;border:2px solid #0288d1;"></span>Entity</div>
+        <div class="legend-item"><span class="swatch" style="background:#fff3e0;border:2px solid #ef6c00;"></span>Security gate</div>
+        <div class="legend-item"><span class="swatch" style="background:#ede7f6;border:2px solid #5e35b1;"></span>Admin</div>
+        <div class="legend-item"><span class="swatch" style="background:#e8f5e9;border:2px solid #2e7d32;"></span>Registrar</div>
+        <div class="legend-item"><span class="swatch" style="background:#fce4ec;border:2px solid #c2185b;"></span>Data store</div>
+        <div class="legend-item"><span class="swatch" style="background:#f5f5f5;border:2px solid #616161;"></span>Output</div>
+        <div class="legend-item">┄┄ rejection path</div>
+    </div>
+</div>
+
+<div id="diagram-wrap">
+    <div class="mermaid" id="graph">
+flowchart LR
+    classDef entity fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#01579b
+    classDef security fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#e65100
+    classDef admin fill:#ede7f6,stroke:#5e35b1,stroke-width:2px,color:#311b92
+    classDef registrar fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20
+    classDef datastore fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#880e4f
+    classDef output fill:#f5f5f5,stroke:#616161,stroke-width:2px,color:#212121
+
+    Admin(["👤 Admin"]):::entity
+    Registrar(["👤 Registrar"]):::entity
+    Login["🔑 1. Login"]:::security
+    RBAC{"🛡️ 2. RBAC"}:::security
+    CSRF{"🔒 3. CSRF"}:::security
+    AdminMod["📋 Admin Module"]:::admin
+    RegMod["🗂️ Registrar Module"]:::registrar
+    DB[("🗄️ MySQL")]:::datastore
+    Files[("📁 Files")]:::datastore
+    Output["📊 Output"]:::output
+
+    Admin --> Login
+    Registrar --> Login
+    Login --> RBAC --> CSRF
+    RBAC -. "denied" .-> Output
+    CSRF -. "token invalid" .-> Output
+    CSRF -- "admin" --> AdminMod
+    CSRF -- "registrar" --> RegMod
+    AdminMod <--> DB
+    RegMod <--> DB
+    RegMod <--> Files
+    AdminMod --> Output
+    RegMod --> Output
+    Output --> Admin
+    Output --> Registrar
+    </div>
+</div>
+
+<footer>
+    Source: <a href="DFD.md">docs/DFD.md</a> — §0 Visual Overview. Rendered client-side with
+    <a href="https://mermaid.js.org/" target="_blank" rel="noopener">Mermaid.js</a> +
+    <a href="https://github.com/bumbu/svg-pan-zoom" target="_blank" rel="noopener">svg-pan-zoom</a>.
+    No build step, no server required — just open this file in a browser.
+</footer>
+
+<script>
+    mermaid.initialize({
+        startOnLoad: false,
+        theme: "base",
+        themeVariables: {
+            background: "#0b1222",
+            primaryColor: "#1e293b",
+            primaryTextColor: "#e2e8f0",
+            primaryBorderColor: "#334155",
+            lineColor: "#64748b",
+            fontFamily: "Segoe UI, Roboto, Helvetica, Arial, sans-serif",
+            fontSize: "15px"
+        },
+        flowchart: { curve: "basis", htmlLabels: true }
+    });
+
+    let panZoomInstance = null;
+
+    function refit() {
+        if (!panZoomInstance) return;
+        panZoomInstance.resize();
+        panZoomInstance.fit();
+        panZoomInstance.center();
+    }
+
+    function setupPanZoom() {
+        const svg = document.querySelector("#diagram-wrap svg");
+        if (!svg) return;
+        svg.removeAttribute("height");
+        svg.removeAttribute("width");
+        svg.style.maxWidth = "none";
+        svg.style.width = "100%";
+        svg.style.height = "100%";
+
+        panZoomInstance = svgPanZoom(svg, {
+            zoomEnabled: true,
+            panEnabled: true,
+            controlIconsEnabled: false,
+            fit: true,
+            center: true,
+            minZoom: 0.05,
+            maxZoom: 10
+        });
+
+        // Mermaid can still be reflowing (emoji/web fonts) right after render
+        // finishes, so the very first fit() is often computed against a stale
+        // bounding box. Defer one more frame and refit once layout settles.
+        requestAnimationFrame(() => requestAnimationFrame(refit));
+    }
+
+    async function render() {
+        await mermaid.run({ querySelector: "#graph" });
+        if (document.fonts && document.fonts.ready) {
+            await document.fonts.ready;
+        }
+        setupPanZoom();
+    }
+
+    document.addEventListener("DOMContentLoaded", render);
+    window.addEventListener("resize", refit);
+
+    document.getElementById("zoomIn").addEventListener("click", () => panZoomInstance && panZoomInstance.zoomIn());
+    document.getElementById("zoomOut").addEventListener("click", () => panZoomInstance && panZoomInstance.zoomOut());
+    document.getElementById("fit").addEventListener("click", refit);
+</script>
+
+</body>
+</html>

@@ -42,7 +42,22 @@ AuthRole::allowOnly(['admin']);
     <?php require_once __DIR__ . '/partials/topbar.php'; ?>
 
     <div class="card">
-        <h5 class="card-header">Audit Logs</h5>
+        <h5 class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            Audit Logs
+            <form method="GET" class="d-flex gap-2">
+                <input
+                    type="text"
+                    name="search"
+                    class="form-control"
+                    style="max-width: 240px;"
+                    placeholder="Search user, module, description"
+                    value="<?php echo htmlspecialchars($search_term); ?>">
+                <button type="submit" class="btn btn-outline-secondary">Filter</button>
+                <?php if ($search_term !== ''): ?>
+                    <a href="audit-logs.php" class="btn btn-outline-secondary">Clear</a>
+                <?php endif; ?>
+            </form>
+        </h5>
         <div class="table-responsive nowrap">
             <table class="table">
                 <thead>
@@ -59,13 +74,14 @@ AuthRole::allowOnly(['admin']);
                     <?php if (!empty($paginated_logs)): ?>
                         <?php foreach ($paginated_logs as $log): ?>
                             <tr>
-                                <td><?php echo $log['user_fullName']; ?></td>
-                                <td><?php echo $log['role']; ?></td>
-                                <td><?php echo $log['module']; ?></td>
-                                <td><?php echo $log['description']; ?></td>
-                                <td><?php echo $log['status']; ?></td>
+                                <td><?php echo htmlspecialchars($log['user_fullName']);?></td>
+                                <td><?php echo htmlspecialchars($log['role']);?></td>
+                                <td><?php echo htmlspecialchars($log['module']);?></td>
+                                <td><?php echo htmlspecialchars($log['description']);?></td>
+                                <td><?php echo htmlspecialchars($log['status']);?></td>
                                 <td>
                                     <form action="../../../app/controllers/admin/AuditLogsController.php" method="post" style="display: inline";>
+                                        <?php echo Csrf::field(); ?>
                                         <input type="hidden" name="id" value="<?php echo htmlspecialchars($log['id']); ?>">
                                         <button 
                                             type="submit" 
@@ -90,16 +106,17 @@ AuthRole::allowOnly(['admin']);
 
         <!-- Pagination -->
         <div class="card-footer">
+            <?php $qs = function ($p) use ($search_term) { return '?' . http_build_query(['search' => $search_term, 'page' => $p]); }; ?>
             <nav aria-label="Page navigation">
                 <ul class="pagination justify-content-end mb-0">
 
                     <!-- First & Previous -->
                     <?php if ($current_page > 1): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?page=1">First</a>
+                            <a class="page-link" href="<?php echo $qs(1); ?>">First</a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<?php echo $current_page - 1; ?>">Previous</a>
+                            <a class="page-link" href="<?php echo $qs($current_page - 1); ?>">Previous</a>
                         </li>
                     <?php else: ?>
                         <li class="page-item disabled">
@@ -120,17 +137,17 @@ AuthRole::allowOnly(['admin']);
                         for ($i = $start_page; $i <= $end_page; $i++):
                     ?>
                         <li class="page-item <?php echo ($i === $current_page) ? 'active' : ''; ?>">
-                            <a class="page-link" href="?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                            <a class="page-link" href="<?php echo $qs($i); ?>"><?php echo $i; ?></a>
                         </li>
                     <?php endfor; ?>
 
                     <!-- Next & Last -->
                     <?php if ($current_page < $total_pages): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<?php echo $current_page + 1; ?>">Next</a>
+                            <a class="page-link" href="<?php echo $qs($current_page + 1); ?>">Next</a>
                         </li>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<?php echo $total_pages; ?>">Last</a>
+                            <a class="page-link" href="<?php echo $qs($total_pages); ?>">Last</a>
                         </li>
                     <?php else: ?>
                         <li class="page-item disabled">

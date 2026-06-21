@@ -26,6 +26,26 @@ $statusColor = static function (string $status): string {
     };
 };
 
+$enrollBadge = static function (string $status): string {
+    return match ($status) {
+        'Enrolled'    => 'bg-label-success',
+        'Transferred' => 'bg-label-info',
+        'Graduated'   => 'bg-label-primary',
+        'Dropped'     => 'bg-label-danger',
+        default       => 'bg-label-secondary',
+    };
+};
+
+$enrollIcon = static function (string $status): string {
+    return match ($status) {
+        'Enrolled'    => 'bx-user-check',
+        'Transferred' => 'bx-shuffle',
+        'Graduated'   => 'bx-medal',
+        'Dropped'     => 'bx-user-x',
+        default       => 'bx-user',
+    };
+};
+
 // ── Chart.js data prep ──────────────────────────────────────────────────────
 $gradeLevelLabels = array_column($data['grade_level_summary'] ?? [], 'grade_level');
 $gradeLevelData   = array_map('intval', array_column($data['grade_level_summary'] ?? [], 'total_students'));
@@ -95,11 +115,17 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
               <?= date('l, F j, Y') ?> &mdash; School records at a glance
             </small>
           </div>
-          <span class="badge bg-label-primary px-3 py-2 fs-6">
-            <i class="bx bx-calendar-check me-1"></i>
-            Active School Year<?= (int)($data['active_school_years'] ?? 0) > 1 ? 's' : '' ?>:
-            <strong><?= $int($data['active_school_years'] ?? 0) ?></strong>
-          </span>
+          <div class="d-flex gap-2 flex-wrap">
+            <span class="badge bg-label-primary px-3 py-2 fs-6">
+              <i class="bx bx-calendar-check me-1"></i>
+              Active School Year<?= (int)($data['active_school_years'] ?? 0) > 1 ? 's' : '' ?>:
+              <strong><?= $int($data['active_school_years'] ?? 0) ?></strong>
+            </span>
+            <span class="badge bg-label-info px-3 py-2 fs-6">
+              <i class="bx bx-medal me-1"></i>
+              Total Graduates: <strong><?= $int($data['total_graduates'] ?? 0) ?></strong>
+            </span>
+          </div>
         </div>
     
         <!-- ── Row 1: Student / Section / Year KPIs ──────────────────────────── -->
@@ -199,7 +225,44 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
           </div>
     
         </div><!-- /Row 1 -->
-    
+
+        <!-- ── Row 1.5: Academic outcomes (enrollment status) ──────────────────── -->
+        <div class="row g-4 mb-4">
+
+          <?php
+            $statusOrder  = ['Enrolled', 'Transferred', 'Graduated', 'Dropped'];
+            $statusCounts = array_column($data['enrollment_status_summary'] ?? [], 'total', 'status');
+          ?>
+
+          <?php foreach ($statusOrder as $status): ?>
+            <?php $count = (int) ($statusCounts[$status] ?? 0); ?>
+            <div class="col-sm-6 col-xl-3">
+              <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center gap-3">
+                  <div class="avatar avatar-lg flex-shrink-0">
+                    <span class="avatar-initial rounded <?= $enrollBadge($status) ?>">
+                      <i class="bx <?= $enrollIcon($status) ?> bx-sm"></i>
+                    </span>
+                  </div>
+                  <div>
+                    <p class="text-muted small mb-0"><?= $e($status) ?></p>
+                    <h3 class="mb-0 fw-bold"><?= $int($count) ?></h3>
+                  </div>
+                </div>
+                <?php if ($status === 'Graduated'): ?>
+                  <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
+                    <small class="text-muted">
+                      <i class="bx bx-medal"></i>
+                      <?= $int($data['graduates_active_year'] ?? 0) ?> graduated this school year
+                    </small>
+                  </div>
+                <?php endif; ?>
+              </div>
+            </div>
+          <?php endforeach; ?>
+
+        </div><!-- /Row 1.5 -->
+
         <!-- ── Row 2: Document status pills ──────────────────────────────────── -->
         <div class="row g-4 mb-4">
     
@@ -339,7 +402,48 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
           </div>
     
         </div><!-- /Row 3 -->
-    
+
+        <!-- ── Row 3.5: Section capacity ───────────────────────────────────────── -->
+        <div class="row g-4 mb-4">
+          <div class="col-12">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header py-3">
+                <h6 class="mb-0 fw-bold">Section Capacity (Active School Year)</h6>
+                <small class="text-muted">Enrolled students vs. maximum capacity per section</small>
+              </div>
+              <div class="card-body">
+                <?php if (!empty($data['section_capacity'])): ?>
+                  <?php foreach ($data['section_capacity'] as $sec): ?>
+                    <?php
+                      $max      = (int) $sec['max_students'];
+                      $enrolled = (int) $sec['enrolled_count'];
+                      $pct      = $max > 0 ? round($enrolled / $max * 100) : 0;
+                      $barColor = $pct >= 100 ? 'danger' : ($pct >= 75 ? 'warning' : 'success');
+                    ?>
+                    <div class="mb-3">
+                      <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="fw-semibold">
+                          <?= $e($sec['section_name']) ?>
+                          <span class="text-muted fw-normal">&mdash; <?= $e($sec['grade_level']) ?></span>
+                        </span>
+                        <span class="text-muted small"><?= $int($enrolled) ?> / <?= $int($max) ?> (<?= $pct ?>%)</span>
+                      </div>
+                      <div class="progress" style="height:6px;">
+                        <div class="progress-bar bg-<?= $barColor ?>" style="width:<?= min($pct, 100) ?>%"></div>
+                      </div>
+                    </div>
+                  <?php endforeach; ?>
+                <?php else: ?>
+                  <div class="text-center text-muted py-4">
+                    <i class="bx bx-buildings fs-3 d-block mb-1"></i>
+                    No active sections found
+                  </div>
+                <?php endif; ?>
+              </div>
+            </div>
+          </div>
+        </div><!-- /Row 3.5 -->
+
         <!-- ── Row 4: Document uploads + status summary ───────────────────────── -->
         <div class="row g-4">
     
@@ -478,18 +582,15 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
         const gradeLevelCtx = document.getElementById('gradeLevelChart');
         if (gradeLevelCtx && gradeLevelLabels.length) {
           new Chart(gradeLevelCtx, {
-            type: 'line',
+            type: 'bar',
             data: {
               labels: gradeLevelLabels,
               datasets: [{
                 label: 'Students',
                 data: gradeLevelData,
-                borderColor: '#696cff',
-                backgroundColor: 'rgba(105, 108, 255, 0.15)',
-                fill: true,
-                tension: 0.35,
-                pointRadius: 4,
-                pointBackgroundColor: '#696cff',
+                backgroundColor: '#696cff',
+                borderRadius: 6,
+                maxBarThickness: 40,
               }],
             },
             options: {
@@ -504,26 +605,19 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
         const docStatusCtx = document.getElementById('docStatusChart');
         if (docStatusCtx && docStatusLabels.length) {
           new Chart(docStatusCtx, {
-            type: 'line',
+            type: 'doughnut',
             data: {
               labels: docStatusLabels,
               datasets: [{
-                label: 'Submissions',
                 data: docStatusData,
-                borderColor: '#696cff',
-                backgroundColor: 'rgba(105, 108, 255, 0.15)',
-                fill: true,
-                tension: 0.35,
-                pointRadius: 5,
-                pointBackgroundColor: docStatusColors,
-                pointBorderColor: docStatusColors,
+                backgroundColor: docStatusColors,
+                borderWidth: 0,
               }],
             },
             options: {
               responsive: true,
               maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+              plugins: { legend: { position: 'bottom' } },
             },
           });
         }

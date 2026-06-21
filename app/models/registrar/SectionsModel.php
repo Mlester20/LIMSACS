@@ -94,7 +94,7 @@ require_once __DIR__ . '/../Model.php';
          */
         public function getAllSchoolYears(){
             try {
-                $query = "SELECT id, school_year, status FROM {$this->school_year} ORDER BY school_year DESC";
+                $query = "SELECT id, school_year, status FROM {$this->school_year} WHERE status = 'active' ORDER BY school_year DESC";
                 $stmt = $this->con->prepare($query);
                 $stmt->execute();
                 return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);

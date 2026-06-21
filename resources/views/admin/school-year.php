@@ -42,8 +42,32 @@ AuthRole::allowOnly(['admin']);
     <?php require_once __DIR__ . '/partials/topbar.php'; ?>
 
 
-    <!-- Button to Trigger Modal -->
-    <div class="text-end">
+    <!-- Search / Filter + Add School Year -->
+    <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+        <form method="GET" class="d-flex gap-2 flex-wrap">
+            <input
+                type="text"
+                name="search"
+                class="form-control"
+                style="max-width: 220px;"
+                placeholder="Search school year"
+                value="<?php echo htmlspecialchars($search_term); ?>">
+
+            <select name="status" class="form-select" style="max-width: 160px;">
+                <option value="">All Statuses</option>
+                <?php foreach (['active', 'inactive', 'archived'] as $statusOption): ?>
+                    <option value="<?php echo $statusOption; ?>" <?php echo $status_filter === $statusOption ? 'selected' : ''; ?>>
+                        <?php echo ucfirst($statusOption); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
+            <button type="submit" class="btn btn-outline-secondary">Filter</button>
+            <?php if ($search_term !== '' || $status_filter !== ''): ?>
+                <a href="school-year.php" class="btn btn-outline-secondary">Clear</a>
+            <?php endif; ?>
+        </form>
+
         <button
             class="btn btn-primary"
             data-bs-toggle="modal"
@@ -56,6 +80,7 @@ AuthRole::allowOnly(['admin']);
     <div class="modal fade" id="addSchoolYearModal" tabindex="-1" aria-labelledby="addSchoolYearModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <form action="../../../app/controllers/admin/SchoolYearController.php" method="POST">
+                <?php echo Csrf::field(); ?>
 
                 <div class="modal-content">
                     <div class="modal-header text-white">
@@ -157,6 +182,7 @@ AuthRole::allowOnly(['admin']);
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="../../../app/controllers/admin/SchoolYearController.php" method="POST">
+                    <?php echo Csrf::field(); ?>
                     <input type="hidden" name="id" id="edit_sy_id">
                     <div class="modal-body">
                         <div class="mb-3">
@@ -202,7 +228,8 @@ AuthRole::allowOnly(['admin']);
               <th>Status</th>
               <th>Actions</th>
             </tr>
-            <tbody>
+          </thead>
+          <tbody>
                 <?php if (!empty($school_years)): ?>
                     <?php foreach ($school_years as $sy): ?>
                         <tr>
@@ -238,7 +265,8 @@ AuthRole::allowOnly(['admin']);
                                   Edit
                                 </button>
 
-                                <form action="" method="POST" class="d-inline">
+                                <form action="../../../app/controllers/admin/SchoolYearController.php" method="POST" class="d-inline">
+                                    <?php echo Csrf::field(); ?>
                                     <input
                                         type="hidden"
                                         name="id"
@@ -264,9 +292,34 @@ AuthRole::allowOnly(['admin']);
                     </tr>
                 <?php endif; ?>
             </tbody>
-          </thead>
         </table>
       </div>
+
+      <?php if ($total_pages > 1): ?>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <span>Page <?php echo $current_page; ?> of <?php echo $total_pages; ?> (<?php echo $total_records; ?> total)</span>
+            <nav>
+                <ul class="pagination mb-0">
+                    <?php
+                        $qs = function ($p) use ($search_term, $status_filter) {
+                            return '?' . http_build_query(['search' => $search_term, 'status' => $status_filter, 'page' => $p]);
+                        };
+                    ?>
+                    <li class="page-item <?php echo $current_page <= 1 ? 'disabled' : ''; ?>">
+                        <a class="page-link" href="<?php echo $qs(max($current_page - 1, 1)); ?>">Previous</a>
+                    </li>
+                    <?php for ($p = 1; $p <= $total_pages; $p++): ?>
+                        <li class="page-item <?php echo $p === $current_page ? 'active' : ''; ?>">
+                            <a class="page-link" href="<?php echo $qs($p); ?>"><?php echo $p; ?></a>
+                        </li>
+                    <?php endfor; ?>
+                    <li class="page-item <?php echo $current_page >= $total_pages ? 'disabled' : ''; ?>">
+                        <a class="page-link" href="<?php echo $qs(min($current_page + 1, $total_pages)); ?>">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+      <?php endif; ?>
     </div>
 
     <?php require_once __DIR__ . '/partials/footer.php'; ?>

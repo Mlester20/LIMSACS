@@ -563,6 +563,25 @@ AuthRole::allowOnly(['registrar']);
         </div>
     </div>
 
+    <!-- Document Viewer Modal -->
+    <div class="modal fade" id="documentViewerModal" tabindex="-1" aria-labelledby="documentViewerLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title mb-0" id="documentViewerLabel">Document Viewer</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0" style="height: 75vh;">
+                    <iframe id="documentViewerFrame" src="about:blank" style="width: 100%; height: 100%; border: 0;"></iframe>
+                </div>
+                <div class="modal-footer py-2">
+                    <a id="documentViewerOpenNewTab" href="#" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">Open in New Tab</a>
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php require_once __DIR__ . '/partials/footer.php'; ?>
     
     <!-- ── Vendor scripts ── -->

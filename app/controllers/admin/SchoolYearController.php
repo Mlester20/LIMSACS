@@ -5,6 +5,9 @@ require_once __DIR__ . '/../../../database/config/config.php';
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../models/admin/SchoolYearModel.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
+require_once __DIR__ . '/../../helpers/csrf.php';
+
+const VALID_SY_STATUSES = ['active', 'inactive', 'archived'];
 
     class SchoolYearController extends Controller{
         public function __construct($con){
@@ -13,12 +16,63 @@ require_once __DIR__ . '/../../helpers/flashMessage.php';
             );
         }
 
-        public function index(){
-            return $this->model->index();
+        public function index($search = '', $status = '', $page = 1){
+            $limit = 10;
+            $page = max(1, (int)$page);
+
+            $totalRecords = $this->model->count($search, $status);
+            $totalPages = $totalRecords > 0 ? (int)ceil($totalRecords / $limit) : 1;
+            $page = min($page, $totalPages);
+            $offset = ($page - 1) * $limit;
+
+            return [
+                'records'       => $this->model->index($search, $status, $limit, $offset) ?: [],
+                'current_page'  => $page,
+                'total_pages'   => $totalPages,
+                'total_records' => $totalRecords,
+                'limit'         => $limit,
+            ];
+        }
+
+        /**
+         * @return string[] validation error messages, empty if valid
+         */
+        public function validate($data){
+            $errors = [];
+
+            if(empty(trim($data['school_year'] ?? ''))){
+                $errors[] = 'School year is required.';
+            }
+
+            $start = DateTime::createFromFormat('Y-m-d', $data['start_date'] ?? '');
+            $end = DateTime::createFromFormat('Y-m-d', $data['end_date'] ?? '');
+
+            if(!$start){
+                $errors[] = 'Start date is invalid.';
+            }
+            if(!$end){
+                $errors[] = 'End date is invalid.';
+            }
+            if($start && $end && $start >= $end){
+                $errors[] = 'Start date must be before end date.';
+            }
+
+            if(!in_array($data['status'] ?? '', VALID_SY_STATUSES, true)){
+                $errors[] = 'Please select a valid status.';
+            }
+
+            return $errors;
         }
 
         public function create($data){
             try{
+                $errors = $this->validate($data);
+                if(!empty($errors)){
+                    FlashMessage::setFlash('error', implode(' ', $errors));
+                    header('Location: ../../../resources/views/admin/school-year.php');
+                    exit();
+                }
+
                 if($this->model->create($data)){
                     FlashMessage::setFlash('success', 'School year created successfully');
                     header("Location: ../../../resources/views/admin/school-year.php");
@@ -56,6 +110,13 @@ require_once __DIR__ . '/../../helpers/flashMessage.php';
 
         public function update($id, $data){
             try{
+                $errors = $this->validate($data);
+                if(!empty($errors)){
+                    FlashMessage::setFlash('error', implode(' ', $errors));
+                    header('Location: ../../../resources/views/admin/school-year.php');
+                    exit();
+                }
+
                 if($this->model->update($id, $data)){
                     FlashMessage::setFlash('success', 'School year updated successfully');
                     header("Location: ../../../resources/views/admin/school-year.php");
@@ -97,9 +158,10 @@ require_once __DIR__ . '/../../helpers/flashMessage.php';
     //============ bootstrap ============//
     try{
         $controller = new SchoolYearController($con);
-        $school_years = $controller->index();
 
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
+            Csrf::requireValidOnPost('../../../resources/views/admin/school-year.php');
+
             if(isset($_POST['create_sy'])){
                 $controller->create([
                     'school_year' => $_POST['school_year'],
@@ -136,6 +198,16 @@ require_once __DIR__ . '/../../helpers/flashMessage.php';
                 $controller->delete($_POST['id']);
             }
         }
+
+        $search_term = trim($_GET['search'] ?? '');
+        $status_filter = $_GET['status'] ?? '';
+        $page = $_GET['page'] ?? 1;
+
+        $listing = $controller->index($search_term, $status_filter, $page);
+        $school_years = $listing['records'];
+        $current_page = $listing['current_page'];
+        $total_pages = $listing['total_pages'];
+        $total_records = $listing['total_records'];
     }catch(Exception $e){
         error_log($e->getMessage());
     }
