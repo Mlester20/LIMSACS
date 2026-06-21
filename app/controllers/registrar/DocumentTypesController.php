@@ -3,6 +3,7 @@ session_start();
 
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../models/registrar/DocumentTypesModel.php';
+require_once __DIR__ . '/../../helpers/csrf.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../../database/config/config.php';

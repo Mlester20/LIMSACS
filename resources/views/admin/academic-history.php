@@ -16,7 +16,7 @@ AuthRole::allowOnly(['admin']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Dashboard | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?> </title>
+    <title> Academic History | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?> </title>
     <link rel="icon" type="image/x-icon" href="../../../public/assets/img/favicon/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -39,8 +39,31 @@ AuthRole::allowOnly(['admin']);
     <?php require_once __DIR__ . '/partials/topbar.php'; ?>
 
     <div class="card">
-        <h5 class="card-header">
+        <h5 class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
             Academic History
+            <form method="GET" class="d-flex gap-2">
+                <input
+                    type="text"
+                    name="search"
+                    class="form-control"
+                    style="max-width: 220px;"
+                    placeholder="Search student name"
+                    value="<?php echo htmlspecialchars($search_term); ?>">
+
+                <select name="school_year_id" class="form-select" style="max-width: 180px;">
+                    <option value="">All School Years</option>
+                    <?php foreach ($school_year_options as $option): ?>
+                        <option value="<?php echo htmlspecialchars($option['id']); ?>" <?php echo (string)$school_year_filter === (string)$option['id'] ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($option['school_year']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+
+                <button type="submit" class="btn btn-outline-secondary">Filter</button>
+                <?php if ($search_term !== '' || $school_year_filter !== ''): ?>
+                    <a href="academic-history.php" class="btn btn-outline-secondary">Clear</a>
+                <?php endif; ?>
+            </form>
         </h5>
         <div class="table-responsive nowrap">
             <table class="table">
@@ -88,10 +111,11 @@ AuthRole::allowOnly(['admin']);
                 </span>
 
                 <nav>
+                    <?php $qs = function ($p) use ($search_term, $school_year_filter) { return '?' . http_build_query(['search' => $search_term, 'school_year_id' => $school_year_filter, 'page' => $p]); }; ?>
                     <ul class="pagination mb-0">
                         <!-- Previous -->
                         <li class="page-item <?= $current_page <= 1 ? 'disabled' : '' ?>">
-                            <a class="page-link" href="?page=<?= max($current_page - 1, 1) ?>">Previous</a>
+                            <a class="page-link" href="<?= $qs(max($current_page - 1, 1)) ?>">Previous</a>
                         </li>
 
                         <!-- Numbered pages -->
@@ -103,7 +127,7 @@ AuthRole::allowOnly(['admin']);
                         ?>
 
                         <?php if ($startPage > 1): ?>
-                            <li class="page-item"><a class="page-link" href="?page=1">1</a></li>
+                            <li class="page-item"><a class="page-link" href="<?= $qs(1) ?>">1</a></li>
                             <?php if ($startPage > 2): ?>
                                 <li class="page-item disabled"><span class="page-link">...</span></li>
                             <?php endif; ?>
@@ -111,7 +135,7 @@ AuthRole::allowOnly(['admin']);
 
                         <?php for ($p = $startPage; $p <= $endPage; $p++): ?>
                             <li class="page-item <?= $p === $current_page ? 'active' : '' ?>">
-                                <a class="page-link" href="?page=<?= $p ?>"><?= $p ?></a>
+                                <a class="page-link" href="<?= $qs($p) ?>"><?= $p ?></a>
                             </li>
                         <?php endfor; ?>
 
@@ -119,12 +143,12 @@ AuthRole::allowOnly(['admin']);
                             <?php if ($endPage < $total_pages - 1): ?>
                                 <li class="page-item disabled"><span class="page-link">...</span></li>
                             <?php endif; ?>
-                            <li class="page-item"><a class="page-link" href="?page=<?= $total_pages ?>"><?= $total_pages ?></a></li>
+                            <li class="page-item"><a class="page-link" href="<?= $qs($total_pages) ?>"><?= $total_pages ?></a></li>
                         <?php endif; ?>
 
                         <!-- Next -->
                         <li class="page-item <?= $current_page >= $total_pages ? 'disabled' : '' ?>">
-                            <a class="page-link" href="?page=<?= min($current_page + 1, $total_pages) ?>">Next</a>
+                            <a class="page-link" href="<?= $qs(min($current_page + 1, $total_pages)) ?>">Next</a>
                         </li>
                     </ul>
                 </nav>

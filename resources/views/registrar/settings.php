@@ -3,6 +3,7 @@ session_start();
 
 require_once __DIR__ . '/../../../app/middleware/Auth.php';
 require_once __DIR__ . '/../../../app/helpers/flashMessage.php';
+require_once __DIR__ . '/../../../app/helpers/csrf.php';
 require_once __DIR__ . '/../../../app/models/UpdateProfileModel.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 
@@ -28,7 +29,7 @@ $memberSince = $userProfile['created_at'] ? date('M d, Y', strtotime($userProfil
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Dashboard | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?> </title>
+    <title> Profile | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?> </title>
     <link rel="icon" type="image/x-icon" href="../../../public/assets/img/favicon/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -61,6 +62,8 @@ $memberSince = $userProfile['created_at'] ? date('M d, Y', strtotime($userProfil
                 <div class="card mb-4">
                     <h5 class="card-header">Profile Details</h5>
                     <!-- Account -->
+                    <form action="../../../app/controllers/UpdateProfile.php" method="POST" enctype="multipart/form-data" id="formAccountSettings">
+                    <?php echo Csrf::field(); ?>
                     <div class="card-body">
                         <div class="d-flex align-items-start align-items-sm-center gap-4">
                             <!-- Profile Picture -->
@@ -108,7 +111,6 @@ $memberSince = $userProfile['created_at'] ? date('M d, Y', strtotime($userProfil
                     </div>
                     <hr class="my-0">
                     <div class="card-body">
-                        <form action="../../../app/controllers/UpdateProfile.php" method="POST" enctype="multipart/form-data" id="formAccountSettings">
                             <!-- Basic Information Section -->
                             <div class="mb-4">
                                 <h6 class="text-uppercase text-muted mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">Basic Information</h6>
@@ -180,8 +182,8 @@ $memberSince = $userProfile['created_at'] ? date('M d, Y', strtotime($userProfil
                                 <button type="submit" class="btn btn-primary me-2">Save changes</button>
                                 <button type="reset" class="btn btn-outline-secondary">Cancel</button>
                             </div>
-                        </form>
                     </div>
+                    </form>
                     <!-- /Account -->
                 </div>
             </div>

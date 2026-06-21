@@ -4,6 +4,7 @@ session_start();
 require_once __DIR__ . '/../../models/admin/AuditLogsModel.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
+require_once __DIR__ . '/../../helpers/csrf.php';
 
     class AuditLogsController{
         private $model;
@@ -12,8 +13,22 @@ require_once __DIR__ . '/../../helpers/flashMessage.php';
             $this->model = new AuditLogsModel($con);
         }
 
-        public function index(){
-            return $this->model->index();
+        public function index($search = '', $page = 1){
+            $limit = 10;
+            $page = max(1, (int)$page);
+
+            $totalRecords = $this->model->count($search);
+            $totalPages = $totalRecords > 0 ? (int)ceil($totalRecords / $limit) : 1;
+            $page = min($page, $totalPages);
+            $offset = ($page - 1) * $limit;
+
+            return [
+                'records'       => $this->model->index($search, $limit, $offset) ?: [],
+                'current_page'  => $page,
+                'total_pages'   => $totalPages,
+                'total_records' => $totalRecords,
+                'limit'         => $limit,
+            ];
         }
 
         public function delete($id){
@@ -22,32 +37,32 @@ require_once __DIR__ . '/../../helpers/flashMessage.php';
                 header("Location: ../../../resources/views/admin/audit-logs.php");
                 exit();
             }else{
-                FlashMessage::setFlash("success", "Error deleting log.");
+                FlashMessage::setFlash("error", "Error deleting log.");
                 header("Location: ../../../resources/views/admin/audit-logs.php");
-                exit();                
+                exit();
             }
         }
     }
 
     try{
         $controller = new AuditLogsController($con);
-        $logs = $controller->index();
-
-        //pagination
-        $entries_per_page = 10;
-        $total_entries = count($logs);
-        $total_pages = ceil($total_entries / $entries_per_page);
-        $current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-        $current_page = max(1, min($current_page, $total_pages));
-
-        // Slice logs for current page
-        $offset = ($current_page - 1) * $entries_per_page;
-        $paginated_logs = array_slice($logs, $offset, $entries_per_page);
 
         if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_logs'])){
+            Csrf::requireValidOnPost('../../../resources/views/admin/audit-logs.php');
             $log_id = $_POST['id'];
             $controller->delete($log_id);
         }
+
+        $search_term = trim($_GET['search'] ?? '');
+        $page = $_GET['page'] ?? 1;
+
+        $listing = $controller->index($search_term, $page);
+        $paginated_logs = $listing['records'];
+        $current_page = $listing['current_page'];
+        $total_pages = $listing['total_pages'];
+        $total_entries = $listing['total_records'];
+        $entries_per_page = $listing['limit'];
+        $offset = ($current_page - 1) * $entries_per_page;
     }catch(Exception $e){
         error_log("Error " . $e->getMessage());
     }

@@ -13,6 +13,8 @@ function populateStudentModal(student) {
             const studentData = response.student || student;
             const academicHistory = response.academic_history || [];
             const parentGuardians = response.parent_guardians || {};
+            const studentDocuments = response.student_documents || [];
+            const documentTypes = response.document_types || [];
 
             // Personal Information
             document.getElementById('modalLrn').textContent = studentData.lrn || '-';
@@ -67,6 +69,9 @@ function populateStudentModal(student) {
 
             // Render Parent/Guardians Information
             renderParentGuardians(parentGuardians);
+
+            // Render Documents Checklist
+            renderDocumentChecklist(studentDocuments, documentTypes);
         },
         error: function(error) {
             console.error('Error fetching student profile:', error);
@@ -176,6 +181,141 @@ function renderParentGuardians(parentGuardians) {
 
     html += '</div>';
     container.innerHTML = html;
+}
+
+/**
+ * Resolve the app's base URL (project root), regardless of how deep the
+ * current page is nested under /resources/views/...
+ * e.g. '/LIMSACS/resources/views/registrar/x.php' -> '/LIMSACS'
+ */
+function getAppBaseUrl() {
+    const path = window.location.pathname;
+    const idx = path.lastIndexOf('/resources');
+    return idx !== -1 ? path.substring(0, idx) : '';
+}
+
+/**
+ * Resolve a stored relative file path (e.g. 'storage/student_documents/doc_x.pdf')
+ * into an absolute URL from the project root.
+ * @param {string} filePath
+ */
+function resolveDocumentUrl(filePath) {
+    if (!filePath) return '';
+    return getAppBaseUrl() + '/' + filePath.replace(/^\/+/, '');
+}
+
+/**
+ * Open a document for viewing/downloading.
+ * PDFs are shown inline in a viewer modal; other file types (e.g. .docx) are
+ * downloaded directly since browsers cannot render them inline.
+ * @param {string} filePath - relative file path stored in the DB
+ * @param {string} label - human-readable name for the document
+ */
+function openDocumentViewer(filePath, label) {
+    const url = resolveDocumentUrl(filePath);
+    if (!url) return;
+
+    const ext = (filePath.split('.').pop() || '').toLowerCase();
+
+    if (ext === 'pdf') {
+        const frame = document.getElementById('documentViewerFrame');
+        const title = document.getElementById('documentViewerLabel');
+        const openNewTab = document.getElementById('documentViewerOpenNewTab');
+
+        if (frame) frame.src = url;
+        if (title) title.textContent = label || 'Document Viewer';
+        if (openNewTab) openNewTab.href = url;
+
+        const modalEl = document.getElementById('documentViewerModal');
+        if (modalEl && window.bootstrap) {
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        }
+    } else {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filePath.split('/').pop() || '';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+
+// Reset the viewer iframe when the modal closes so playback/loading stops
+document.addEventListener('DOMContentLoaded', function () {
+    const modalEl = document.getElementById('documentViewerModal');
+    if (!modalEl) return;
+    modalEl.addEventListener('hidden.bs.modal', function () {
+        const frame = document.getElementById('documentViewerFrame');
+        if (frame) frame.src = 'about:blank';
+    });
+});
+
+/**
+ * Render the documents checklist tab
+ * @param {Array} studentDocs - Documents submitted by the student
+ * @param {Array} docTypes - All available document types
+ */
+function renderDocumentChecklist(studentDocs, docTypes) {
+    const tableBody = document.getElementById('documentChecklistBody');
+    const summary = document.getElementById('documentChecklistSummary');
+    if (!tableBody) return;
+
+    if (!docTypes || docTypes.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No document types configured</td></tr>';
+        if (summary) summary.textContent = '';
+        return;
+    }
+
+    const docsByTypeId = new Map();
+    (studentDocs || []).forEach(doc => {
+        docsByTypeId.set(String(doc.document_type_id), doc);
+    });
+
+    const statusBadgeClass = {
+        Submitted: 'bg-info',
+        Verified: 'bg-success',
+        Rejected: 'bg-danger',
+        Pending: 'bg-warning'
+    };
+
+    let submittedCount = 0;
+    let html = '';
+
+    docTypes.forEach(docType => {
+        const doc = docsByTypeId.get(String(docType.id));
+
+        if (doc) {
+            submittedCount++;
+            const badgeClass = statusBadgeClass[doc.status] || 'bg-secondary';
+            const ext = (doc.file_path || '').split('.').pop().toLowerCase();
+            const actionLabel = ext === 'pdf' ? 'View' : 'Download';
+            html += `
+                <tr>
+                    <td>${escapeHtml(docType.document_name)}</td>
+                    <td><span class="badge ${badgeClass}">${escapeHtml(doc.status || 'N/A')}</span></td>
+                    <td>${escapeHtml(doc.remarks || '-')}</td>
+                    <td>
+                        ${doc.file_path ? `<button type="button" class="btn btn-sm btn-outline-primary" onclick='openDocumentViewer(${JSON.stringify(doc.file_path)}, ${JSON.stringify(docType.document_name)})'>${actionLabel}</button>` : '-'}
+                    </td>
+                </tr>
+            `;
+        } else {
+            html += `
+                <tr>
+                    <td>${escapeHtml(docType.document_name)}</td>
+                    <td><span class="badge bg-danger">✗ Missing</span></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            `;
+        }
+    });
+
+    tableBody.innerHTML = html;
+
+    if (summary) {
+        summary.textContent = `${submittedCount} of ${docTypes.length} documents submitted`;
+    }
 }
 
 /**
@@ -314,8 +454,7 @@ async function searchStudents(keyword){
         }
 
         //build  api url with absolute path
-        const baseUrl = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/resources'));
-        const apiUrl = baseUrl + '/app/api/registrar/search-students.php?q=' + encodeURIComponent(keyword.trim());
+        const apiUrl = getAppBaseUrl() + '/app/api/registrar/search-students.php?q=' + encodeURIComponent(keyword.trim());
 
         const response = await fetch(apiUrl, {
             method: 'GET', 
@@ -397,13 +536,17 @@ function renderSearchResults(results){
                     >
                         Edit
                     </button>
-                    <button 
-                        class="btn btn-sm btn-danger" 
-                        title="Delete Student"
-                        onclick="event.stopPropagation(); if(confirm('Are you sure you want to delete this student? This action cannot be undone.')) deleteStudentAjax(${student.id})"
-                    >
-                        Delete
-                    </button>
+                    <form method="POST" action="../../../app/controllers/registrar/StudentsController.php" style="display: inline;">
+                        <input type="hidden" name="student_id" value="${student.id}">
+                        <button 
+                            type="submit" 
+                            class="btn btn-sm btn-danger" 
+                            onclick="return confirm('Are you sure you want to delete this student? This action cannot be undone.');"
+                            name="delete_student"
+                        >
+                            Delete
+                        </button>
+                    </form>
                 </td>
             </tr>`;
     }).join('');

@@ -40,8 +40,32 @@ AuthRole::allowOnly(['admin']);
     <?php require_once __DIR__ . '/partials/sidebar.php'; ?>
     <?php require_once __DIR__ . '/partials/topbar.php'; ?>
 
-    <!-- Button to Trigger Modal -->
-    <div class="text-end">
+    <!-- Search / Filter + Add User -->
+    <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+        <form method="GET" class="d-flex gap-2 flex-wrap">
+            <input
+                type="text"
+                name="search"
+                class="form-control"
+                style="max-width: 240px;"
+                placeholder="Search name or email"
+                value="<?php echo htmlspecialchars($search_term); ?>">
+
+            <select name="role" class="form-select" style="max-width: 160px;">
+                <option value="">All Roles</option>
+                <?php foreach (['admin', 'registrar', 'teacher', 'staff'] as $roleOption): ?>
+                    <option value="<?php echo $roleOption; ?>" <?php echo $role_filter === $roleOption ? 'selected' : ''; ?>>
+                        <?php echo ucfirst($roleOption); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+
+            <button type="submit" class="btn btn-outline-secondary">Filter</button>
+            <?php if ($search_term !== '' || $role_filter !== ''): ?>
+                <a href="users.php" class="btn btn-outline-secondary">Clear</a>
+            <?php endif; ?>
+        </form>
+
         <button
             class="btn btn-primary"
             data-bs-toggle="modal"
@@ -63,6 +87,7 @@ AuthRole::allowOnly(['admin']);
                 action="../../../app/controllers/admin/UsersController.php"
                 method="POST"
                 enctype="multipart/form-data">
+                <?php echo Csrf::field(); ?>
 
                 <div class="modal-content">
 
@@ -228,6 +253,7 @@ AuthRole::allowOnly(['admin']);
                 action="../../../app/controllers/admin/UsersController.php"
                 method="POST"
                 enctype="multipart/form-data">
+                <?php echo Csrf::field(); ?>
 
                 <div class="modal-content">
 
@@ -379,17 +405,22 @@ AuthRole::allowOnly(['admin']);
                                         Edit
                                     </button>
 
-                                    <form action="../../../app/controllers/admin/UsersController.php" method="post" style="display: inline;">
-                                        <input type="hidden" name="id" value="<?php echo htmlspecialchars($user['id']); ?>"/>
-                                        <button 
-                                            type="submit" 
-                                            class="btn btn-sm btn-danger"
-                                            onclick="return confirm('Are you sure you want to delete this user? ')"
-                                            name="delete_user"
-                                        >
-                                            Delete
-                                        </button>
-                                    </form>
+                                    <?php if ((int)$user['id'] === (int)($_SESSION['id'] ?? 0)): ?>
+                                        <button class="btn btn-sm btn-danger" disabled title="You cannot delete your own account">Delete</button>
+                                    <?php else: ?>
+                                        <form action="../../../app/controllers/admin/UsersController.php" method="post" style="display: inline;">
+                                            <?php echo Csrf::field(); ?>
+                                            <input type="hidden" name="id" value="<?php echo htmlspecialchars($user['id']); ?>"/>
+                                            <button
+                                                type="submit"
+                                                class="btn btn-sm btn-danger"
+                                                onclick="return confirm('Are you sure you want to delete this user? ')"
+                                                name="delete_user"
+                                            >
+                                                Delete
+                                            </button>
+                                        </form>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach;?>
@@ -403,6 +434,32 @@ AuthRole::allowOnly(['admin']);
                 </tbody>
             </table>
         </div>
+
+        <?php if ($total_pages > 1): ?>
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <span>Page <?php echo $current_page; ?> of <?php echo $total_pages; ?> (<?php echo $total_records; ?> total)</span>
+                <nav>
+                    <ul class="pagination mb-0">
+                        <?php
+                            $qs = function ($p) use ($search_term, $role_filter) {
+                                return '?' . http_build_query(['search' => $search_term, 'role' => $role_filter, 'page' => $p]);
+                            };
+                        ?>
+                        <li class="page-item <?php echo $current_page <= 1 ? 'disabled' : ''; ?>">
+                            <a class="page-link" href="<?php echo $qs(max($current_page - 1, 1)); ?>">Previous</a>
+                        </li>
+                        <?php for ($p = 1; $p <= $total_pages; $p++): ?>
+                            <li class="page-item <?php echo $p === $current_page ? 'active' : ''; ?>">
+                                <a class="page-link" href="<?php echo $qs($p); ?>"><?php echo $p; ?></a>
+                            </li>
+                        <?php endfor; ?>
+                        <li class="page-item <?php echo $current_page >= $total_pages ? 'disabled' : ''; ?>">
+                            <a class="page-link" href="<?php echo $qs(min($current_page + 1, $total_pages)); ?>">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        <?php endif; ?>
     </div>
 
     <?php require_once __DIR__ . '/partials/footer.php'; ?>

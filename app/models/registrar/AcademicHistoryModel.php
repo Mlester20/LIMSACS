@@ -151,6 +151,30 @@ require_once __DIR__ . '/../Model.php';
         }
 
         /**
+         * Get a single enrollment record by id, joined with the student's name
+         * @param int $id Enrollment record ID
+         * @return array|null
+         */
+        public function getById($id) {
+            try {
+                $query = "SELECT ah.*, s.first_name, s.last_name
+                        FROM {$this->academic_history} ah
+                        JOIN {$this->students} s ON ah.student_id = s.id
+                        WHERE ah.id = ? LIMIT 1";
+
+                $stmt = $this->con->prepare($query);
+                $stmt->bind_param('i', $id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                return $result->fetch_assoc();
+            } catch (Exception $e) {
+                error_log("Get academic history by id error: " . $e->getMessage());
+                return null;
+            }
+        }
+
+        /**
          * Update enrollment status
          * @param int $id Enrollment record ID
          * @param string $status New status
@@ -189,6 +213,44 @@ require_once __DIR__ . '/../Model.php';
             } catch (Exception $e) {
                 error_log("Delete enrollment error: " . $e->getMessage());
                 return false;
+            }
+        }
+
+        /**
+         * Get currently enrolled/transferred students across all sections, capped to $limit
+         * @param int $limit
+         * @return array
+         */
+        public function getAllEnrolled($limit = 100) {
+            try {
+                $query = "SELECT
+                            ah.id,
+                            ah.student_id,
+                            ah.enrollment_status,
+                            ah.grade_level,
+                            ah.created_at,
+                            s.lrn,
+                            s.first_name,
+                            s.last_name,
+                            sec.section_name,
+                            sy.school_year
+                        FROM {$this->academic_history} ah
+                        JOIN {$this->students} s ON ah.student_id = s.id
+                        JOIN {$this->sections} sec ON ah.section_id = sec.id
+                        JOIN {$this->school_year} sy ON ah.school_year_id = sy.id
+                        WHERE ah.enrollment_status IN ('Enrolled', 'Transferred')
+                        ORDER BY sy.school_year DESC, s.first_name ASC
+                        LIMIT ?";
+
+                $stmt = $this->con->prepare($query);
+                $stmt->bind_param('i', $limit);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                return $result->fetch_all(MYSQLI_ASSOC);
+            } catch (Exception $e) {
+                error_log("Get all enrolled students error: " . $e->getMessage());
+                return [];
             }
         }
 

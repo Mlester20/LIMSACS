@@ -6,6 +6,7 @@ require_once __DIR__ . '/../Model.php';
         protected $school_year = 'school_year';
         protected $sections = 'sections';
         protected $students = 'students';
+        protected $academic_history = 'academic_history';
 
         public function index(){
             $query = "SELECT
@@ -84,6 +85,91 @@ require_once __DIR__ . '/../Model.php';
             } catch (Exception $e) {
                 error_log("Get active school year error: " . $e->getMessage());
                 return null;
+            }
+        }
+
+        /**
+         * Get all school years
+         * @return array
+         */
+        public function getAllSchoolYears(){
+            try {
+                $query = "SELECT id, school_year, status FROM {$this->school_year} WHERE status = 'active' ORDER BY school_year DESC";
+                $stmt = $this->con->prepare($query);
+                $stmt->execute();
+                return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            } catch (Exception $e) {
+                error_log("Get all school years error: " . $e->getMessage());
+                return [];
+            }
+        }
+
+        /**
+         * Get a single section by id
+         * @param int $id
+         * @return array|null
+         */
+        public function getById($id){
+            try {
+                $query = "SELECT * FROM {$this->sections} WHERE id = ? LIMIT 1";
+                $stmt = $this->con->prepare($query);
+                $stmt->bind_param('i', $id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                return $result->fetch_assoc();
+            } catch (Exception $e) {
+                error_log("Get section by id error: " . $e->getMessage());
+                return null;
+            }
+        }
+
+        /**
+         * Get distinct grade levels available across all sections
+         * @return array
+         */
+        public function getDistinctGradeLevels(){
+            try {
+                $query = "SELECT DISTINCT grade_level FROM {$this->sections} WHERE grade_level IS NOT NULL ORDER BY grade_level ASC";
+                $stmt = $this->con->prepare($query);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                $grades = [];
+                while ($row = $result->fetch_assoc()) {
+                    $grades[] = $row['grade_level'];
+                }
+                return $grades;
+            } catch (Exception $e) {
+                error_log("Get distinct grade levels error: " . $e->getMessage());
+                return [];
+            }
+        }
+
+        /**
+         * Get sections for a school year/grade level, with current enrollment counts
+         * @param int $school_year_id
+         * @param string $grade_level
+         * @return array
+         */
+        public function getByGradeLevelWithEnrollment($school_year_id, $grade_level){
+            try {
+                $query = "SELECT s.*, COUNT(ah.id) as current_enrollment
+                        FROM {$this->sections} s
+                        LEFT JOIN {$this->academic_history} ah
+                            ON s.id = ah.section_id
+                            AND ah.school_year_id = ?
+                            AND ah.enrollment_status IN ('Enrolled', 'Transferred')
+                        WHERE s.school_year_id = ? AND s.grade_level = ?
+                        GROUP BY s.id
+                        ORDER BY s.section_name ASC";
+
+                $stmt = $this->con->prepare($query);
+                $stmt->bind_param('iis', $school_year_id, $school_year_id, $grade_level);
+                $stmt->execute();
+                return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            } catch (Exception $e) {
+                error_log("Get sections by grade level error: " . $e->getMessage());
+                return [];
             }
         }
 

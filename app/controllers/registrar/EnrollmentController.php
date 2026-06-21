@@ -13,6 +13,11 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
 
     class EnrollmentController extends Controller {
 
+        // Kept for backward compatibility with views that reference
+        // EnrollmentController::TERMINAL_GRADE_LEVEL; EnrollmentService owns
+        // the actual graduation-eligibility business rule.
+        const TERMINAL_GRADE_LEVEL = EnrollmentService::TERMINAL_GRADE_LEVEL;
+
         private $academicHistoryModel;
         private $sectionsModel;
         protected $auditLogs;
@@ -51,12 +56,7 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
          */
         public function getStudentWithHistory($student_id) {
             try {
-                $query = "SELECT * FROM students WHERE id = ?";
-                $stmt = $this->model->con->prepare($query);
-                $stmt->bind_param('i', $student_id);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $student = $result->fetch_assoc();
+                $student = $this->model->getById($student_id);
 
                 if ($student) {
                     $student['enrollment_history'] = $this->academicHistoryModel->getByStudentId($student_id);
@@ -78,69 +78,27 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
          * @return array ['success' => bool, 'message' => string]
          */
         public function enrollStudent($student_id, $school_year_id, $grade_level, $section_id) {
-            try {
-                // Validate student exists
-                $query = "SELECT id FROM students WHERE id = ?";
-                $stmt = $this->model->con->prepare($query);
-                $stmt->bind_param('i', $student_id);
-                $stmt->execute();
-                if (!$stmt->get_result()->fetch_assoc()) {
-                    return ['success' => false, 'message' => 'Student not found.'];
-                }
+            $result = $this->enrollmentService->enrollStudent(
+                $student_id,
+                $school_year_id,
+                $grade_level,
+                $section_id,
+                $_SESSION['id'] ?? null
+            );
 
-                // Check if already enrolled in this school year
-                if ($this->academicHistoryModel->isAlreadyEnrolled($student_id, $school_year_id)) {
-                    return ['success' => false, 'message' => 'Student is already enrolled in this school year.'];
-                }
-
-                // Get section details
-                $query = "SELECT max_students FROM sections WHERE id = ?";
-                $stmt = $this->model->con->prepare($query);
-                $stmt->bind_param('i', $section_id);
-                $stmt->execute();
-                $sectionResult = $stmt->get_result()->fetch_assoc();
-
-                if (!$sectionResult) {
-                    return ['success' => false, 'message' => 'Section not found.'];
-                }
-
-                // Check section capacity
-                $currentEnrollment = $this->academicHistoryModel->getSectionEnrollmentCount($section_id, $school_year_id);
-                if ($currentEnrollment >= $sectionResult['max_students']) {
-                    return ['success' => false, 'message' => "Section is full. Maximum capacity: {$sectionResult['max_students']}."];
-                }
-
-                // Create enrollment record
-                $enrollmentData = [
-                    'student_id' => $student_id,
-                    'enrolled_by' => $_SESSION['id'] ?? null,
-                    'school_year_id' => $school_year_id,
-                    'grade_level' => $grade_level,
-                    'section_id' => $section_id,
-                    'enrollment_status' => 'Enrolled'
-                ];
-
-
-                if ($this->academicHistoryModel->create($enrollmentData)) {
-                    // Log the action
-                    $this->auditLogs->log(
-                        $_SESSION['id'],
-                        $_SESSION['role'],
-                        'ENROLL STUDENT',
-                        'ENROLLMENT',
-                        null,
-                        'academic_history',
-                        "Student enrolled in {$grade_level}"
-                    );
-
-                    return ['success' => true, 'message' => 'Student enrolled successfully.'];
-                } else {
-                    return ['success' => false, 'message' => 'Failed to create enrollment record.'];
-                }
-            } catch (Exception $e) {
-                error_log("Enroll student error: " . $e->getMessage());
-                return ['success' => false, 'message' => 'An error occurred during enrollment.'];
+            if ($result['success']) {
+                $this->auditLogs->log(
+                    $_SESSION['id'],
+                    $_SESSION['role'],
+                    'ENROLL STUDENT',
+                    'ENROLLMENT',
+                    null,
+                    'academic_history',
+                    "Student enrolled in {$grade_level}"
+                );
             }
+
+            return $result;
         }
 
         /**
@@ -148,15 +106,7 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
          * @return array
          */
         public function getSchoolYears() {
-            try {
-                $query = "SELECT id, school_year, status FROM school_year ORDER BY school_year DESC";
-                $stmt = $this->model->con->prepare($query);
-                $stmt->execute();
-                return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-            } catch (Exception $e) {
-                error_log("Get school years error: " . $e->getMessage());
-                return [];
-            }
+            return $this->sectionsModel->getAllSchoolYears();
         }
 
         /**
@@ -166,25 +116,7 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
          * @return array
          */
         public function getSectionsByGradeLevel($school_year_id, $grade_level) {
-            try {
-                $query = "SELECT s.*, COUNT(ah.id) as current_enrollment
-                        FROM sections s
-                        LEFT JOIN academic_history ah 
-                            ON s.id = ah.section_id 
-                            AND ah.school_year_id = ?
-                            AND ah.enrollment_status IN ('Enrolled', 'Transferred')
-                        WHERE s.school_year_id = ? AND s.grade_level = ?
-                        GROUP BY s.id
-                        ORDER BY s.section_name ASC";
-                
-                $stmt = $this->model->con->prepare($query);
-                $stmt->bind_param('iis', $school_year_id, $school_year_id, $grade_level);
-                $stmt->execute();
-                return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-            } catch (Exception $e) {
-                error_log("Get sections by grade error: " . $e->getMessage());
-                return [];
-            }
+            return $this->sectionsModel->getByGradeLevelWithEnrollment($school_year_id, $grade_level);
         }
 
         /**
@@ -192,21 +124,7 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
          * @return array
          */
         public function getGradeLevels() {
-            try {
-                $query = "SELECT DISTINCT grade_level FROM sections WHERE grade_level IS NOT NULL ORDER BY grade_level ASC";
-                $stmt = $this->model->con->prepare($query);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                
-                $grades = [];
-                while ($row = $result->fetch_assoc()) {
-                    $grades[] = $row['grade_level'];
-                }
-                return $grades;
-            } catch (Exception $e) {
-                error_log("Get grade levels error: " . $e->getMessage());
-                return [];
-            }
+            return $this->sectionsModel->getDistinctGradeLevels();
         }
 
         /**
@@ -226,6 +144,44 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
          */
         public function updateEnrollmentStatus($enrollment_id, $status) {
             return $this->academicHistoryModel->updateStatus($enrollment_id, $status);
+        }
+
+        /**
+         * Mark a student's latest enrollment as Dropped, Transferred, or Graduated.
+         * For Graduated, also records the graduation details in the graduates table.
+         * @param int $enrollment_id academic_history.id of the enrollment record
+         * @param string $new_status 'Dropped' | 'Transferred' | 'Graduated'
+         * @param array|null $graduateData Required when $new_status is 'Graduated'.
+         *        Keys: graduation_date, honors, remarks
+         * @return array ['success' => bool, 'message' => string]
+         */
+        public function updateStudentStatus($enrollment_id, $new_status, $graduateData = null) {
+            $result = $this->enrollmentService->updateStudentStatus(
+                $enrollment_id,
+                $new_status,
+                $graduateData,
+                $_SESSION['id'] ?? null
+            );
+
+            if ($result['success']) {
+                $actionMap = [
+                    'Graduated'   => 'GRADUATE STUDENT',
+                    'Dropped'     => 'DROP STUDENT',
+                    'Transferred' => 'TRANSFER STUDENT'
+                ];
+
+                $this->auditLogs->log(
+                    $_SESSION['id'],
+                    $_SESSION['role'],
+                    $actionMap[$new_status] ?? strtoupper($new_status) . ' STUDENT',
+                    'ENROLLMENT',
+                    $enrollment_id,
+                    'academic_history',
+                    "Marked {$result['studentName']} as {$new_status}"
+                );
+            }
+
+            return $result;
         }
 
         /**
@@ -266,82 +222,11 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
          * Get enrolled students with pagination
          * @param int $page - Current page number (default: 1)
          * @param int $itemsPerPage - Items per page (default: 10)
+         * @param string $status - Enrollment status to filter by, or 'All' for every status
          * @return array - Array with 'enrollments' and 'pagination' keys
          */
-        public function getEnrolledStudentsWithPagination($page = 1, $itemsPerPage = 10) {
-            try {
-                $page = max(1, (int)$page);
-                $itemsPerPage = max(1, (int)$itemsPerPage);
-                $offset = ($page - 1) * $itemsPerPage;
-
-                // Get total count
-                $query_count = "
-                    SELECT COUNT(*) as total
-                    FROM academic_history ah
-                    JOIN students s ON ah.student_id = s.id
-                    WHERE ah.enrollment_status = 'Enrolled'
-                ";
-                $stmt = $this->model->con->prepare($query_count);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $row = $result->fetch_assoc();
-                $totalRecords = $row['total'] ?? 0;
-
-                // Get paginated data
-                $query = "
-                    SELECT 
-                        ah.id as enrollment_id,
-                        s.id as student_id,
-                        s.first_name,
-                        s.last_name,
-                        s.lrn,
-                        sy.school_year,
-                        ah.grade_level,
-                        sec.section_name,
-                        ah.enrollment_status
-                    FROM academic_history ah
-                    JOIN students s ON ah.student_id = s.id
-                    JOIN school_year sy ON ah.school_year_id = sy.id
-                    JOIN sections sec ON ah.section_id = sec.id
-                    WHERE ah.enrollment_status = 'Enrolled'
-                    ORDER BY s.last_name ASC, s.first_name ASC
-                    LIMIT ? OFFSET ?
-                ";
-                
-                $stmt = $this->model->con->prepare($query);
-                $stmt->bind_param('ii', $itemsPerPage, $offset);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $enrollments = $result->fetch_all(MYSQLI_ASSOC);
-
-                // Calculate pagination info
-                $totalPages = ceil($totalRecords / $itemsPerPage);
-                
-                return [
-                    'enrollments' => $enrollments,
-                    'pagination' => [
-                        'currentPage' => $page,
-                        'itemsPerPage' => $itemsPerPage,
-                        'totalRecords' => $totalRecords,
-                        'totalPages' => $totalPages,
-                        'hasPrevPage' => $page > 1,
-                        'hasNextPage' => $page < $totalPages
-                    ]
-                ];
-            } catch (Exception $e) {
-                error_log("Get enrolled students error: " . $e->getMessage());
-                return [
-                    'enrollments' => [],
-                    'pagination' => [
-                        'currentPage' => 1,
-                        'itemsPerPage' => $itemsPerPage,
-                        'totalRecords' => 0,
-                        'totalPages' => 0,
-                        'hasPrevPage' => false,
-                        'hasNextPage' => false
-                    ]
-                ];
-            }
+        public function getEnrolledStudentsWithPagination($page = 1, $itemsPerPage = 10, $status = 'Enrolled') {
+            return $this->enrollmentService->getEnrolledStudentsWithPagination($page, $itemsPerPage, $status);
         }
 
         /**
@@ -349,10 +234,20 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
          * @param string $keyword
          * @param int $page
          * @param int $itemsPerPage
+         * @param string $status Enrollment status to filter by, or 'All' for every status
          * @return array ['enrollments' => array, 'pagination' => array]
          */
-        public function searchEnrolledStudents($keyword, $page = 1, $itemsPerPage = 10) {
-            return $this->enrollmentService->searchEnrolledStudents($keyword, $page, $itemsPerPage);
+        public function searchEnrolledStudents($keyword, $page = 1, $itemsPerPage = 10, $status = 'Enrolled') {
+            return $this->enrollmentService->searchEnrolledStudents($keyword, $page, $itemsPerPage, $status);
+        }
+
+        /**
+         * Get currently enrolled/transferred students across all sections, capped to $limit
+         * @param int $limit
+         * @return array
+         */
+        public function getAllEnrolledStudents($limit = 100) {
+            return $this->academicHistoryModel->getAllEnrolled($limit);
         }
     }
 
@@ -418,41 +313,10 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
 
             // Get all enrolled students
             if (isset($_POST['get_all_enrolled_students'])) {
-                $query = "SELECT 
-                            ah.id, 
-                            ah.student_id, 
-                            ah.enrollment_status,
-                            ah.grade_level, 
-                            ah.created_at,
-                            s.lrn,
-                            s.first_name,
-                            s.last_name,
-                            sec.section_name,
-                            sy.school_year
-                        FROM academic_history ah
-                        JOIN students s ON ah.student_id = s.id
-                        JOIN sections sec ON ah.section_id = sec.id
-                        JOIN school_year sy ON ah.school_year_id = sy.id
-                        WHERE ah.enrollment_status IN ('Enrolled', 'Transferred')
-                        ORDER BY sy.school_year DESC, s.first_name ASC
-                        LIMIT 100";
-                
-                try {
-                
-                    $stmt = $con->prepare($query);
-                    $stmt->execute();
-                    $result = $stmt->get_result();
-                    $enrollments = $result->fetch_all(MYSQLI_ASSOC);
-                    
-                    header('Content-Type: application/json');
-                    echo json_encode($enrollments);
-                    exit();
-                } catch (Exception $e) {
-                    error_log("Get enrolled students error: " . $e->getMessage());
-                    header('Content-Type: application/json');
-                    echo json_encode([]);
-                    exit();
-                }
+                $enrollments = $controller->getAllEnrolledStudents(100);
+                header('Content-Type: application/json');
+                echo json_encode($enrollments);
+                exit();
             }
 
             // Get enrollment history for a student
@@ -472,9 +336,48 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
                 $keyword      = $_POST['keyword'] ?? '';
                 $page         = $_POST['page'] ?? 1;
                 $itemsPerPage = $_POST['items_per_page'] ?? 10;
+                $status       = $_POST['status'] ?? 'Enrolled';
 
-                $result = $controller->searchEnrolledStudents($keyword, $page, $itemsPerPage);
+                $allowedStatusFilters = ['Enrolled', 'Transferred', 'Dropped', 'Graduated', 'All'];
+                if (!in_array($status, $allowedStatusFilters, true)) {
+                    $status = 'Enrolled';
+                }
+
+                $result = $controller->searchEnrolledStudents($keyword, $page, $itemsPerPage, $status);
                 header('Content-Type: application/json');
+                echo json_encode($result);
+                exit();
+            }
+
+            // Update student status (Dropped / Transferred / Graduated)
+            if (isset($_POST['update_status'])) {
+                $enrollment_id = $_POST['enrollment_id'] ?? null;
+                $new_status = $_POST['new_status'] ?? null;
+                $allowedStatuses = ['Dropped', 'Transferred', 'Graduated'];
+
+                header('Content-Type: application/json');
+
+                if (!$enrollment_id || !in_array($new_status, $allowedStatuses, true)) {
+                    echo json_encode(['success' => false, 'message' => 'Missing or invalid status update data.']);
+                    exit();
+                }
+
+                $graduateData = null;
+                if ($new_status === 'Graduated') {
+                    $graduation_date = $_POST['graduation_date'] ?? null;
+                    if (!$graduation_date) {
+                        echo json_encode(['success' => false, 'message' => 'Graduation date is required.']);
+                        exit();
+                    }
+
+                    $graduateData = [
+                        'graduation_date' => $graduation_date,
+                        'honors' => !empty($_POST['honors']) ? $_POST['honors'] : null,
+                        'remarks' => !empty($_POST['remarks']) ? $_POST['remarks'] : null
+                    ];
+                }
+
+                $result = $controller->updateStudentStatus($enrollment_id, $new_status, $graduateData);
                 echo json_encode($result);
                 exit();
             }

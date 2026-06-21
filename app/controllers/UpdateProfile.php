@@ -2,6 +2,7 @@
 session_start();
 
 require_once __DIR__ . '/../helpers/message.php';
+require_once __DIR__ . '/../helpers/csrf.php';
 require_once __DIR__ . '/../models/UpdateProfileModel.php';
 require_once __DIR__ . '/../../database/config/config.php';
 
@@ -13,6 +14,12 @@ if (!isset($_SESSION['id'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!Csrf::isValid($_POST['csrf_token'] ?? null)) {
+        setFlash('error', 'Your session has expired. Please try again.');
+        header("Location: " . $_SERVER['HTTP_REFERER']);
+        exit();
+    }
+
     $updateProfileModel = new UpdateProfileModel($con);
     
     $userId = $_SESSION['id'];
