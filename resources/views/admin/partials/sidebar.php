@@ -41,6 +41,16 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <li class="menu-item"><a href="academic-history.php" class="menu-link"><div data-i18n="Account">Academic History</div></a></li>
           </ul>
         </li>
+        <li class="menu-item <?php echo (in_array($currentPage, ['graduates.php', 'graduates-master-list.php', 'graduate-view.php'])) ? 'active' : ''; ?>">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <i class="menu-icon tf-icons bx bx-medal"></i>
+            <div data-i18n="Graduates">Graduates</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item"><a href="graduates.php" class="menu-link"><div data-i18n="Dashboard">Dashboard</div></a></li>
+            <li class="menu-item"><a href="graduates-master-list.php" class="menu-link"><div data-i18n="Master List">Master List</div></a></li>
+          </ul>
+        </li>
         <li class="menu-item <?php echo ($currentPage === 'school-year.php') ? 'active' : ''; ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
             <i class="menu-icon tf-icons bx bx-book-open"></i>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 19, 2026 at 03:57 PM
+-- Generation Time: Jun 21, 2026 at 05:31 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -43,8 +43,8 @@ CREATE TABLE `academic_history` (
 --
 
 INSERT INTO `academic_history` (`id`, `student_id`, `enrolled_by`, `school_year_id`, `grade_level`, `section_id`, `enrollment_status`, `created_at`) VALUES
-(5, 11, 3, 3, 'Grade 6', 4, 'Graduated', '2026-06-19 13:31:20'),
-(6, 42, 3, 3, 'Grade 1', 5, 'Enrolled', '2026-06-19 13:53:38');
+(8, 11, 3, 3, 'Grade 1', 6, 'Enrolled', '2026-06-21 12:59:02'),
+(9, 34, 3, 3, 'Grade 6', 7, 'Graduated', '2026-06-21 13:00:35');
 
 -- --------------------------------------------------------
 
@@ -71,7 +71,6 @@ CREATE TABLE `audit_logs` (
 --
 
 INSERT INTO `audit_logs` (`id`, `user_id`, `role`, `action`, `module`, `reference_id`, `reference_table`, `description`, `ip_address`, `status`, `created_at`) VALUES
-(3, 1, 'admin', 'CREATE USER', 'USER', NULL, 'users', 'admin created a new user record', '::1', 'success', '2026-06-07 14:07:45'),
 (4, 1, 'admin', 'DELETED USER', 'USER', NULL, 'users', 'admin Deleted user record', '::1', 'success', '2026-06-07 14:08:40'),
 (5, 1, 'admin', 'CREATE USER', 'USER', NULL, 'users', 'admin created a new user record', '::1', 'success', '2026-06-07 14:11:52'),
 (6, 1, 'admin', 'UPDATE USER', 'USER', NULL, 'users', 'admin updated user record', '::1', 'success', '2026-06-07 14:27:55'),
@@ -279,7 +278,35 @@ INSERT INTO `audit_logs` (`id`, `user_id`, `role`, `action`, `module`, `referenc
 (209, 3, 'registrar', 'UPDATE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar updated section: Mahogani', '::1', 'success', '2026-06-19 13:30:31'),
 (210, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 6', '::1', 'success', '2026-06-19 13:31:20'),
 (211, 3, 'registrar', 'GRADUATE STUDENT', 'ENROLLMENT', 5, 'academic_history', 'Marked Mark Lester  Raguindin as Graduated', '::1', 'success', '2026-06-19 13:32:39'),
-(212, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-19 13:53:38');
+(212, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-19 13:53:38'),
+(213, 3, 'registrar', 'DELETE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar deleted section', '::1', 'success', '2026-06-19 14:00:33'),
+(214, 3, 'registrar', 'DELETE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar deleted section', '::1', 'success', '2026-06-19 14:00:35'),
+(215, 3, 'registrar', 'CREATE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar created section: Pine', '::1', 'success', '2026-06-19 14:23:34'),
+(216, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-19 14:23:54'),
+(217, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 01:52:40'),
+(218, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-21 02:14:53'),
+(219, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-21 02:16:03'),
+(220, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 12:30:25'),
+(221, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-21 12:30:51'),
+(222, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 12:46:41'),
+(223, 3, 'registrar', 'CREATE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar created a new document type: Test.', '::1', 'success', '2026-06-21 12:47:07'),
+(224, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 12:47:28'),
+(225, 3, 'registrar', 'DELETE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar deleted a document type with ID: 20.', '::1', 'success', '2026-06-21 12:49:22'),
+(226, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-21 12:59:02'),
+(227, 3, 'registrar', 'CREATE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar created section: Mahogani', '::1', 'success', '2026-06-21 12:59:42'),
+(228, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 6', '::1', 'success', '2026-06-21 13:00:35'),
+(229, 3, 'registrar', 'GRADUATE STUDENT', 'ENROLLMENT', 9, 'academic_history', 'Marked Maria Flores as Graduated', '::1', 'success', '2026-06-21 13:00:57'),
+(230, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-21 13:04:53'),
+(231, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 13:05:33'),
+(232, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-21 13:39:29'),
+(233, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 14:09:55'),
+(234, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 34', '::1', 'success', '2026-06-21 14:12:20'),
+(235, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 10', '::1', 'success', '2026-06-21 14:12:39'),
+(236, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-21 14:51:39'),
+(237, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 15:01:13'),
+(238, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 15:11:08'),
+(239, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-21 15:28:02'),
+(240, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 15:30:29');
 
 -- --------------------------------------------------------
 
@@ -328,7 +355,7 @@ CREATE TABLE `graduates` (
 --
 
 INSERT INTO `graduates` (`id`, `student_id`, `academic_history_id`, `graduation_date`, `honors`, `remarks`, `recorded_by`, `created_at`) VALUES
-(2, 11, 5, '2027-04-05', NULL, 'Test', 3, '2026-06-19 13:32:39');
+(1, 34, 9, '2026-06-24', 'Test', NULL, 3, '2026-06-21 13:00:57');
 
 -- --------------------------------------------------------
 
@@ -373,7 +400,8 @@ CREATE TABLE `school_year` (
 
 INSERT INTO `school_year` (`id`, `school_year`, `start_date`, `end_date`, `status`, `created_at`, `updated_at`) VALUES
 (3, '2026-2027', '2026-06-08', '2027-04-05', 'active', '2026-06-06 15:01:38', '2026-06-09 13:33:49'),
-(6, '2027-2028', '2027-06-07', '2028-04-03', 'inactive', '2026-06-09 13:28:47', '2026-06-09 13:33:40');
+(6, '2027-2028', '2027-06-07', '2028-04-03', 'archived', '2026-06-09 13:28:47', '2026-06-21 13:05:10'),
+(7, '2028-2029', '2028-06-05', '2029-04-09', 'archived', '2026-06-21 12:33:31', '2026-06-21 13:05:15');
 
 -- --------------------------------------------------------
 
@@ -396,8 +424,8 @@ CREATE TABLE `sections` (
 --
 
 INSERT INTO `sections` (`id`, `section_name`, `grade_level`, `adviser_id`, `school_year_id`, `max_students`, `created_at`) VALUES
-(4, 'Mahogani', 'Grade 6', 8, 3, 35, '2026-06-09 13:29:58'),
-(5, 'Pine', 'Grade 1', 7, 3, 35, '2026-06-12 13:34:47');
+(6, 'Pine', 'Grade 1', 7, 3, 35, '2026-06-19 14:23:34'),
+(7, 'Mahogani', 'Grade 6', 8, 3, 35, '2026-06-21 12:59:42');
 
 -- --------------------------------------------------------
 
@@ -485,7 +513,8 @@ CREATE TABLE `student_documents` (
 
 INSERT INTO `student_documents` (`id`, `student_id`, `document_type_id`, `file_path`, `status`, `remarks`, `uploaded_by`, `uploaded_at`) VALUES
 (8, 11, 17, 'storage/student_documents/doc_1781766001.pdf', 'Verified', 'Verified', 3, '2026-06-18 07:00:01'),
-(9, 11, 15, 'storage/student_documents/doc_1781848806.docx', 'Verified', 'Verified', 3, '2026-06-19 06:00:06');
+(9, 11, 15, 'storage/student_documents/doc_1781848806.docx', 'Verified', 'Verified', 3, '2026-06-19 06:00:06'),
+(10, 34, 14, 'storage/student_documents/doc_1782051140.pdf', 'Verified', 'Verified', 3, '2026-06-21 14:12:20');
 
 -- --------------------------------------------------------
 
@@ -509,8 +538,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `full_name`, `email`, `password`, `role`, `profile_picture`, `created_at`, `updated_at`) VALUES
-(1, 'admin', 'admin@gmail.com', '$2y$10$ISff11xX1PgO7HpubtYmBO4ck8pKTKXAd9kn2aI/ZIJtIhOvfnpTy', 'admin', 'storage/profiles/pfp_1_1780663737.png', '2026-06-03 05:10:02', '2026-06-05 20:48:57'),
-(3, 'Registrar', 'registrar@gmail.com', '$2y$10$rrHlYbYy4H0aRnlHLfdYju3PpzK5Pr5dp6mr54VfVXIs2nbvr968q', 'registrar', 'storage/profiles/pfp_3_1780558920.jpg', '2026-06-03 07:01:06', '2026-06-15 00:39:00'),
+(1, 'admin', 'admin@gmail.com', '$2y$10$ISff11xX1PgO7HpubtYmBO4ck8pKTKXAd9kn2aI/ZIJtIhOvfnpTy', 'admin', 'storage/profiles/pfp_1_1782008660.jpg', '2026-06-03 05:10:02', '2026-06-21 10:24:20'),
+(3, 'Registrar', 'registrar@gmail.com', '$2y$10$rrHlYbYy4H0aRnlHLfdYju3PpzK5Pr5dp6mr54VfVXIs2nbvr968q', 'registrar', 'storage/profiles/pfp_3_1782007787.jpg', '2026-06-03 07:01:06', '2026-06-21 10:09:47'),
 (7, 'John Doe', 'teacher@gmail.com', '$2y$10$LcAKY/X2C2t4Fu4LYdioBOu3hV1x8.bnc9R7pjfFSTQWY95mTY0WG', 'teacher', NULL, '2026-06-08 10:38:13', '2026-06-08 10:38:13'),
 (8, 'Mark Lester', 'marklester@gmail.com', '$2y$10$Mr7XFswgt3TDt43QRe3CrO/tsc1IIMaguPegRKcH1WXazKUFEixNm', 'teacher', NULL, '2026-06-08 11:15:37', '2026-06-08 11:15:37');
 
@@ -600,25 +629,25 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `academic_history`
 --
 ALTER TABLE `academic_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=213;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=241;
 
 --
 -- AUTO_INCREMENT for table `document_types`
 --
 ALTER TABLE `document_types`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `graduates`
 --
 ALTER TABLE `graduates`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `parents_guardians`
@@ -630,13 +659,13 @@ ALTER TABLE `parents_guardians`
 -- AUTO_INCREMENT for table `school_year`
 --
 ALTER TABLE `school_year`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `sections`
 --
 ALTER TABLE `sections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `students`
@@ -648,7 +677,7 @@ ALTER TABLE `students`
 -- AUTO_INCREMENT for table `student_documents`
 --
 ALTER TABLE `student_documents`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `users`
