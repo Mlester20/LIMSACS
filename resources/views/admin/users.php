@@ -374,6 +374,93 @@ AuthRole::allowOnly(['admin']);
         </div>
     </div>
 
+    <!-- Reset Password Modal -->
+    <div
+        class="modal fade"
+        id="resetPasswordModal"
+        tabindex="-1"
+        aria-labelledby="resetPasswordModalLabel"
+        aria-hidden="true">
+
+        <div class="modal-dialog">
+            <form
+                action="../../../app/controllers/admin/UsersController.php"
+                method="POST"
+                id="resetPasswordForm">
+                <?php echo Csrf::field(); ?>
+
+                <div class="modal-content">
+
+                    <!-- Header -->
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="resetPasswordModalLabel">
+                            Reset Password
+                        </h5>
+
+                        <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                        </button>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="modal-body">
+                        <input type="hidden" id="reset_user_id" name="id" value="">
+
+                        <p class="mb-3">
+                            Set a new password for <strong id="reset_user_name"></strong>.
+                            They will need to use this new password the next time they log in.
+                        </p>
+
+                        <div class="mb-3">
+                            <label for="new_password" class="form-label">New Password</label>
+                            <input
+                                type="password"
+                                class="form-control"
+                                id="new_password"
+                                name="new_password"
+                                placeholder="Enter new password"
+                                minlength="8"
+                                required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="confirm_password" class="form-label">Confirm Password</label>
+                            <input
+                                type="password"
+                                class="form-control"
+                                id="confirm_password"
+                                placeholder="Re-enter new password"
+                                minlength="8"
+                                required>
+                            <div class="invalid-feedback" id="confirm_password_feedback">Passwords do not match.</div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            name="reset_password"
+                            class="btn btn-primary">
+                            Reset Password
+                        </button>
+                    </div>
+
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card mt-4">
         <h5 class="card-header">Users</h5>
         <div class="table-responsive nowrap">
@@ -403,6 +490,15 @@ AuthRole::allowOnly(['admin']);
                                         data-bs-target="#editUserModal"
                                         onclick="updateUser(<?php echo htmlspecialchars($user['id']); ?>, '<?php echo htmlspecialchars($user['full_name']); ?>', '<?php echo htmlspecialchars($user['email']); ?>', '<?php echo htmlspecialchars($user['role']); ?>')">
                                         Edit
+                                    </button>
+
+                                    <button
+                                        class="btn btn-sm btn-info"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#resetPasswordModal"
+                                        title="Reset this user's password"
+                                        onclick="resetPasswordModal(<?php echo htmlspecialchars($user['id']); ?>, '<?php echo htmlspecialchars($user['full_name']); ?>')">
+                                        Reset Password
                                     </button>
 
                                     <?php if ((int)$user['id'] === (int)($_SESSION['id'] ?? 0)): ?>

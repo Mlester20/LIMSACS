@@ -18,6 +18,7 @@ AuthRole::allowOnly(['registrar']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> Dashboard | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?> </title>
+    <meta name="csrf-token" content="<?php echo htmlspecialchars(Csrf::token()); ?>">
     <link rel="icon" type="image/x-icon" href="../../../public/assets/img/favicon/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -56,6 +57,7 @@ AuthRole::allowOnly(['registrar']);
     <div class="modal fade" id="enrollStudentModal" tabindex="-1" aria-labelledby="enrollStudentModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <form id="enrollStudentForm" method="POST" action="../../../app/controllers/registrar/StudentsController.php">
+                <?php echo Csrf::field(); ?>
                 <div class="modal-content">
                     <div class="modal-header py-2">
                         <h6 class="modal-title mb-0" id="enrollStudentModalLabel">
@@ -199,6 +201,7 @@ AuthRole::allowOnly(['registrar']);
                                     </button>
                                     <!-- delete action -->
                                     <form method="POST" action="../../../app/controllers/registrar/StudentsController.php" style="display: inline;">
+                                        <?php echo Csrf::field(); ?>
                                         <input type="hidden" name="student_id" value="<?php echo $student['id']; ?>">
                                         <button 
                                             type="submit" 
@@ -305,6 +308,7 @@ AuthRole::allowOnly(['registrar']);
     <div class="modal fade" id="editStudentModal" tabindex="-1" aria-labelledby="editStudentModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <form id="editStudentForm" method="POST" action="../../../app/controllers/registrar/StudentsController.php">
+                <?php echo Csrf::field(); ?>
                 <div class="modal-content">
                     <div class="modal-header py-2">
                         <h6 class="modal-title mb-0" id="editStudentModalLabel">

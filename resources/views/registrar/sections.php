@@ -21,6 +21,7 @@ AuthRole::allowOnly(['registrar']);
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
     <title>Sections | <?php  require_once __DIR__ . '/../../../app/helpers/title.php'; ?></title>
+    <meta name="csrf-token" content="<?php echo htmlspecialchars(Csrf::token()); ?>">
     <meta name="description" content="" />
     <link rel="icon" type="image/x-icon" href="../../../public/assets/img/favicon/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -60,6 +61,7 @@ AuthRole::allowOnly(['registrar']);
       <div class="modal-dialog">
         <div class="modal-content">
           <form action="../../../app/controllers/registrar/SectionsController.php" method="post">
+            <?php echo Csrf::field(); ?>
             <div class="modal-header">
               <h5 class="modal-title" id="addSectionModalLabel">Add Section</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -130,6 +132,7 @@ AuthRole::allowOnly(['registrar']);
       <div class="modal-dialog">
         <div class="modal-content">
           <form action="../../../app/controllers/registrar/SectionsController.php" method="post">
+            <?php echo Csrf::field(); ?>
             <div class="modal-header">
               <h5 class="modal-title" id="editSectionModalLabel">Edit Section</h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -351,6 +354,7 @@ AuthRole::allowOnly(['registrar']);
                     </button>
 
                     <form method="POST" action="../../../app/controllers/registrar/SectionsController.php" style="display: inline;">
+                      <?php echo Csrf::field(); ?>
                       <input type="hidden" name="delete_section" value="<?php echo $section['id']; ?>">
                       <button 
                           type="submit" 

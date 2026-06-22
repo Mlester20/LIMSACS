@@ -1,3 +1,12 @@
+/**
+ * Read the CSRF token rendered into the page's <meta name="csrf-token"> tag,
+ * needed for AJAX mutations (drop/transfer/graduate) that don't go through a native form.
+ */
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.content : '';
+}
+
 const enrollmentController = {
     searchStudent: function(term) {
         if (term.length < 2) {
@@ -415,7 +424,8 @@ const enrollmentController = {
             data: {
                 update_status: 1,
                 enrollment_id: enrollmentId,
-                new_status: 'Dropped'
+                new_status: 'Dropped',
+                csrf_token: getCsrfToken()
             },
             dataType: 'json',
             success: function(response) {
@@ -441,7 +451,8 @@ const enrollmentController = {
             data: {
                 update_status: 1,
                 enrollment_id: enrollmentId,
-                new_status: 'Transferred'
+                new_status: 'Transferred',
+                csrf_token: getCsrfToken()
             },
             dataType: 'json',
             success: function(response) {
@@ -485,7 +496,8 @@ const enrollmentController = {
                 new_status: 'Graduated',
                 graduation_date: graduationDate,
                 honors: honors,
-                remarks: remarks
+                remarks: remarks,
+                csrf_token: getCsrfToken()
             },
             dataType: 'json',
             success: function(response) {

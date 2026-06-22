@@ -21,6 +21,7 @@ AuthRole::allowOnly(['registrar']);
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
     <title>Guardians | <?php  require_once __DIR__ . '/../../../app/helpers/title.php'; ?></title>
+    <meta name="csrf-token" content="<?php echo htmlspecialchars(Csrf::token()); ?>">
     <meta name="description" content="" />
     <link rel="icon" type="image/x-icon" href="../../../public/assets/img/favicon/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -63,6 +64,7 @@ AuthRole::allowOnly(['registrar']);
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="../../../app/controllers/registrar/ParentGuardiansController.php" method="post">
+                    <?php echo Csrf::field(); ?>
                     <div class="modal-body py-2"> <div class="alert alert-info py-1 px-3 mb-2">
                             <small style="font-size: 0.75rem;">
                                 <strong>Note:</strong> Leave blank if not applicable (N/A).
@@ -181,6 +183,7 @@ AuthRole::allowOnly(['registrar']);
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="../../../app/controllers/registrar/ParentGuardiansController.php" method="post">
+                    <?php echo Csrf::field(); ?>
                     <input type="hidden" name="id" id="edit_id">
                     <div class="modal-body py-2">
                         <div class="alert alert-info py-1 px-3 mb-2">
@@ -360,6 +363,7 @@ AuthRole::allowOnly(['registrar']);
                                         </button>
 
                                         <form action="../../../app/controllers/registrar/ParentGuardiansController.php" method="post" style="display: inline">
+                                            <?php echo Csrf::field(); ?>
                                             <input type="hidden" name="id" value="<?php echo $parentGuardian['id']; ?>">
                                             <button 
                                                 type="submit" 

@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../services/StudentsService.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
+require_once __DIR__ . '/../../helpers/csrf.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 
     class ParentGuardiansController extends Controller{
@@ -171,6 +172,10 @@ require_once __DIR__ . '/../../../database/config/config.php';
                 header('Content-Type: application/json');
                 echo json_encode(['exists' => $row['total'] > 0]);
                 exit();
+            }
+
+            if(isset($_POST['save_guardian']) || isset($_POST['update_guardian']) || isset($_POST['delete_guardian'])){
+                Csrf::requireValidOnPost('../../../resources/views/registrar/parent-guardians.php');
             }
 
             if(isset($_POST['save_guardian'])){

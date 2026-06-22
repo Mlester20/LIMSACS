@@ -5,6 +5,7 @@ require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
+require_once __DIR__ . '/../../helpers/csrf.php';
 require_once __DIR__ . '/../../models/registrar/StudentsModel.php';
 require_once __DIR__ . '/../../models/registrar/AcademicHistoryModel.php';
 require_once __DIR__ . '/../../models/registrar/SectionsModel.php';
@@ -291,6 +292,8 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
 
             // Enroll student
             if (isset($_POST['enroll_student'])) {
+                Csrf::requireValidOnPost('../../../resources/views/registrar/enrollment.php');
+
                 $student_id = $_POST['student_id'] ?? null;
                 $enrolled_by = $_SESSION['id'] ?? null;
                 $school_year_id = $_POST['school_year_id'] ?? null;
@@ -356,6 +359,11 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
                 $allowedStatuses = ['Dropped', 'Transferred', 'Graduated'];
 
                 header('Content-Type: application/json');
+
+                if (!Csrf::isValid($_POST['csrf_token'] ?? null)) {
+                    echo json_encode(['success' => false, 'message' => 'Your session has expired. Please refresh the page and try again.']);
+                    exit();
+                }
 
                 if (!$enrollment_id || !in_array($new_status, $allowedStatuses, true)) {
                     echo json_encode(['success' => false, 'message' => 'Missing or invalid status update data.']);

@@ -1,145 +1,285 @@
-Let me read all the uploaded files first to fully understand the current codebase.Now I have a thorough understanding of the entire codebase. Here's a well-structured Claude prompt you can use:
+# Create Admin Graduates Module (PHP MVC + MySQL)
+
+Analyze the existing School Records Management System database and architecture.
+
+Create a complete **Admin Graduates Module** using PHP MVC architecture.
+
+## Objective
+
+Provide a centralized Graduate Management System where administrators can:
+
+* View all graduated students.
+* Access a master list of graduates.
+* Filter graduates by school year, grade level, section, and graduation status.
+* Search graduates by LRN or student name.
+* View complete academic history.
+* Export graduate records.
+* Generate graduate statistics and analytics.
 
 ---
 
-## The Prompt
+## Architecture Requirements
 
+Follow MVC architecture.
+
+### Model
+
+Create:
+
+```text
+app/models/admin/GraduatesModel.php
 ```
-You are an expert PHP/JavaScript developer. I have an existing school registrar system 
-built with a custom MVC framework (PHP + MySQLi + Bootstrap 5 + jQuery). I need you to 
-integrate student documents into the Student Profile modal (studentDetailsModal) inside 
-student-records.php — so that when a registrar clicks a student row, the modal shows 
-their profile, academic history, parent/guardians, AND a Documents tab with a 
-checklist of all document_types showing ✓ (submitted/verified) or ✗ (missing) per 
-document type.
 
-=== ARCHITECTURE OVERVIEW ===
+Responsibilities:
 
-The app follows this structure:
-- Views:  resources/views/registrar/student-records.php
-- JS:     public/js/registrar/students.js
-- Controller: app/controllers/registrar/StudentsController.php
-- Models: app/models/registrar/StudentsModel.php
-          app/models/registrar/StudentsDocumentModel.php
+* Retrieve graduate records.
+* Retrieve graduate statistics.
+* Retrieve academic history of graduates.
+* Retrieve graduates by school year.
+* Retrieve graduates by section.
+* Retrieve graduates by grade level.
+* Search graduates.
+* Retrieve graduate counts.
 
-The base Controller.php accepts a model via constructor:
-  parent::__construct(new SomeModel($con))
+Use:
 
-The base Model.php wraps a MySQLi $con connection.
+```php
+require_once __DIR__ . '/../Model.php';
+```
 
-=== EXISTING AJAX ENDPOINT ===
+Use:
 
-StudentsController.php already handles a POST AJAX action:
+```php
+$this->con
+```
 
-  if($_POST['action'] === 'get_student_profile'){
-      $student_id = intval($_POST['student_id']);
-      $profile = $controller->getStudentProfile($student_id);
-      echo json_encode($profile);
-      exit();
-  }
+as the mysqli connection.
 
-getStudentProfile() currently returns:
-  [
-    'student'          => [...],   // from students table
-    'academic_history' => [...],   // from academic_history table
-    'parent_guardians' => [...]    // from parent_guardians table
-  ]
+Use prepared statements for all queries.
 
-The JS function populateStudentModal(student) calls this endpoint via $.ajax POST and
-renders academic history and parent/guardians into the modal.
+---
 
-=== WHAT I NEED YOU TO DO ===
+### Controller
 
-**1. PHP — StudentsController.php**
-   - In getStudentProfile(), also fetch the student's documents using 
-     StudentsDocumentModel. Inject StudentsDocumentModel as a dependency 
-     (same pattern as AcademicHistoryModel and ParentGuardiansModel already injected).
-   - Also fetch ALL document types from DocumentTypesModel.
-   - Return them in the JSON response as two new keys:
-       'student_documents' => [...],   // rows from student_documents for this student_id
-       'document_types'    => [...]    // all rows from document_types table
+Create:
 
-   Each student_document row must include at minimum:
-     id, student_id, document_type_id, status, remarks, file_path, uploaded_at
+```text
+app/controllers/admin/GraduatesController.php
+```
 
-   Each document_type row must include:
-     id, document_name
+Responsibilities:
 
-**2. PHP — StudentsDocumentModel.php**
-   Add a new method:
-     public function getByStudentId($student_id)
-   
-   It should SELECT sd.*, dt.document_name FROM student_documents sd
-   LEFT JOIN document_types dt ON sd.document_type_id = dt.id
-   WHERE sd.student_id = ?
-   ORDER BY dt.document_name ASC
+* Display graduate dashboard.
+* Display graduate master list.
+* Display graduate profile.
+* Display academic history.
+* Handle filters.
+* Handle searches.
+* Handle exports.
 
-**3. HTML — student-records.php (studentDetailsModal)**
-   The current modal has sections for Personal Info, Academic History, and 
-   Parent/Guardians side by side. Convert the modal body to use Bootstrap tabs:
+---
 
-   Tab 1: "Profile" — existing personal info, demographics, contact fields 
-          (all current #modalXxx divs stay here unchanged)
-   Tab 2: "Academic History" — the existing academic history table
-   Tab 3: "Parents / Guardians" — the existing parent/guardian cards
-   Tab 4: "Documents" — NEW checklist section (see below)
+### Views
 
-   The Documents tab should render a table or list with columns:
-     | Document Type | Status | Remarks | Action |
+Create:
 
-   - For each document_type in the full list, show one row.
-   - If the student HAS that document: show the document's status badge 
-     (Submitted = info, Verified = success, Rejected = danger, Pending = warning),
-     show remarks, and show a small "View" button that opens file_path in a new tab.
-   - If the student DOES NOT HAVE that document: show a red ✗ badge labeled 
-     "Missing" and leave Remarks and Action blank.
-   - At the top of the Documents tab show a summary line:
-       "X of Y documents submitted"  (where Y = total document types)
+```text
+resources/views/admin/graduates/index.php
+resources/views/admin/graduates/view.php
+resources/views/admin/graduates/master-list.php
+```
 
-**4. JavaScript — students.js**
-   In populateStudentModal(student), after receiving the AJAX response:
-   - Read response.student_documents and response.document_types
-   - Call a new function renderDocumentChecklist(studentDocuments, documentTypes)
-     that builds the Documents tab HTML described above.
-   - The tab structure must use Bootstrap 5 tab syntax 
-     (nav-tabs + tab-content + tab-pane).
+Use Bootstrap 5.
 
-   renderDocumentChecklist(studentDocs, docTypes):
-   - Build a Map keyed by document_type_id from studentDocs for O(1) lookup.
-   - Iterate over docTypes to produce a table row per document type.
-   - Insert the generated HTML into a container with id="documentChecklistBody".
+Follow the same UI style used by the existing Admin Dashboard.
 
-=== CONSTRAINTS ===
-- Keep all existing PHP code untouched except the specific additions above.
-- Do not change the AJAX endpoint URL or method — it stays POST to StudentsController.php 
-  with action=get_student_profile.
-- Use Bootstrap 5 classes only (the project already loads Bootstrap 5 via 
-  /public/assets/vendor/js/bootstrap.js).
-- Use vanilla JS or jQuery (jQuery is already loaded globally).
-- All new PHP must use prepared statements (MySQLi bind_param style, no PDO).
-- Do not break the existing tab navigation — the modal's "Edit" button in the footer 
-  should still trigger editStudent() for the currently viewed student.
-- Maintain the same file structure; don't create new files unless I ask.
+---
 
-=== DELIVERABLES ===
-Provide the complete modified versions of these four files (not diffs, full files):
-1. app/controllers/registrar/StudentsController.php
-2. app/models/registrar/StudentsDocumentModel.php
-3. resources/views/registrar/student-records.php  (modal section + tab markup only is 
-   fine if the file is large — clearly mark where to replace)
-4. public/js/registrar/students.js
+## Graduate Source
 
-For each file, explain in 2–3 sentences what changed and why before showing the code.
+Use the existing database structure.
+
+Determine graduates from:
+
+```text
+academic_history
+```
+
+or any equivalent academic status table.
+
+Graduated students should be identified through:
+
+```text
+enrollment_status = 'Completed'
+```
+
+or
+
+```text
+student_status = 'Graduated'
+```
+
+depending on the actual schema.
+
+Do NOT create a separate graduates table if the data already exists in academic history.
+
+---
+
+## Graduate Dashboard
+
+Create summary cards:
+
+```text
+Total Graduates
+Male Graduates
+Female Graduates
+Current School Year Graduates
+Previous School Year Graduates
+```
+
+Create analytics:
+
+```text
+Graduates Per School Year
+Graduates Per Grade Level
+Graduates Per Section
+```
+
+Provide chart-ready datasets.
+
+---
+
+## Master List of Graduates
+
+Create a data table containing:
+
+```text
+LRN
+Student Name
+Gender
+Grade Level
+Section
+School Year
+Date Graduated
+Registrar
+Status
+```
+
+Features:
+
+* Pagination
+* Search
+* Sorting
+* Filters
+* Export buttons
+
+Filters:
+
+```text
+School Year
+Grade Level
+Section
+Gender
+Status
 ```
 
 ---
 
-A few notes on why the prompt is written this way:
+## Graduate Profile
 
-**Feeds exact context** — it tells Claude the constructor pattern, the existing AJAX response shape, and the jQuery/Bootstrap versions already in use, so it won't invent a different approach.
+Create a detailed graduate profile page.
 
-**Specifies the checklist logic explicitly** — "build a Map keyed by document_type_id" gives Claude a clear algorithm so it doesn't produce a nested-loop O(n²) version.
+Display:
 
-**Anchors deliverables** — asking for full files (or clearly marked replacement blocks) prevents Claude from returning incomplete snippets that are hard to slot in.
+```text
+Personal Information
+Academic History
+Enrollment History
+Section History
+Graduation Information
+Documents Submitted
+```
 
-**Constraints prevent breakage** — explicitly forbidding changes to the AJAX URL and the `editStudent()` footer button stops Claude from accidentally refactoring things that already work.
+---
+
+## Academic History Integration
+
+Display all academic records for the selected graduate:
+
+```text
+School Year
+Grade Level
+Section
+Enrollment Status
+Date Enrolled
+Date Completed
+```
+
+Provide a timeline view.
+
+---
+
+## Export Features
+
+Prepare controller and service methods for:
+
+```text
+Export PDF
+Export Excel
+Print Master List
+```
+
+Create method stubs if implementation libraries are not yet installed.
+
+---
+
+## Performance Requirements
+
+Avoid N+1 queries.
+
+Use JOINs where appropriate.
+
+Create aggregate queries for dashboard statistics.
+
+Do not perform one query per graduate.
+
+Implement a DashboardStatsService if needed.
+
+---
+
+## Security Requirements
+
+Use:
+
+* Prepared statements
+* Session validation
+* Role validation
+* CSRF protection for POST actions
+* Output escaping
+
+Only users with:
+
+```text
+admin
+```
+
+role may access this module.
+
+---
+
+## Deliverables
+
+Generate:
+
+1. GraduatesModel.php
+2. GraduatesController.php
+3. Graduate dashboard view
+4. Master list view
+5. Graduate profile view
+6. SQL queries
+7. Routing examples
+8. Suggested folder structure
+9. Bootstrap UI layout
+10. Performance optimization recommendations
+
+Base all implementation on the existing database schema and avoid creating redundant tables.

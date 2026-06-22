@@ -15,6 +15,44 @@ try {
     $documentTypes = [];
 }
 
+// Status -> [badge class, icon] used for stat cards and table badges.
+$statusMeta = function (string $status): array {
+    return match ($status) {
+        'Verified'  => ['bg-label-success', 'bx-check-circle'],
+        'Submitted' => ['bg-label-info', 'bx-upload'],
+        'Pending'   => ['bg-label-warning', 'bx-time-five'],
+        'Rejected'  => ['bg-label-danger', 'bx-x-circle'],
+        default     => ['bg-label-secondary', 'bx-file'],
+    };
+};
+
+// File extension -> icon class for the document type column.
+$fileIcon = function (?string $path): string {
+    $ext = strtolower(pathinfo((string) $path, PATHINFO_EXTENSION));
+    return match ($ext) {
+        'pdf'          => 'bx-file-pdf text-danger',
+        'doc', 'docx'  => 'bx-file-doc text-primary',
+        'xls', 'xlsx'  => 'bx-spreadsheet text-success',
+        'jpg', 'jpeg', 'png' => 'bx-image text-warning',
+        default        => 'bx-file text-secondary',
+    };
+};
+
+// Normalize the stored relative path into the absolute /storage/... URL used for previews.
+$fileUrl = function (?string $path): string {
+    if (empty($path)) {
+        return '#';
+    }
+    return '/storage/student_documents/' . basename($path);
+};
+
+$statusCounts = ['Submitted' => 0, 'Verified' => 0, 'Pending' => 0, 'Rejected' => 0];
+foreach ($documents as $doc) {
+    if (isset($statusCounts[$doc['status']])) {
+        $statusCounts[$doc['status']]++;
+    }
+}
+$totalDocuments = count($documents);
 ?>
 
 <!DOCTYPE html>
@@ -56,16 +94,111 @@ try {
     <?php require_once __DIR__ . '/partials/sidebar.php'; ?>
     <?php require_once __DIR__ . '/partials/topbar.php'; ?>
 
-    <div class="row mb-3 align-items-center">
-        <div class="col-md-6">
-            <div class="input-group">
-                <input type="text" class="form-control" placeholder="Search documents by student name..." id="searchInput">
-            </div>
+    <!-- ── Page header ───────────────────────────────────────────────────── -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+            <h4 class="fw-bold mb-0">Student Documents</h4>
+            <small class="text-muted">Track and manage submitted, verified, and pending student requirements</small>
         </div>
-        <div class="col-md-6 text-end mt-2 mt-md-0">
+        <div class="d-flex gap-2 flex-wrap">
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDocumentModal">
                 <i class="bx bx-plus"></i> Add Document
             </button>
+        </div>
+    </div>
+
+    <!-- ── Summary cards ─────────────────────────────────────────────────── -->
+    <div class="row g-4 mb-4">
+        <div class="col-6 col-md-4 col-xl">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="avatar avatar-lg flex-shrink-0">
+                        <span class="avatar-initial rounded bg-label-primary">
+                            <i class="bx bx-folder-open bx-sm"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">Total Documents</p>
+                        <h3 class="mb-0 fw-bold"><?php echo number_format($totalDocuments); ?></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="avatar avatar-lg flex-shrink-0">
+                        <span class="avatar-initial rounded bg-label-success">
+                            <i class="bx bx-check-circle bx-sm"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">Verified</p>
+                        <h3 class="mb-0 fw-bold"><?php echo number_format($statusCounts['Verified']); ?></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="avatar avatar-lg flex-shrink-0">
+                        <span class="avatar-initial rounded bg-label-info">
+                            <i class="bx bx-upload bx-sm"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">Submitted</p>
+                        <h3 class="mb-0 fw-bold"><?php echo number_format($statusCounts['Submitted']); ?></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="avatar avatar-lg flex-shrink-0">
+                        <span class="avatar-initial rounded bg-label-warning">
+                            <i class="bx bx-time-five bx-sm"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">Pending</p>
+                        <h3 class="mb-0 fw-bold"><?php echo number_format($statusCounts['Pending']); ?></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="avatar avatar-lg flex-shrink-0">
+                        <span class="avatar-initial rounded bg-label-danger">
+                            <i class="bx bx-x-circle bx-sm"></i>
+                        </span>
+                    </div>
+                    <div>
+                        <p class="text-muted small mb-0">Rejected</p>
+                        <h3 class="mb-0 fw-bold"><?php echo number_format($statusCounts['Rejected']); ?></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Search toolbar ────────────────────────────────────────────────── -->
+    <div class="row mb-3 align-items-center">
+        <div class="col-md-6">
+            <div class="input-group">
+                <span class="input-group-text bg-label-secondary border-end-0"><i class="bx bx-search"></i></span>
+                <input type="text" class="form-control border-start-0" placeholder="Search by student name or document type..." id="searchInput">
+            </div>
+        </div>
+        <div class="col-md-6 text-end mt-2 mt-md-0">
+            <span class="text-muted small">
+                <i class="bx bx-folder me-1"></i>
+                <?php echo number_format($totalDocuments); ?> document record<?php echo $totalDocuments === 1 ? '' : 's'; ?> total
+            </span>
         </div>
     </div>
 
@@ -76,11 +209,11 @@ try {
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Student Name</th>
-                        <th>Document Type</th>
-                        <th>Status</th>
-                        <th>Uploaded By</th>
-                        <th>Uploaded At</th>
+                        <th><i class="bx bx-user me-1"></i>Student Name</th>
+                        <th><i class="bx bx-file-blank me-1"></i>Document Type</th>
+                        <th><i class="bx bx-flag me-1"></i>Status</th>
+                        <th><i class="bx bx-user-circle me-1"></i>Uploaded By</th>
+                        <th><i class="bx bx-calendar me-1"></i>Uploaded At</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -100,6 +233,7 @@ try {
                                 $isNewStudentGroup = $document['student_id'] !== $lastStudentId;
                                 $lastStudentId = $document['student_id'];
                                 $studentFullName = $document['student_first_name'] . ' ' . $document['student_last_name'];
+                                [$statusBadgeClass, $statusIcon] = $statusMeta($document['status']);
                             ?>
                             <tr
                                 class="document-row"
@@ -111,26 +245,36 @@ try {
                                 <td><?php echo $index + 1; ?></td>
                                 <?php if($isNewStudentGroup): ?>
                                     <td rowspan="<?php echo $studentRowspans[$document['student_id']]; ?>" class="align-middle">
-                                        <?php echo htmlspecialchars($studentFullName); ?>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar avatar-sm flex-shrink-0">
+                                                <span class="avatar-initial rounded-circle bg-label-primary">
+                                                    <?php echo htmlspecialchars(strtoupper(substr($studentFullName, 0, 1))); ?>
+                                                </span>
+                                            </div>
+                                            <span class="fw-medium"><?php echo htmlspecialchars($studentFullName); ?></span>
+                                        </div>
                                     </td>
                                 <?php endif; ?>
-                                <td><?php echo htmlspecialchars($document['document_type_name']); ?></td>
                                 <td>
-                                    <?php 
-                                        $status = $document['status'];
-                                        $statusClass = match($status) {
-                                            'Submitted' => 'bg-info',
-                                            'Verified' => 'bg-success',
-                                            'Rejected' => 'bg-danger',
-                                            'Pending' => 'bg-warning',
-                                            default => 'bg-secondary'
-                                        };
-                                    ?>
-                                    <span class="badge <?php echo $statusClass; ?>"><?php echo htmlspecialchars($status); ?></span>
+                                    <i class="bx <?php echo $fileIcon($document['file_path']); ?> me-1"></i>
+                                    <?php echo htmlspecialchars($document['document_type_name']); ?>
                                 </td>
-                                <td><?php echo htmlspecialchars($document['uploaded_by_name']); ?></td>
-                                <td><?php echo date('M d, Y', strtotime($document['uploaded_at'])); ?></td>
                                 <td>
+                                    <span class="badge <?php echo $statusBadgeClass; ?>">
+                                        <i class="bx <?php echo $statusIcon; ?> me-1"></i><?php echo htmlspecialchars($document['status']); ?>
+                                    </span>
+                                </td>
+                                <td><?php echo htmlspecialchars($document['uploaded_by_name'] ?? '—'); ?></td>
+                                <td><?php echo date('M d, Y', strtotime($document['uploaded_at'])); ?></td>
+                                <td class="text-nowrap">
+                                    <a
+                                        href="<?php echo htmlspecialchars($fileUrl($document['file_path'])); ?>"
+                                        target="_blank"
+                                        class="btn btn-sm btn-outline-secondary"
+                                        title="View File"
+                                    >
+                                        <i class="bx bx-show"></i>
+                                    </a>
                                     <button class="btn btn-sm btn-warning" title="Edit" data-bs-toggle="modal" data-bs-target="#editDocumentModal" onclick="editDocument(<?php echo htmlspecialchars(json_encode($document)); ?>)">
                                         <i class="bx bx-edit"></i>
                                     </button>
@@ -142,7 +286,10 @@ try {
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-3">No documents found.</td>
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <i class="bx bx-folder-open fs-1 d-block mb-2"></i>
+                                No documents found.
+                            </td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -181,10 +328,16 @@ try {
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header py-2">
-                    <h6 class="modal-title fw-bold" id="addDocumentModalLabel">Add New Document</h6>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 rounded-2" style="width:34px;height:34px;">
+                            <i class="bx bx-plus text-primary fs-5"></i>
+                        </div>
+                        <h6 class="modal-title fw-bold mb-0" id="addDocumentModalLabel">Add New Document</h6>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="../../../app/controllers/registrar/StudentsDocumentController.php" method="post" enctype="multipart/form-data" id="addDocumentForm">
+                    <?php echo Csrf::field(); ?>
                     <div class="modal-body py-2">
                         <!-- Student Search -->
                         <div class="mb-3">
@@ -254,14 +407,20 @@ try {
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <form action="../../../app/controllers/registrar/StudentsDocumentController.php" method="post" enctype="multipart/form-data" id="editDocumentForm">
-                
+                <?php echo Csrf::field(); ?>
+
                 <div class="modal-header py-2">
-                    <h6 class="modal-title fw-bold" id="editDocumentModalLabel">Edit Document</h6>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center justify-content-center bg-warning bg-opacity-10 rounded-2" style="width:34px;height:34px;">
+                            <i class="bx bx-edit text-warning fs-5"></i>
+                        </div>
+                        <h6 class="modal-title fw-bold mb-0" id="editDocumentModalLabel">Edit Document</h6>
+                    </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                
+
                 <input type="hidden" name="document_id" id="edit_document_id">
-                
+
                 <div class="modal-body py-2" style="max-height: 60vh; overflow-y: auto;">
                     <div class="mb-3">
                         <label class="form-label small mb-1 fw-bold">Student: <span class="text-danger">*</span></label>
@@ -334,6 +493,7 @@ try {
 
     <!-- Delete Document Form (Hidden) -->
     <form action="../../../app/controllers/registrar/StudentsDocumentController.php" method="post" id="deleteDocumentForm" style="display: none;">
+        <?php echo Csrf::field(); ?>
         <input type="hidden" name="document_id" id="delete_document_id">
         <input type="hidden" name="delete_document" value="1">
     </form>

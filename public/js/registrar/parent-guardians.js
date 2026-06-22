@@ -1,3 +1,12 @@
+/**
+ * Read the CSRF token rendered into the page's <meta name="csrf-token"> tag,
+ * needed for forms built dynamically in JS (e.g. search result rows).
+ */
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.content : '';
+}
+
 function editParentGuardian(id, studentId, studentName, fatherName, fatherOccupation, fatherContact, motherName, motherOccupation, motherContact, guardianName, guardianRelationship, guardianContact) {
     document.getElementById('edit_id').value = id;
     document.getElementById('edit_student_id').value = studentId || '';
@@ -188,11 +197,12 @@ function renderSearchResults(results) {
                     </button>
 
                     <form action="../../../app/controllers/registrar/ParentGuardiansController.php" method="post" style="display: inline;">
-                        <input type="hidden" name="guardian_id" value="${guardian.id}">
-                        <button 
-                            type="submit" 
-                            name="deleteGuardian" 
-                            class="btn btn-sm btn-danger" 
+                        <input type="hidden" name="csrf_token" value="${getCsrfToken()}">
+                        <input type="hidden" name="id" value="${guardian.id}">
+                        <button
+                            type="submit"
+                            name="delete_guardian"
+                            class="btn btn-sm btn-danger"
                             onclick="return confirm('Are you sure you want to delete this guardian?');"
                         >
                             Delete

@@ -132,6 +132,39 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
             }
         }
 
+        public function resetPassword($id, $newPassword){
+            try{
+                if(strlen($newPassword ?? '') < 8){
+                    FlashMessage::setFlash('error', 'Password must be at least 8 characters.');
+                    header('Location: ../../../resources/views/admin/users.php');
+                    exit();
+                }
+
+                $hashed = hashPassword($newPassword);
+
+                if($this->model->resetPassword($id, $hashed)){
+                    $this->auditLogs->log(
+                        $_SESSION['id'] ?? null,
+                        $_SESSION['role'] ?? 'unknown',
+                        'RESET PASSWORD',
+                        'USER',
+                        $id,
+                        'users',
+                        $_SESSION['full_name'] . ' reset the password for user ID: ' . $id,
+                    );
+                    FlashMessage::setFlash('success', 'Password reset successfully');
+                    header('Location: ../../../resources/views/admin/users.php');
+                }else{
+                    FlashMessage::setFlash('error', 'Failed to reset password');
+                    header('Location: ../../../resources/views/admin/users.php');
+                }
+                exit();
+            }catch(Exception $e){
+                error_log($e->getMessage());
+                exit();
+            }
+        }
+
         public function delete($id){
             try{
                 if((int)$id === (int)($_SESSION['id'] ?? 0)){
@@ -199,6 +232,11 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
             if(isset($_POST['delete_user'])){
                 $user_id = $_POST['id'];
                 $controller->delete($user_id);
+            }
+
+            if(isset($_POST['reset_password'])){
+                $user_id = $_POST['id'];
+                $controller->resetPassword($user_id, $_POST['new_password'] ?? '');
             }
         }
 

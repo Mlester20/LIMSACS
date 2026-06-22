@@ -195,6 +195,15 @@ function getAppBaseUrl() {
 }
 
 /**
+ * Read the CSRF token rendered into the page's <meta name="csrf-token"> tag,
+ * needed for forms/requests built dynamically in JS (e.g. search result rows).
+ */
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.content : '';
+}
+
+/**
  * Resolve a stored relative file path (e.g. 'storage/student_documents/doc_x.pdf')
  * into an absolute URL from the project root.
  * @param {string} filePath
@@ -537,10 +546,11 @@ function renderSearchResults(results){
                         Edit
                     </button>
                     <form method="POST" action="../../../app/controllers/registrar/StudentsController.php" style="display: inline;">
+                        <input type="hidden" name="csrf_token" value="${getCsrfToken()}">
                         <input type="hidden" name="student_id" value="${student.id}">
-                        <button 
-                            type="submit" 
-                            class="btn btn-sm btn-danger" 
+                        <button
+                            type="submit"
+                            class="btn btn-sm btn-danger"
                             onclick="return confirm('Are you sure you want to delete this student? This action cannot be undone.');"
                             name="delete_student"
                         >

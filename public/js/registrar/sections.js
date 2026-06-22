@@ -1,3 +1,12 @@
+/**
+ * Read the CSRF token rendered into the page's <meta name="csrf-token"> tag,
+ * needed for requests built dynamically in JS (e.g. search result rows).
+ */
+function getCsrfToken() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return meta ? meta.content : '';
+}
+
 function editFunction(id, section_name, grade_level, adviser_id, school_year_id) {
     document.getElementById('edit_section_id').value = id;
     document.getElementById('edit_section_name').value = section_name;
@@ -236,7 +245,7 @@ function renderSearchResults(results) {
                         onclick="if(confirm('Are you sure you want to delete this section?')) {
                             fetch('../../../app/controllers/registrar/SectionsController.php', {
                                 method: 'POST',
-                                body: new URLSearchParams({delete_section: ${sectionId}})
+                                body: new URLSearchParams({delete_section: ${sectionId}, csrf_token: getCsrfToken()})
                             }).then(r => location.reload()).catch(e => alert('Error: ' + e));
                         }"
                     >
