@@ -29,8 +29,9 @@
             <div data-i18n="Analytics">Dashboard</div>
           </a>
         </li>
+        <!-- Student Management -->
         <li class="menu-header small text-uppercase">
-          <span class="menu-header-text">Pages</span>
+          <span class="menu-header-text">Student Management</span>
         </li>
         <li class="menu-item <?php echo ($currentPage == 'enrollment.php' || $currentPage == 'student-records.php') ? 'active' : ''; ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -42,6 +43,20 @@
             <li class="menu-item"><a href="student-records.php" class="menu-link"><div data-i18n="Account">Student Information</div></a></li>
           </ul>
         </li>
+        <li class="menu-item <?php echo ($currentPage == 'parent-guardians.php') ? 'active' : ''; ?>">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <i class="menu-icon tf-icons bx bx-user"></i>
+            <div data-i18n="Parents & Guardians">Parents</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item"><a href="parent-guardians.php" class="menu-link"><div data-i18n="Parents & Guardians">Parents & Guardians</div></a></li>
+          </ul>
+        </li>
+
+        <!-- Academics -->
+        <li class="menu-header small text-uppercase">
+          <span class="menu-header-text">Academics</span>
+        </li>
         <li class="menu-item <?php echo ($currentPage == 'sections.php') ? 'active' : ''; ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
             <i class="menu-icon tf-icons bx bx-book"></i>
@@ -50,6 +65,20 @@
           <ul class="menu-sub">
             <li class="menu-item"><a href="sections.php" class="menu-link"><div data-i18n="Basic">Sections</div></a></li>
           </ul>
+        </li>
+        <li class="menu-item <?php echo ($currentPage == 'school-year.php') ? 'active' : ''; ?>">
+          <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <i class="menu-icon tf-icons bx bx-calendar"></i>
+            <div data-i18n="School Year">School Year</div>
+          </a>
+          <ul class="menu-sub">
+            <li class="menu-item"><a href="school-year.php" class="menu-link"><div data-i18n="School Year">School Year</div></a></li>
+          </ul>
+        </li>
+
+        <!-- Documents -->
+        <li class="menu-header small text-uppercase">
+          <span class="menu-header-text">Documents</span>
         </li>
         <li class="menu-item <?php echo ($currentPage == 'document-types.php' || $currentPage == 'student-documents.php') ? 'active' : ''; ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -62,14 +91,10 @@
             <li class="menu-item"><a href="student-documents.php" class="menu-link"><div data-i18n="Student Documents">Student Documents</div></a></li>
           </ul>
         </li>
-        <li class="menu-item <?php echo ($currentPage == 'parent-guardians.php') ? 'active' : ''; ?>">
-          <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-user"></i>
-            <div data-i18n="Parents & Guardians">Parents</div>
-          </a>
-          <ul class="menu-sub">
-            <li class="menu-item"><a href="parent-guardians.php" class="menu-link"><div data-i18n="Parents & Guardians">Parents & Guardians</div></a></li>
-          </ul>
+
+        <!-- Graduates -->
+        <li class="menu-header small text-uppercase">
+          <span class="menu-header-text">Graduates</span>
         </li>
         <li class="menu-item <?php echo (in_array($currentPage, ['graduates.php', 'graduates-master-list.php', 'graduate-view.php'])) ? 'active' : ''; ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -82,7 +107,7 @@
           </ul>
         </li>
 
-          <!-- Audits -->
+        <!-- Audits -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Audits</span></li>
           <li class="menu-item <?php echo ($currentPage === 'logs.php') ? 'active' : '' ?> ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">

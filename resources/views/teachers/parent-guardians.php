@@ -1,8 +1,8 @@
 <?php
 require_once __DIR__ . '/../../../app/helpers/flashMessage.php';
-require_once __DIR__ . '/../../../app/controllers/registrar/ParentGuardiansController.php';
-require_once __DIR__ . '/../../../app/middleware/Auth.php';
-AuthRole::allowOnly(['registrar']);
+require_once __DIR__ . '/../../../app/controllers/teacher/ParentGuardiansController.php';
+require_once __DIR__ . '/../../../app/middleware/auth.php';
+AuthRole::allowOnly(['teacher']);
 ?>
 
 <!DOCTYPE html>
@@ -20,7 +20,7 @@ AuthRole::allowOnly(['registrar']);
       name="viewport"
       content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
     />
-    <title>Guardians | <?php  require_once __DIR__ . '/../../../app/helpers/title.php'; ?></title>
+    <title>Parents & Guardians | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?></title>
     <meta name="csrf-token" content="<?php echo htmlspecialchars(Csrf::token()); ?>">
     <meta name="description" content="" />
     <link rel="icon" type="image/x-icon" href="../../../public/assets/img/favicon/logo.png" />
@@ -40,7 +40,7 @@ AuthRole::allowOnly(['registrar']);
 </head>
 <body>
 
-    <?php FlashMessage::showFlash(); ?>   
+    <?php FlashMessage::showFlash(); ?>
 
     <?php require_once __DIR__ . '/partials/sidebar.php'; ?>
     <?php require_once __DIR__ . '/partials/topbar.php'; ?>
@@ -51,32 +51,35 @@ AuthRole::allowOnly(['registrar']);
           <input type="text" class="form-control" placeholder="Search Parent or Guardian (e.g., Juan Dela Cruz)" id="searchInput">
         </div>
       </div>
-      
+
       <div class="col-md-6 text-end mt-2 mt-md-0">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGuardianModal">Add Student/Guardian</button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGuardianModal">
+            <i class="bx bx-user-plus"></i> Add Parent/Guardian
+        </button>
       </div>
     </div>
 
-    <!-- add guardian modal-->
+    <!-- add guardian modal -->
     <div class="modal fade" id="addGuardianModal" tabindex="-1" aria-labelledby="addGuardianModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable"> <div class="modal-content">
-                <div class="modal-header py-2"> <h6 class="modal-title fw-bold" id="addGuardianModalLabel">Add New Guardian</h6>
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title fw-bold" id="addGuardianModalLabel">Add New Guardian</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="../../../app/controllers/registrar/ParentGuardiansController.php" method="post">
+                <form action="../../../app/controllers/teacher/ParentGuardiansController.php" method="post">
                     <?php echo Csrf::field(); ?>
-                    <div class="modal-body py-2"> <div class="alert alert-info py-1 px-3 mb-2">
+                    <div class="modal-body py-2">
+                        <div class="alert alert-info py-1 px-3 mb-2">
                             <small style="font-size: 0.75rem;">
-                                <strong>Note:</strong> Leave blank if not applicable (N/A).
+                                <strong>Note:</strong> Leave blank if not applicable (N/A). Only students currently assigned to you are shown.
                             </small>
                         </div>
 
                         <div class="mb-2">
                             <label class="form-label small mb-1 fw-bold">Student:</label>
-                            <!-- Hidden field — actual value submitted -->
                             <input type="hidden" id="add_student_id" name="student_id" required>
 
-                            <!-- Search input -->
                             <input
                                 type="text"
                                 class="form-control form-control-sm"
@@ -85,7 +88,6 @@ AuthRole::allowOnly(['registrar']);
                                 autocomplete="off"
                             >
 
-                            <!-- Search results dropdown -->
                             <div id="studentSearchResults" class="list-group list-group-sm mt-1" style="
                                 max-height: 200px;
                                 overflow-y: auto;
@@ -94,9 +96,8 @@ AuthRole::allowOnly(['registrar']);
                                 border-top: none;
                             "></div>
 
-                            <!-- Duplicate warning -->
                             <div id="duplicateWarning" class="alert alert-warning py-1 px-2 mb-0 mt-1" style="display:none; font-size: 0.8rem;">
-                                <strong>⚠️ Warning:</strong> This student already has a guardian record.
+                                <strong>Warning:</strong> This student already has a guardian record.
                             </div>
                         </div>
 
@@ -105,7 +106,8 @@ AuthRole::allowOnly(['registrar']);
                                 Father's Information
                             </div>
                             <div class="card-body py-2 px-3">
-                                <div class="row g-2"> <div class="col-md-5">
+                                <div class="row g-2">
+                                    <div class="col-md-5">
                                         <label class="form-label small mb-1">Father's Name</label>
                                         <input type="text" class="form-control form-control-sm" name="father_name" placeholder="e.g. Juan Dela Cruz">
                                     </div>
@@ -166,7 +168,8 @@ AuthRole::allowOnly(['registrar']);
                         </div>
 
                     </div>
-                    <div class="modal-footer py-1"> <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <div class="modal-footer py-1">
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-sm btn-primary px-3" name="save_guardian">Save</button>
                     </div>
                 </form>
@@ -174,7 +177,7 @@ AuthRole::allowOnly(['registrar']);
         </div>
     </div>
 
-    <!-- edit guardian modal-->
+    <!-- edit guardian modal -->
     <div class="modal fade" id="editGuardianModal" tabindex="-1" aria-labelledby="editGuardianModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
@@ -182,7 +185,7 @@ AuthRole::allowOnly(['registrar']);
                     <h6 class="modal-title fw-bold" id="editGuardianModalLabel">Edit Guardian</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="../../../app/controllers/registrar/ParentGuardiansController.php" method="post">
+                <form action="../../../app/controllers/teacher/ParentGuardiansController.php" method="post">
                     <?php echo Csrf::field(); ?>
                     <input type="hidden" name="id" id="edit_id">
                     <div class="modal-body py-2">
@@ -194,31 +197,8 @@ AuthRole::allowOnly(['registrar']);
 
                         <div class="mb-2">
                             <label class="form-label small mb-1 fw-bold">Student:</label>
-                            <!-- Hidden field — actual value submitted -->
                             <input type="hidden" id="edit_student_id" name="student_id" required>
-
-                            <!-- Search input -->
-                            <input
-                                type="text"
-                                class="form-control form-control-sm"
-                                id="editStudentSearchInput"
-                                placeholder="Search by name or LRN..."
-                                autocomplete="off"
-                            >
-
-                            <!-- Search results dropdown -->
-                            <div id="editStudentSearchResults" class="list-group list-group-sm mt-1" style="
-                                max-height: 200px;
-                                overflow-y: auto;
-                                display: none;
-                                border: 1px solid #dee2e6;
-                                border-top: none;
-                            "></div>
-
-                            <!-- Duplicate warning -->
-                            <div id="editDuplicateWarning" class="alert alert-warning py-1 px-2 mb-0 mt-1" style="display:none; font-size: 0.8rem;">
-                                <strong>⚠️ Warning:</strong> This student already has another guardian record.
-                            </div>
+                            <input type="text" class="form-control form-control-sm" id="editStudentNameDisplay" readonly>
                         </div>
 
                         <div class="card border mb-2 shadow-sm">
@@ -297,9 +277,99 @@ AuthRole::allowOnly(['registrar']);
         </div>
     </div>
 
+    <!-- View Guardian Modal -->
+    <div class="modal fade" id="viewGuardianModal" tabindex="-1" aria-labelledby="viewGuardianModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header py-2 bg-info text-white">
+                    <h6 class="modal-title fw-bold" id="viewGuardianModalLabel">
+                        <i class="bx bx-eye"></i> Parent/Guardian Details
+                    </h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3">
+                    <div class="row align-items-center mb-3">
+                        <label class="col-sm-3 col-form-label fw-bold">Student:</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control form-control-sm" id="viewStudentName" readonly>
+                        </div>
+                    </div>
+
+                    <div class="card border mb-3 shadow-sm">
+                        <div class="card-header py-2 bg-light fw-bold text-secondary" style="font-size: 0.85rem;">
+                            Father's Information
+                        </div>
+                        <div class="card-body py-2 px-3">
+                            <div class="row g-2">
+                                <div class="col-md-12">
+                                    <label class="form-label small mb-1">Father's Name</label>
+                                    <input type="text" class="form-control form-control-sm" id="viewFatherName" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-1">Father's Occupation</label>
+                                    <input type="text" class="form-control form-control-sm" id="viewFatherOccupation" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-1">Father's Contact</label>
+                                    <input type="text" class="form-control form-control-sm" id="viewFatherContact" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border mb-3 shadow-sm">
+                        <div class="card-header py-2 bg-light fw-bold text-secondary" style="font-size: 0.85rem;">
+                            Mother's Information
+                        </div>
+                        <div class="card-body py-2 px-3">
+                            <div class="row g-2">
+                                <div class="col-md-12">
+                                    <label class="form-label small mb-1">Mother's Name</label>
+                                    <input type="text" class="form-control form-control-sm" id="viewMotherName" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-1">Mother's Occupation</label>
+                                    <input type="text" class="form-control form-control-sm" id="viewMotherOccupation" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-1">Mother's Contact</label>
+                                    <input type="text" class="form-control form-control-sm" id="viewMotherContact" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card border mb-3 shadow-sm">
+                        <div class="card-header py-2 bg-light fw-bold text-secondary" style="font-size: 0.85rem;">
+                            Guardian Information
+                        </div>
+                        <div class="card-body py-2 px-3">
+                            <div class="row g-2">
+                                <div class="col-md-12">
+                                    <label class="form-label small mb-1">Guardian's Name</label>
+                                    <input type="text" class="form-control form-control-sm" id="viewGuardianName" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-1">Guardian's Relationship</label>
+                                    <input type="text" class="form-control form-control-sm" id="viewGuardianRelationship" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small mb-1">Guardian's Contact</label>
+                                    <input type="text" class="form-control form-control-sm" id="viewGuardianContact" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="card mt-4">
-        <h5 class="card-header">Parent & Guardians</h5>
+        <h5 class="card-header">My Students' Parents & Guardians</h5>
         <div class="table-responsive nowrap">
             <table class="table">
                 <thead>
@@ -313,181 +383,79 @@ AuthRole::allowOnly(['registrar']);
                 </thead>
                 <tbody>
                     <?php if(!empty($parentGuardians)): ?>
-                            <?php foreach($parentGuardians as $index => $parentGuardian): ?>
-                                <tr>
-                                    <td><?php echo $pagination['itemsPerPage'] * ($pagination['currentPage'] - 1) + ($index + 1); ?></td>
-                                    <td><?php echo htmlspecialchars($parentGuardian['student_first_name']); ?> <?php echo htmlspecialchars($parentGuardian['student_last_name']); ?></td>
-                                    <td><?php echo htmlspecialchars($parentGuardian['father_name']); ?></td>
-                                    <td><?php echo htmlspecialchars($parentGuardian['mother_name']); ?></td>
-                                    <td>
-                                        <button 
-                                            class="btn btn-sm btn-primary" 
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#editGuardianModal"
-                                            onclick="editParentGuardian(
-                                                '<?php echo $parentGuardian['id']; ?>',
-                                                '<?php echo $parentGuardian['student_id']; ?>',
-                                                '<?php echo htmlspecialchars($parentGuardian['student_first_name']) . ' ' . htmlspecialchars($parentGuardian['student_last_name']); ?>',
-                                                '<?php echo addslashes($parentGuardian['father_name']); ?>',
-                                                '<?php echo addslashes($parentGuardian['father_occupation']); ?>',
-                                                '<?php echo addslashes($parentGuardian['father_contact']); ?>',
-                                                '<?php echo addslashes($parentGuardian['mother_name']); ?>',
-                                                '<?php echo addslashes($parentGuardian['mother_occupation']); ?>',
-                                                '<?php echo addslashes($parentGuardian['mother_contact']); ?>',
-                                                '<?php echo addslashes($parentGuardian['guardian_name']); ?>',
-                                                '<?php echo addslashes($parentGuardian['guardian_relationship']); ?>',
-                                                '<?php echo addslashes($parentGuardian['guardian_contact']); ?>'
-                                            )"
-                                        >
-                                            Edit
-                                        </button>
+                        <?php foreach($parentGuardians as $index => $parentGuardian): ?>
+                            <tr>
+                                <td><?php echo $pagination['itemsPerPage'] * ($pagination['currentPage'] - 1) + ($index + 1); ?></td>
+                                <td><?php echo htmlspecialchars($parentGuardian['student_first_name']); ?> <?php echo htmlspecialchars($parentGuardian['student_last_name']); ?></td>
+                                <td><?php echo htmlspecialchars($parentGuardian['father_name']); ?></td>
+                                <td><?php echo htmlspecialchars($parentGuardian['mother_name']); ?></td>
+                                <td>
+                                    <button
+                                        class="btn btn-sm btn-info"
+                                        title="View"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#viewGuardianModal"
+                                        onclick="viewParentGuardian(
+                                            '<?php echo htmlspecialchars($parentGuardian['student_first_name']); ?> <?php echo htmlspecialchars($parentGuardian['student_last_name']); ?>',
+                                            '<?php echo addslashes($parentGuardian['father_name']); ?>',
+                                            '<?php echo addslashes($parentGuardian['father_occupation']); ?>',
+                                            '<?php echo addslashes($parentGuardian['father_contact']); ?>',
+                                            '<?php echo addslashes($parentGuardian['mother_name']); ?>',
+                                            '<?php echo addslashes($parentGuardian['mother_occupation']); ?>',
+                                            '<?php echo addslashes($parentGuardian['mother_contact']); ?>',
+                                            '<?php echo addslashes($parentGuardian['guardian_name']); ?>',
+                                            '<?php echo addslashes($parentGuardian['guardian_relationship']); ?>',
+                                            '<?php echo addslashes($parentGuardian['guardian_contact']); ?>'
+                                        )"
+                                    >
+                                        View
+                                    </button>
 
-                                                        <button 
-                                            class="btn btn-sm btn-info" 
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#viewGuardianModal"
-                                            onclick="viewParentGuardian(
-                                                '<?php echo htmlspecialchars($parentGuardian['student_first_name']); ?> <?php echo htmlspecialchars($parentGuardian['student_last_name']); ?>',
-                                                '<?php echo htmlspecialchars($parentGuardian['father_name']); ?>',
-                                                '<?php echo htmlspecialchars($parentGuardian['father_occupation']); ?>',
-                                                '<?php echo htmlspecialchars($parentGuardian['father_contact']); ?>',
-                                                '<?php echo htmlspecialchars($parentGuardian['mother_name']); ?>',
-                                                '<?php echo htmlspecialchars($parentGuardian['mother_occupation']); ?>',
-                                                '<?php echo htmlspecialchars($parentGuardian['mother_contact']); ?>',
-                                                '<?php echo htmlspecialchars($parentGuardian['guardian_name']); ?>',
-                                                '<?php echo htmlspecialchars($parentGuardian['guardian_relationship']); ?>',
-                                                '<?php echo htmlspecialchars($parentGuardian['guardian_contact']); ?>'
-                                            )"
-                                        >
-                                            View
-                                        </button>
-
-                                        <form action="../../../app/controllers/registrar/ParentGuardiansController.php" method="post" style="display: inline">
-                                            <?php echo Csrf::field(); ?>
-                                            <input type="hidden" name="id" value="<?php echo $parentGuardian['id']; ?>">
-                                            <button 
-                                                type="submit" 
-                                                class="btn btn-sm btn-danger"
-                                                name="delete_guardian"
-                                                onclick="return confirm('Are you sure you want to delete this guardian?')"
-                                                >
-                                                Delete
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            <?php endforeach;?>
-                         <?php else: ?>
+                                    <button
+                                        class="btn btn-sm btn-primary"
+                                        title="Edit"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editGuardianModal"
+                                        onclick="editParentGuardian(
+                                            '<?php echo $parentGuardian['id']; ?>',
+                                            '<?php echo $parentGuardian['student_id']; ?>',
+                                            '<?php echo htmlspecialchars($parentGuardian['student_first_name']) . ' ' . htmlspecialchars($parentGuardian['student_last_name']); ?>',
+                                            '<?php echo addslashes($parentGuardian['father_name']); ?>',
+                                            '<?php echo addslashes($parentGuardian['father_occupation']); ?>',
+                                            '<?php echo addslashes($parentGuardian['father_contact']); ?>',
+                                            '<?php echo addslashes($parentGuardian['mother_name']); ?>',
+                                            '<?php echo addslashes($parentGuardian['mother_occupation']); ?>',
+                                            '<?php echo addslashes($parentGuardian['mother_contact']); ?>',
+                                            '<?php echo addslashes($parentGuardian['guardian_name']); ?>',
+                                            '<?php echo addslashes($parentGuardian['guardian_relationship']); ?>',
+                                            '<?php echo addslashes($parentGuardian['guardian_contact']); ?>'
+                                        )"
+                                    >
+                                        Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach;?>
+                    <?php else: ?>
                         <tr>
-                            <td colspan="7" class="text-center">No parent guardians found.</td>
+                            <td colspan="5" class="text-center">No parent/guardian records found for your students.</td>
                         </tr>
-                        <?php endif; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
-        
-        <!-- View Guardian Modal -->
-        <div class="modal fade" id="viewGuardianModal" tabindex="-1" aria-labelledby="viewGuardianModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                <div class="modal-content">
-                    <div class="modal-header py-2 bg-info text-white">
-                        <h6 class="modal-title fw-bold" id="viewGuardianModalLabel">
-                            <i class="bx bx-eye"></i> Parent/Guardian Details
-                        </h6>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body py-3">
-                        <div class="row align-items-center mb-3">
-                            <label class="col-sm-3 col-form-label fw-bold">Student:</label>
-                            <div class="col-sm-9">
-                                <input type="text" class="form-control form-control-sm" id="viewStudentName" readonly>
-                            </div>
-                        </div>
-    
-                        <div class="card border mb-3 shadow-sm">
-                            <div class="card-header py-2 bg-light fw-bold text-secondary" style="font-size: 0.85rem;">
-                                Father's Information
-                            </div>
-                            <div class="card-body py-2 px-3">
-                                <div class="row g-2">
-                                    <div class="col-md-12">
-                                        <label class="form-label small mb-1">Father's Name</label>
-                                        <input type="text" class="form-control form-control-sm" id="viewFatherName" readonly>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label small mb-1">Father's Occupation</label>
-                                        <input type="text" class="form-control form-control-sm" id="viewFatherOccupation" readonly>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label small mb-1">Father's Contact</label>
-                                        <input type="text" class="form-control form-control-sm" id="viewFatherContact" readonly>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-    
-                        <div class="card border mb-3 shadow-sm">
-                            <div class="card-header py-2 bg-light fw-bold text-secondary" style="font-size: 0.85rem;">
-                                Mother's Information
-                            </div>
-                            <div class="card-body py-2 px-3">
-                                <div class="row g-2">
-                                    <div class="col-md-12">
-                                        <label class="form-label small mb-1">Mother's Name</label>
-                                        <input type="text" class="form-control form-control-sm" id="viewMotherName" readonly>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label small mb-1">Mother's Occupation</label>
-                                        <input type="text" class="form-control form-control-sm" id="viewMotherOccupation" readonly>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label small mb-1">Mother's Contact</label>
-                                        <input type="text" class="form-control form-control-sm" id="viewMotherContact" readonly>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-    
-                        <div class="card border mb-3 shadow-sm">
-                            <div class="card-header py-2 bg-light fw-bold text-secondary" style="font-size: 0.85rem;">
-                                Guardian Information
-                            </div>
-                            <div class="card-body py-2 px-3">
-                                <div class="row g-2">
-                                    <div class="col-md-12">
-                                        <label class="form-label small mb-1">Guardian's Name</label>
-                                        <input type="text" class="form-control form-control-sm" id="viewGuardianName" readonly>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label small mb-1">Guardian's Relationship</label>
-                                        <input type="text" class="form-control form-control-sm" id="viewGuardianRelationship" readonly>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label small mb-1">Guardian's Contact</label>
-                                        <input type="text" class="form-control form-control-sm" id="viewGuardianContact" readonly>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer py-2">
-                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
+
         <!-- Pagination -->
         <div class="card-footer">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <small class="text-muted">
-                        Showing <?php echo (($pagination['currentPage'] - 1) * $pagination['itemsPerPage']) + 1; ?> 
+                        Showing <?php echo $pagination['totalRecords'] > 0 ? (($pagination['currentPage'] - 1) * $pagination['itemsPerPage']) + 1 : 0; ?>
                         to <?php echo min($pagination['currentPage'] * $pagination['itemsPerPage'], $pagination['totalRecords']); ?>
                         of <?php echo $pagination['totalRecords']; ?> records
                     </small>
                 </div>
-                
+
                 <nav>
                     <ul class="pagination pagination-sm m-0">
                         <!-- Previous Button -->
@@ -502,11 +470,11 @@ AuthRole::allowOnly(['registrar']);
                         <?php endif; ?>
 
                         <!-- Page Numbers -->
-                        <?php 
+                        <?php
                             $startPage = max(1, $pagination['currentPage'] - 2);
                             $endPage = min($pagination['totalPages'], $pagination['currentPage'] + 2);
-                            
-                            if($startPage > 1): 
+
+                            if($startPage > 1):
                         ?>
                             <li class="page-item">
                                 <a class="page-link" href="?page=1">1</a>
@@ -557,9 +525,7 @@ AuthRole::allowOnly(['registrar']);
         </div>
     </div>
 
-
     <?php require_once __DIR__ . '/partials/footer.php'; ?>
-
 
     <script src="../../../public/assets/vendor/libs/jquery/jquery.js"></script>
     <script src="../../../public/assets/vendor/libs/popper/popper.js"></script>
@@ -567,7 +533,6 @@ AuthRole::allowOnly(['registrar']);
     <script src="../../../public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
     <script src="../../../public/assets/vendor/js/menu.js"></script>
     <script src="../../../public/assets/js/main.js"></script>
-    <script async defer src="https://buttons.github.io/buttons.js"></script>
-    <script src="../../../public/js/registrar/parent-guardians.js"></script>
+    <script src="../../../public/js/teacher/parent-guardians.js"></script>
 </body>
 </html>

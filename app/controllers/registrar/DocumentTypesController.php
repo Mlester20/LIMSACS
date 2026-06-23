@@ -120,6 +120,8 @@ require_once __DIR__ . '/../../../database/config/config.php';
         $paginated_documentTypes = array_slice($documentTypes, $offset, $entries_per_page);
 
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
+            Csrf::requireValidOnPost('../../../resources/views/registrar/document-types.php');
+
             if(isset($_POST['save_document_type'])){
                 $controller->create(
                     [

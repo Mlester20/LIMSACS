@@ -63,6 +63,7 @@ require_once __DIR__ . '/../helpers/auditLogs.php';
             $routes = [
                 "admin" => "../../../resources/views/admin/dashboard.php",
                 "registrar" => "../../../resources/views/registrar/home.php",
+                "teacher" => "../../../resources/views/teachers/home.php",
                 //if role is not found, redirect to index to avoid unauthorized access
                 "default" => "../../../index.php"
             ];

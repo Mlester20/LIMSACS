@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
 require_once __DIR__ . '/../../models/registrar/StudentsDocumentModel.php';
 require_once __DIR__ . '/../../models/registrar/DocumentTypesModel.php';
 require_once __DIR__ . '/../../services/StudentsService.php';
+require_once __DIR__ . '/../../helpers/csrf.php';
 
     class StudentsController extends Controller{
         private $itemsPerPage = 10;
@@ -109,6 +110,15 @@ require_once __DIR__ . '/../../services/StudentsService.php';
         public function update($id, $data, $page = 1){
             try{
                 if($this->model->update($id, $data)){
+                    $this->auditLogs->log(
+                        $_SESSION['id'] ?? null,
+                        $_SESSION['role'] ?? 'unknown',
+                        'UPDATE STUDENT',
+                        'STUDENT',
+                        $id,
+                        'students',
+                        $_SESSION['full_name'] . ' updated student record with ID: ' . $id,
+                    );
                     FlashMessage::setFlash("success", "Student record updated successfully.");
                     header("Location: ../../../resources/views/registrar/student-records.php?page=" . intval($page));
                     exit();
@@ -126,6 +136,15 @@ require_once __DIR__ . '/../../services/StudentsService.php';
         public function delete($id, $page = 1){
            try{
                 if($this->model->delete($id)){
+                    $this->auditLogs->log(
+                        $_SESSION['id'] ?? null,
+                        $_SESSION['role'] ?? 'unknown',
+                        'DELETE STUDENT',
+                        'STUDENT',
+                        $id,
+                        'students',
+                        $_SESSION['full_name'] . ' deleted student record with ID: ' . $id,
+                    );
                     FlashMessage::setFlash("success", "Student record deleted successfully.");
                     header("Location: ../../../resources/views/registrar/student-records.php?page=" . intval($page));
                     exit();
@@ -202,6 +221,10 @@ require_once __DIR__ . '/../../services/StudentsService.php';
         ];
 
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
+            if(isset($_POST['enroll_student']) || isset($_POST['edit_student']) || isset($_POST['delete_student'])){
+                Csrf::requireValidOnPost('../../../resources/views/registrar/student-records.php');
+            }
+
             if(isset($_POST['enroll_student'])){
                 $controller->create(
                     [

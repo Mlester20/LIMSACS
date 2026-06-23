@@ -53,6 +53,7 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Enrollment | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?></title>
+    <meta name="csrf-token" content="<?php echo htmlspecialchars(Csrf::token()); ?>">
     <link rel="icon" type="image/x-icon" href="../../../public/assets/img/favicon/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -299,6 +300,7 @@ try {
                     <div id="enrollmentFormSection" style="display: none;">
                         <h6 class="text-uppercase text-muted mb-3" style="font-size: 0.75rem; letter-spacing: 0.5px;">Step 3: Select Enrollment Details</h6>
                         <form id="enrollmentForm" method="POST" action="../../../app/controllers/registrar/EnrollmentController.php">
+                            <?php echo Csrf::field(); ?>
                             <input type="hidden" name="student_id" id="hiddenStudentId">
 
                             <div class="row g-2 mb-3">

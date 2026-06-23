@@ -1,8 +1,8 @@
 <?php
-require_once __DIR__ . '/../../../app/controllers/registrar/StudentsController.php';
+require_once __DIR__ . '/../../../app/controllers/teacher/StudentController.php';
 require_once __DIR__ . '/../../../app/helpers/flashMessage.php';
 require_once __DIR__ . '/../../../app/middleware/auth.php';
-AuthRole::allowOnly(['registrar']); 
+AuthRole::allowOnly(['teacher']);
 ?>
 
 <!DOCTYPE html>
@@ -17,7 +17,7 @@ AuthRole::allowOnly(['registrar']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Dashboard | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?> </title>
+    <title> Students List | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?> </title>
     <meta name="csrf-token" content="<?php echo htmlspecialchars(Csrf::token()); ?>">
     <link rel="icon" type="image/x-icon" href="../../../public/assets/img/favicon/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -42,128 +42,8 @@ AuthRole::allowOnly(['registrar']);
     <?php require_once __DIR__ . '/partials/sidebar.php'; ?>
     <?php require_once __DIR__ . '/partials/topbar.php'; ?>
 
-    <div class="row mb-3 align-items-center">
-      <div class="col-md-6">
-        <div class="input-group">
-          <input type="text" class="form-control" placeholder="Search Students (e.g., Juan Dela Cruz)" id="searchInput">
-        </div>
-      </div>
-      
-      <div class="col-md-6 text-end mt-2 mt-md-0">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#enrollStudentModal">Add Student Information</button>
-      </div>
-    </div>
-
-    <div class="modal fade" id="enrollStudentModal" tabindex="-1" aria-labelledby="enrollStudentModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <form id="enrollStudentForm" method="POST" action="../../../app/controllers/registrar/StudentsController.php">
-                <?php echo Csrf::field(); ?>
-                <div class="modal-content">
-                    <div class="modal-header py-2">
-                        <h6 class="modal-title mb-0" id="enrollStudentModalLabel">
-                            <i class="icon-base iconify" data-icon="tabler:user-plus"></i> Add New Student Information
-                        </h6>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-
-                    <div class="modal-body p-3">
-
-                        <p class="text-muted small mb-2"><em>Note: Leave blank if N/A</em></p>
-
-                        <p class="text-muted fw-semibold mb-2" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:.05em;">Student Identity</p>
-                        <div class="row g-2 mb-3">
-                            <div class="col-md-12">
-                                <label class="form-label form-label-sm mb-1">LRN (Learner Reference Number)</label>
-                                <input type="text" class="form-control form-control-sm" name="lrn" maxlength="20" placeholder="e.g., 102305621901">
-                            </div>
-                        </div>
-
-                        <p class="text-muted fw-semibold mb-2" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:.05em;">Personal Information</p>
-                        <div class="row g-2 mb-2">
-                            <div class="col-md-3">
-                                <label class="form-label form-label-sm mb-1">First Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control form-control-sm" name="first_name" placeholder="e.g., Juan" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label form-label-sm mb-1">Middle Name</label>
-                                <input type="text" class="form-control form-control-sm" name="middle_name" placeholder="e.g., Mabini">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label form-label-sm mb-1">Last Name <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control form-control-sm" name="last_name" required placeholder="e.g., Dela Cruz">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label form-label-sm mb-1">Suffix</label>
-                                <input type="text" class="form-control form-control-sm" name="suffix" placeholder="Jr., Sr., III">
-                            </div>
-                        </div>
-
-                        <div class="row g-2 mb-2">
-                            <div class="col-md-12">
-                                <label class="form-label form-label-sm mb-1">Gender <span class="text-danger">*</span></label>
-                                <select class="form-select form-select-sm" name="gender" required>
-                                    <option value="" disabled selected>Select Gender</option>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row g-2 mb-3">
-                            <div class="col-md-3">
-                                <label class="form-label form-label-sm mb-1">Birth Date <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control form-control-sm" name="birth_date" id="enrollBirthDate" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label form-label-sm mb-1">Age</label>
-                                <!-- auto computed age base from the birth date-->
-                                <input type="number" id="ageInput" class="form-control form-control-sm" name="age" min="1" max="30" readonly> 
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label form-label-sm mb-1">Place of Birth</label>
-                                <input type="text" class="form-control form-control-sm" name="place_of_birth" maxlength="150" placeholder="e.g., Manila, Philippines">
-                            </div>
-                        </div>
-
-                        <p class="text-muted fw-semibold mb-2" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:.05em;">Demographics</p>
-                        <div class="row g-2 mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label form-label-sm mb-1">Nationality</label>
-                                <input type="text" class="form-control form-control-sm" name="nationality" value="Filipino" maxlength="100">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label form-label-sm mb-1">Religion</label>
-                                <input type="text" class="form-control form-control-sm" name="religion" maxlength="100" placeholder="e.g., Catholic">
-                            </div>
-                        </div>
-
-                        <p class="text-muted fw-semibold mb-2" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:.05em;">Contact & Address</p>
-                        <div class="row g-2 mb-2">
-                            <div class="col-md-6">
-                                <label class="form-label form-label-sm mb-1">Contact Number</label>
-                                <input type="text" class="form-control form-control-sm" name="contact_number" maxlength="12" placeholder="e.g., 09123456789">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label form-label-sm mb-1">Address</label>
-                                <input type="text" class="form-control form-control-sm" name="address" placeholder="e.g., San Juan City, Manila, Philippines">
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="modal-footer py-2">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary btn-sm" id="enrollStudentBtn" name="enroll_student">
-                            <i class="icon-base iconify" data-icon="tabler:device-floppy"></i> Add Student
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <div class="card">
-        <h5 class="card-header">Student Information</h5>
+        <h5 class="card-header">My Students</h5>
         <div class="table-responsive nowrap">
             <table class="table">
                 <thead>
@@ -173,15 +53,17 @@ AuthRole::allowOnly(['registrar']);
                         <th>Full Name</th>
                         <th>Gender</th>
                         <th>Age</th>
+                        <th>Grade & Section</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if(!empty($students)): ?>
                         <?php foreach($students as $index => $student): ?>
-                            <tr 
-                                style="cursor: pointer;" 
-                                data-bs-toggle="modal" 
+                            <tr
+                                style="cursor: pointer;"
+                                data-bs-toggle="modal"
                                 data-bs-target="#studentDetailsModal"
                                 onclick="populateStudentModal(<?php echo htmlspecialchars(json_encode($student)); ?>)"
                             >
@@ -190,34 +72,44 @@ AuthRole::allowOnly(['registrar']);
                                 <td><?php echo htmlspecialchars($student['full_name'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($student['gender'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($student['age'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars(trim(($student['grade_level'] ?? '') . ' - ' . ($student['section_name'] ?? ''), ' -')) ?: 'N/A'; ?></td>
                                 <td>
-
-                                    <button 
+                                    <?php
+                                        $badgeColors = ['Enrolled' => 'success', 'Graduated' => 'primary', 'Transferred' => 'warning', 'Dropped' => 'danger'];
+                                        $rowBadgeColor = $badgeColors[$student['enrollment_status']] ?? 'secondary';
+                                    ?>
+                                    <span class="badge bg-<?php echo $rowBadgeColor; ?>"><?php echo htmlspecialchars($student['enrollment_status'] ?? 'N/A'); ?></span>
+                                </td>
+                                <td>
+                                    <button
                                         class="btn btn-sm btn-primary"
+                                        title="Edit Student"
                                         data-bs-toggle="modal"
                                         data-bs-target="#editStudentModal"
-                                        onclick="editStudent(<?php echo htmlspecialchars(json_encode($student)); ?>)">
-                                        Edit
+                                        onclick="event.stopPropagation(); editStudent(<?php echo htmlspecialchars(json_encode($student)); ?>)">
+                                        <i class="bx bx-edit-alt"></i>
                                     </button>
-                                    <!-- delete action -->
-                                    <form method="POST" action="../../../app/controllers/registrar/StudentsController.php" style="display: inline;">
-                                        <?php echo Csrf::field(); ?>
-                                        <input type="hidden" name="student_id" value="<?php echo $student['id']; ?>">
-                                        <button 
-                                            type="submit" 
-                                            class="btn btn-sm btn-danger" 
-                                            onclick="return confirm('Are you sure you want to delete this student? This action cannot be undone.');"
-                                            name="delete_student"
-                                            >
-                                            Delete
+                                    <?php if(($student['enrollment_status'] ?? '') === 'Enrolled'): ?>
+                                        <?php $fullNameJs = htmlspecialchars($student['full_name'], ENT_QUOTES); ?>
+                                        <button
+                                            class="btn btn-sm btn-danger"
+                                            title="Mark as Dropped"
+                                            onclick="event.stopPropagation(); studentsController.dropStudent(<?php echo (int)$student['enrollment_id']; ?>, '<?php echo $fullNameJs; ?>')">
+                                            <i class="bx bx-x-circle"></i>
                                         </button>
-                                    </form>
+                                        <button
+                                            class="btn btn-sm btn-warning"
+                                            title="Mark as Transferred"
+                                            onclick="event.stopPropagation(); studentsController.transferStudent(<?php echo (int)$student['enrollment_id']; ?>, '<?php echo $fullNameJs; ?>')">
+                                            <i class="bx bx-transfer"></i>
+                                        </button>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6" class="text-center">No students found</td>
+                            <td colspan="8" class="text-center">No Student Currently Assigned To You</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -229,12 +121,12 @@ AuthRole::allowOnly(['registrar']);
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <small class="text-muted">
-                        Showing <?php echo (($pagination['currentPage'] - 1) * $pagination['itemsPerPage']) + 1; ?> 
+                        Showing <?php echo $pagination['totalRecords'] > 0 ? (($pagination['currentPage'] - 1) * $pagination['itemsPerPage']) + 1 : 0; ?>
                         to <?php echo min($pagination['currentPage'] * $pagination['itemsPerPage'], $pagination['totalRecords']); ?>
                         of <?php echo $pagination['totalRecords']; ?> records
                     </small>
                 </div>
-                
+
                 <nav>
                     <ul class="pagination pagination-sm m-0">
                         <!-- Previous Button -->
@@ -249,11 +141,11 @@ AuthRole::allowOnly(['registrar']);
                         <?php endif; ?>
 
                         <!-- Page Numbers -->
-                        <?php 
+                        <?php
                             $startPage = max(1, $pagination['currentPage'] - 2);
                             $endPage = min($pagination['totalPages'], $pagination['currentPage'] + 2);
-                            
-                            if($startPage > 1): 
+
+                            if($startPage > 1):
                         ?>
                             <li class="page-item">
                                 <a class="page-link" href="?page=1">1</a>
@@ -307,7 +199,7 @@ AuthRole::allowOnly(['registrar']);
     <!-- Update Student Modal -->
     <div class="modal fade" id="editStudentModal" tabindex="-1" aria-labelledby="editStudentModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
-            <form id="editStudentForm" method="POST" action="../../../app/controllers/registrar/StudentsController.php">
+            <form id="editStudentForm" method="POST" action="../../../app/controllers/teacher/StudentController.php">
                 <?php echo Csrf::field(); ?>
                 <div class="modal-content">
                     <div class="modal-header py-2">
@@ -415,7 +307,7 @@ AuthRole::allowOnly(['registrar']);
         </div>
     </div>
 
-    
+    <!-- Student Profile Modal -->
     <div class="modal fade" id="studentDetailsModal" tabindex="-1" aria-labelledby="studentDetailsModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
@@ -529,6 +421,11 @@ AuthRole::allowOnly(['registrar']);
                         </div>
 
                         <div class="tab-pane fade" id="studentParentGuardiansTab" role="tabpanel" aria-labelledby="studentParentGuardiansTab-tab">
+                            <div class="d-flex justify-content-end mb-2">
+                                <a href="parent-guardians.php" class="btn btn-sm btn-outline-primary">
+                                    <i class="bx bx-group"></i> Manage Parents/Guardians
+                                </a>
+                            </div>
                             <div id="parentGuardiansInfo">
                                 <p class="text-center text-muted">Loading...</p>
                             </div>
@@ -561,7 +458,6 @@ AuthRole::allowOnly(['registrar']);
 
                 <div class="modal-footer bg-light">
                     <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary btn-sm">Edit</button>
                 </div>
             </div>
         </div>
@@ -587,7 +483,7 @@ AuthRole::allowOnly(['registrar']);
     </div>
 
     <?php require_once __DIR__ . '/partials/footer.php'; ?>
-    
+
     <!-- ── Vendor scripts ── -->
     <script src="../../../public/assets/vendor/libs/jquery/jquery.js"></script>
     <script src="../../../public/assets/vendor/libs/popper/popper.js"></script>
@@ -595,6 +491,6 @@ AuthRole::allowOnly(['registrar']);
     <script src="../../../public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
     <script src="../../../public/assets/vendor/js/menu.js"></script>
     <script src="../../../public/assets/js/main.js"></script>
-    <script src="../../../public/js/registrar/students.js"></script>
+    <script src="../../../public/js/teacher/students.js"></script>
 </body>
 </html>

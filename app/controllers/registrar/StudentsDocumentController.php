@@ -8,6 +8,7 @@ require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../helpers/fileUpload.php';
 require_once __DIR__ . '/../../helpers/FlashMessage.php';
+require_once __DIR__ . '/../../helpers/csrf.php';
 require_once __DIR__ . '/../../services/StudentsService.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 
@@ -150,6 +151,10 @@ require_once __DIR__ . '/../../../database/config/config.php';
      $documentTypes = $controller->getDocumentTypes();
 
      if($_SERVER['REQUEST_METHOD'] === 'POST'){
+          if(isset($_POST['submit_document']) || isset($_POST['update_document']) || isset($_POST['delete_document'])){
+               Csrf::requireValidOnPost('../../../resources/views/registrar/student-documents.php');
+          }
+
           if(isset($_POST['submit_document'])){
                $controller->create(
                     [

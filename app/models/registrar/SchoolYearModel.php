@@ -1,19 +1,19 @@
 <?php
 require_once __DIR__ . '/../Model.php';
 
-    class UsersModel extends Model{
-        protected $users = 'users';
+    class SchoolYearModel extends Model{
+        protected $sy = 'school_year';
 
         /**
-         * @param string $search matches full_name/email
-         * @param string $role exact role filter
+         * @param string $search matches school_year
+         * @param string $status exact status filter
          * @param int|null $limit pass null to fetch all matching rows (no pagination)
          */
-        public function index($search = '', $role = '', $limit = null, $offset = 0){
+        public function index($search = '', $status = '', $limit = null, $offset = 0){
             try{
-                [$where, $params, $types] = $this->buildFilters($search, $role);
+                [$where, $params, $types] = $this->buildFilters($search, $status);
 
-                $query = "SELECT id, full_name, email, role, created_at FROM {$this->users}{$where} ORDER BY id ASC";
+                $query = "SELECT * FROM {$this->sy}{$where} ORDER BY id DESC";
                 if($limit !== null){
                     $query .= " LIMIT ? OFFSET ?";
                     $params[] = $limit;
@@ -27,6 +27,7 @@ require_once __DIR__ . '/../Model.php';
                 }
                 $stmt->execute();
                 $result = $stmt->get_result();
+
                 return $result->fetch_all(MYSQLI_ASSOC);
             }catch(Exception $e){
                 error_log($e->getMessage());
@@ -34,11 +35,11 @@ require_once __DIR__ . '/../Model.php';
             }
         }
 
-        public function count($search = '', $role = ''){
+        public function count($search = '', $status = ''){
             try{
-                [$where, $params, $types] = $this->buildFilters($search, $role);
+                [$where, $params, $types] = $this->buildFilters($search, $status);
 
-                $query = "SELECT COUNT(*) AS total FROM {$this->users}{$where}";
+                $query = "SELECT COUNT(*) AS total FROM {$this->sy}{$where}";
                 $stmt = $this->con->prepare($query);
                 if($types !== ''){
                     $stmt->bind_param($types, ...$params);
@@ -52,22 +53,20 @@ require_once __DIR__ . '/../Model.php';
             }
         }
 
-        private function buildFilters($search, $role){
+        private function buildFilters($search, $status){
             $conditions = [];
             $params = [];
             $types = '';
 
             if($search !== ''){
-                $conditions[] = "(full_name LIKE ? OR email LIKE ?)";
-                $like = '%' . $search . '%';
-                $params[] = $like;
-                $params[] = $like;
-                $types .= 'ss';
+                $conditions[] = "school_year LIKE ?";
+                $params[] = '%' . $search . '%';
+                $types .= 's';
             }
 
-            if($role !== ''){
-                $conditions[] = "role = ?";
-                $params[] = $role;
+            if($status !== ''){
+                $conditions[] = "status = ?";
+                $params[] = $status;
                 $types .= 's';
             }
 
@@ -77,15 +76,14 @@ require_once __DIR__ . '/../Model.php';
 
         public function create($data){
             try{
-                $query = "INSERT INTO {$this->users} (full_name, email, password, role, profile_picture) VALUES(?, ?, ?, ?, ?)";
+                $query = "INSERT INTO {$this->sy} (school_year, start_date, end_date, status) VALUES(?, ?, ?, ?)";
                 $stmt = $this->con->prepare($query);
                 $stmt->bind_param(
-                    "sssss",
-                    $data['full_name'],
-                    $data['email'],
-                    $data['password'],
-                    $data['role'],
-                    $data['profile_picture']
+                    "ssss",
+                    $data['school_year'],
+                    $data['start_date'],
+                    $data['end_date'],  
+                    $data['status']
                 );
                 $stmt->execute();
                 return true;
@@ -95,15 +93,47 @@ require_once __DIR__ . '/../Model.php';
             }
         }
 
+        /**
+         * Check if there's an active school year, excluding a specific ID if updating
+         * @param string $status
+         * @param int|null $except_id
+         * @return bool
+         */
+        public function activeSy($status = 'active', $except_id = null) {
+            try {
+
+                $query = "SELECT * FROM {$this->sy} WHERE status = ?";
+                if ($except_id) {
+                    $query .= " AND id != ?";
+                }
+
+                $stmt = $this->con->prepare($query);
+
+                if ($except_id) {
+                    $stmt->bind_param("si", $status, $except_id); 
+                } else {
+                    $stmt->bind_param("s", $status);
+                }
+
+                $stmt->execute();
+                $result = $stmt->get_result();
+                return $result->num_rows > 0;
+            } catch(Exception $e) {
+                error_log('Error: ' . $e->getMessage());
+                return false;
+            }
+        }
+
         public function update($id, $data){
             try{
-                $query = "UPDATE {$this->users} SET full_name = ?, email = ?, role = ? WHERE id = ?";
+                $query = "UPDATE {$this->sy} SET school_year = ?, start_date = ?, end_date = ?, status = ? WHERE id = ?";
                 $stmt = $this->con->prepare($query);
                 $stmt->bind_param(
-                    "sssi",
-                    $data['full_name'],
-                    $data['email'],
-                    $data['role'],
+                    "ssssi",
+                    $data['school_year'],
+                    $data['start_date'],
+                    $data['end_date'],
+                    $data['status'],
                     $id
                 );
                 $stmt->execute();
@@ -114,22 +144,9 @@ require_once __DIR__ . '/../Model.php';
             }
         }
 
-        public function resetPassword($id, $hashedPassword){
-            try{
-                $query = "UPDATE {$this->users} SET password = ? WHERE id = ?";
-                $stmt = $this->con->prepare($query);
-                $stmt->bind_param("si", $hashedPassword, $id);
-                $stmt->execute();
-                return true;
-            }catch(Exception $e){
-                error_log($e->getMessage());
-                return false;
-            }
-        }
-
         public function delete($id){
             try{
-                $query = "DELETE FROM {$this->users} WHERE id = ?";
+                $query = "DELETE FROM {$this->sy} WHERE id = ?";
                 $stmt = $this->con->prepare($query);
                 $stmt->bind_param("i", $id);
                 $stmt->execute();

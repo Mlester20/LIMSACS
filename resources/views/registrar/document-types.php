@@ -56,6 +56,7 @@ AuthRole::allowOnly(['registrar']);
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="../../../app/controllers/registrar/DocumentTypesController.php" method="post">
+                    <?php echo Csrf::field(); ?>
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="documentName" class="form-label">Document Name</label>
@@ -90,6 +91,7 @@ AuthRole::allowOnly(['registrar']);
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="../../../app/controllers/registrar/DocumentTypesController.php" method="post">
+                    <?php echo Csrf::field(); ?>
                     <input type="hidden" name="document_id" id="editDocumentTypeId">
                     <div class="modal-body">
                         <div class="mb-3">
@@ -153,6 +155,7 @@ AuthRole::allowOnly(['registrar']);
                                     </button>
 
                                     <form action="../../../app/controllers/registrar/DocumentTypesController.php" method="post" style="display: inline";>
+                                        <?php echo Csrf::field(); ?>
                                         <input type="hidden" name="document_id" value="<?php echo $documentType['id']; ?>">
                                         <button 
                                             class="btn btn-sm btn-danger"

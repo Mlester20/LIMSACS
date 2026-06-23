@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"c:/xampp/htdocs/LIMSACS/app/models/teacher\" \"c:/xampp/htdocs/LIMSACS/app/controllers/teacher\")",
+      "Bash(node --check public/js/teacher/students.js)",
+      "Bash(php -l app/models/teacher/StudentsModel.php)",
+      "Bash(php -l app/controllers/teacher/StudentController.php)",
+      "Bash(php -l resources/views/teachers/students.php)",
+      "Bash(php -l app/models/teacher/ParentGuardiansModel.php)",
+      "Bash(php -l app/controllers/teacher/ParentGuardiansController.php)",
+      "Bash(php -l resources/views/teachers/parent-guardians.php)",
+      "Bash(node --check public/js/teacher/parent-guardians.js)",
+      "Bash(php -l resources/views/teachers/partials/sidebar.php)"
+    ],
+    "additionalDirectories": [
+      "c:\\xampp\\htdocs\\LIMSACS\\app\\models"
+    ]
+  }
+}

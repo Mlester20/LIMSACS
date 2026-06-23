@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../models/registrar/AcademicHistoryModel.php';
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../helpers/fLashMessage.php';
+require_once __DIR__ . '/../../helpers/csrf.php';
 require_once __DIR__ . '/../../services/SectionService.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 
@@ -140,6 +141,10 @@ require_once __DIR__ . '/../../../database/config/config.php';
 
         // Handle POST requests first
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
+            if(isset($_POST['save_section']) || isset($_POST['update_section']) || isset($_POST['delete_section'])){
+                Csrf::requireValidOnPost('../../../resources/views/registrar/sections.php');
+            }
+
             if(isset($_POST['save_section'])){
                 $controller->create(
                     [
