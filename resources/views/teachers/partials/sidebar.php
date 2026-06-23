@@ -32,66 +32,23 @@
         <li class="menu-header small text-uppercase">
           <span class="menu-header-text">Pages</span>
         </li>
-        <li class="menu-item <?php echo ($currentPage == 'enrollment.php' || $currentPage == 'student-records.php') ? 'active' : ''; ?>">
+        <li class="menu-item <?php echo ($currentPage == 'students.php') ? 'active' : ''; ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
             <i class="menu-icon tf-icons bx bx-user"></i>
-            <div data-i18n="Account Settings">Enroll Students</div>
+            <div data-i18n="Account Settings">My Students</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="enrollment.php" class="menu-link"><div data-i18n="Account">Enrollment</div></a></li>
-            <li class="menu-item"><a href="student-records.php" class="menu-link"><div data-i18n="Account">Student Information</div></a></li>
-          </ul>
-        </li>
-        <li class="menu-item <?php echo ($currentPage == 'sections.php') ? 'active' : ''; ?>">
-          <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-book"></i>
-            <div data-i18n="Sections">Sections</div>
-          </a>
-          <ul class="menu-sub">
-            <li class="menu-item"><a href="sections.php" class="menu-link"><div data-i18n="Basic">Sections</div></a></li>
-          </ul>
-        </li>
-        <li class="menu-item <?php echo ($currentPage == 'document-types.php' || $currentPage == 'student-documents.php') ? 'active' : ''; ?>">
-          <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-file"></i>
-            <div data-i18n="Documents">Documents</div>
-          </a>
-          <ul class="menu-sub">
-            <li class="menu-item"><a href="document-types.php" class="menu-link"><div data-i18n="Document Types">Documents Types</div></a></li>
-
-            <li class="menu-item"><a href="student-documents.php" class="menu-link"><div data-i18n="Student Documents">Student Documents</div></a></li>
+            <li class="menu-item"><a href="students.php" class="menu-link"><div data-i18n="Account">Students</div></a></li>
           </ul>
         </li>
         <li class="menu-item <?php echo ($currentPage == 'parent-guardians.php') ? 'active' : ''; ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-user"></i>
+            <i class="menu-icon tf-icons bx bx-group"></i>
             <div data-i18n="Parents & Guardians">Parents</div>
           </a>
           <ul class="menu-sub">
             <li class="menu-item"><a href="parent-guardians.php" class="menu-link"><div data-i18n="Parents & Guardians">Parents & Guardians</div></a></li>
           </ul>
-        </li>
-        <li class="menu-item <?php echo (in_array($currentPage, ['graduates.php', 'graduates-master-list.php', 'graduate-view.php'])) ? 'active' : ''; ?>">
-          <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-medal"></i>
-            <div data-i18n="Graduates">Graduates</div>
-          </a>
-          <ul class="menu-sub">
-            <li class="menu-item"><a href="graduates.php" class="menu-link"><div data-i18n="Dashboard">Dashboard</div></a></li>
-            <li class="menu-item"><a href="graduates-master-list.php" class="menu-link"><div data-i18n="Master List">Master List</div></a></li>
-          </ul>
-        </li>
-
-          <!-- Audits -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Audits</span></li>
-          <li class="menu-item <?php echo ($currentPage === 'logs.php') ? 'active' : '' ?> ">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
-              <i class="menu-icon tf-icons bx bx-file"></i>
-              <div data-i18n="Logs">Logs</div>
-            </a>
-            <ul class="menu-sub">
-              <li class="menu-item"><a href="logs.php" class="menu-link"><div data-i18n="Activity Logs">Activity Logs</div></a></li>
-            </ul>
         </li>
       </ul>
     </aside>
