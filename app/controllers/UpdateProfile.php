@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../database/config/config.php';
 // Check if user is authenticated
 if (!isset($_SESSION['id'])) {
     setFlash('error', 'Please log in to access this page.');
-    header("Location: ../../../index.php");
+    header("Location: " . BASE_URL . "/index.php");
     exit();
 }
 

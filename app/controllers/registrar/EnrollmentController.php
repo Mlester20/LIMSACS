@@ -292,7 +292,7 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
 
             // Enroll student
             if (isset($_POST['enroll_student'])) {
-                Csrf::requireValidOnPost('../../../resources/views/registrar/enrollment.php');
+                Csrf::requireValidOnPost(BASE_URL . '/resources/views/registrar/enrollment.php');
 
                 $student_id = $_POST['student_id'] ?? null;
                 $enrolled_by = $_SESSION['id'] ?? null;
@@ -310,7 +310,7 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
                 } else {
                     FlashMessage::setFlash('error', 'Missing required enrollment data.');
                 }
-                header("Location: ../../../resources/views/registrar/enrollment.php");
+                header("Location: " . BASE_URL . "/resources/views/registrar/enrollment.php");
                 exit();
             }
 

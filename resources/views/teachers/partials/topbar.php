@@ -19,10 +19,10 @@
                     <?php
                       $profile_pic = !empty($_SESSION['profile_picture'])
                           ? htmlspecialchars($_SESSION['profile_picture'])
-                          : '../../../public/assets/img/avatars/1.png';
+                          : 'public/assets/img/avatars/1.png';
                     ?>
                     <img
-                        src="<?php echo '../../../' . $profile_pic; ?>"
+                        src="<?php echo BASE_URL . '/' . ltrim($profile_pic, '/'); ?>"
                         alt="Profile Picture"
                         class="rounded-circle mb-3"
                     />
@@ -37,10 +37,10 @@
                             <?php
                               $profile_pic = !empty($_SESSION['profile_picture'])
                                   ? htmlspecialchars($_SESSION['profile_picture'])
-                                  : '../../../public/assets/img/avatars/1.png';
+                                  : 'public/assets/img/avatars/1.png';
                             ?>
                             <img
-                                src="<?php echo '../../../' . $profile_pic; ?>"
+                                src="<?php echo BASE_URL . '/' . ltrim($profile_pic, '/'); ?>"
                                 alt="Profile Picture"
                                 class="rounded-circle mb-3"
                             />
@@ -54,9 +54,9 @@
                   </a>
                 </li>
                 <li><div class="dropdown-divider"></div></li>
-                <li><a class="dropdown-item" href="settings.php"><i class="bx bx-user me-2"></i><span class="align-middle">My Profile</span></a></li>
+                <li><a class="dropdown-item" href="<?= BASE_URL ?>/resources/views/teachers/settings.php"><i class="bx bx-user me-2"></i><span class="align-middle">My Profile</span></a></li>
                 <li><div class="dropdown-divider"></div></li>
-                <li><a class="dropdown-item" href="../../../../app/controllers/Logout.php" onclick="return confirm('Are you sure you to logout?')"><i class="bx bx-power-off me-2"></i><span class="align-middle">Log Out</span></a></li>
+                <li><a class="dropdown-item" href="<?= BASE_URL ?>/app/controllers/Logout.php" onclick="return confirm('Are you sure you to logout?')"><i class="bx bx-power-off me-2"></i><span class="align-middle">Log Out</span></a></li>
               </ul>
             </li>
           </ul>

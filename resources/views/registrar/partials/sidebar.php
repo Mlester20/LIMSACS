@@ -9,9 +9,9 @@
     <!-- Menu -->
     <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
       <div class="app-brand demo">
-        <a href="index.html" class="app-brand-link">
+        <a href="<?= BASE_URL ?>/resources/views/registrar/home.php" class="app-brand-link">
           <span class="app-brand-logo demo">
-            <img src="../../../public/assets/img/favicon/logo.png" alt="Logo" style="width: 50x; height: 50px;">
+            <img src="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" alt="Logo" style="width: 50x; height: 50px;">
           </span>
           <span class="app-brand-text demo menu-text fw-bolder ms-2">LIMSACS</span>
         </a>
@@ -24,7 +24,7 @@
 
       <ul class="menu-inner py-1">
         <li class="menu-item <?php echo ($currentPage == 'home.php') ? 'active' : ''; ?>">
-          <a href="home.php" class="menu-link">
+          <a href="<?= BASE_URL ?>/resources/views/registrar/home.php" class="menu-link">
             <i class="menu-icon tf-icons bx bx-home-circle"></i>
             <div data-i18n="Analytics">Dashboard</div>
           </a>
@@ -39,8 +39,8 @@
             <div data-i18n="Account Settings">Enroll Students</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="enrollment.php" class="menu-link"><div data-i18n="Account">Enrollment</div></a></li>
-            <li class="menu-item"><a href="student-records.php" class="menu-link"><div data-i18n="Account">Student Information</div></a></li>
+            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/enrollment.php" class="menu-link"><div data-i18n="Account">Enrollment</div></a></li>
+            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/student-records.php" class="menu-link"><div data-i18n="Account">Student Information</div></a></li>
           </ul>
         </li>
         <li class="menu-item <?php echo ($currentPage == 'parent-guardians.php') ? 'active' : ''; ?>">
@@ -49,7 +49,7 @@
             <div data-i18n="Parents & Guardians">Parents</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="parent-guardians.php" class="menu-link"><div data-i18n="Parents & Guardians">Parents & Guardians</div></a></li>
+            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/parent-guardians.php" class="menu-link"><div data-i18n="Parents & Guardians">Parents & Guardians</div></a></li>
           </ul>
         </li>
 
@@ -63,7 +63,7 @@
             <div data-i18n="Sections">Sections</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="sections.php" class="menu-link"><div data-i18n="Basic">Sections</div></a></li>
+            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/sections.php" class="menu-link"><div data-i18n="Basic">Sections</div></a></li>
           </ul>
         </li>
         <li class="menu-item <?php echo ($currentPage == 'school-year.php') ? 'active' : ''; ?>">
@@ -72,7 +72,7 @@
             <div data-i18n="School Year">School Year</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="school-year.php" class="menu-link"><div data-i18n="School Year">School Year</div></a></li>
+            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/school-year.php" class="menu-link"><div data-i18n="School Year">School Year</div></a></li>
           </ul>
         </li>
 
@@ -86,9 +86,9 @@
             <div data-i18n="Documents">Documents</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="document-types.php" class="menu-link"><div data-i18n="Document Types">Documents Types</div></a></li>
+            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/document-types.php" class="menu-link"><div data-i18n="Document Types">Documents Types</div></a></li>
 
-            <li class="menu-item"><a href="student-documents.php" class="menu-link"><div data-i18n="Student Documents">Student Documents</div></a></li>
+            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/student-documents.php" class="menu-link"><div data-i18n="Student Documents">Student Documents</div></a></li>
           </ul>
         </li>
 
@@ -102,8 +102,8 @@
             <div data-i18n="Graduates">Graduates</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="graduates.php" class="menu-link"><div data-i18n="Dashboard">Dashboard</div></a></li>
-            <li class="menu-item"><a href="graduates-master-list.php" class="menu-link"><div data-i18n="Master List">Master List</div></a></li>
+            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/graduates.php" class="menu-link"><div data-i18n="Dashboard">Dashboard</div></a></li>
+            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/graduates-master-list.php" class="menu-link"><div data-i18n="Master List">Master List</div></a></li>
           </ul>
         </li>
 
@@ -115,7 +115,7 @@
               <div data-i18n="Logs">Logs</div>
             </a>
             <ul class="menu-sub">
-              <li class="menu-item"><a href="logs.php" class="menu-link"><div data-i18n="Activity Logs">Activity Logs</div></a></li>
+              <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/logs.php" class="menu-link"><div data-i18n="Activity Logs">Activity Logs</div></a></li>
             </ul>
         </li>
       </ul>

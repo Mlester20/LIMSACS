@@ -112,7 +112,7 @@ require_once __DIR__ . '/../../../database/config/config.php';
         public function exportPdf($filters = []): void{
             require_once __DIR__ . '/../../helpers/flashMessage.php';
             FlashMessage::setFlash('info', 'PDF export is not yet available. Install a PDF library (e.g. Dompdf) to enable this feature.');
-            header('Location: ../../../resources/views/registrar/graduates-master-list.php');
+            header('Location: ' . BASE_URL . '/resources/views/registrar/graduates-master-list.php');
             exit();
         }
     }

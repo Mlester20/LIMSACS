@@ -34,11 +34,11 @@ require_once __DIR__ . '/../../helpers/csrf.php';
         public function delete($id){
             if($this->model->delete($id)){
                 FlashMessage::setFlash("success", "Log deleted successfully.");
-                header("Location: ../../../resources/views/admin/audit-logs.php");
+                header("Location: " . BASE_URL . "/resources/views/admin/audit-logs.php");
                 exit();
             }else{
                 FlashMessage::setFlash("error", "Error deleting log.");
-                header("Location: ../../../resources/views/admin/audit-logs.php");
+                header("Location: " . BASE_URL . "/resources/views/admin/audit-logs.php");
                 exit();
             }
         }
@@ -48,7 +48,7 @@ require_once __DIR__ . '/../../helpers/csrf.php';
         $controller = new AuditLogsController($con);
 
         if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_logs'])){
-            Csrf::requireValidOnPost('../../../resources/views/admin/audit-logs.php');
+            Csrf::requireValidOnPost(BASE_URL . '/resources/views/admin/audit-logs.php');
             $log_id = $_POST['id'];
             $controller->delete($log_id);
         }

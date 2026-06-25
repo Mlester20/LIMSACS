@@ -70,7 +70,7 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
                 $errors = $this->validate($data, true);
                 if(!empty($errors)){
                     FlashMessage::setFlash('error', implode(' ', $errors));
-                    header('Location: ../../../resources/views/admin/users.php');
+                    header('Location: ' . BASE_URL . '/resources/views/admin/users.php');
                     exit();
                 }
 
@@ -88,10 +88,10 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
                         $_SESSION['full_name'] . ' created a new user record',
                     );
                     FlashMessage::setFlash('success', 'User created successfully');
-                    header('Location: ../../../resources/views/admin/users.php');
+                    header('Location: ' . BASE_URL . '/resources/views/admin/users.php');
                 }else{
                     FlashMessage::setFlash("error", "Failed to create user");
-                    header("Location: ../../../resources/views/admin/users.php");
+                    header("Location: " . BASE_URL . "/resources/views/admin/users.php");
                     exit();
                 }
             }catch(Exception $e){
@@ -105,7 +105,7 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
                 $errors = $this->validate($data, false);
                 if(!empty($errors)){
                     FlashMessage::setFlash('error', implode(' ', $errors));
-                    header('Location: ../../../resources/views/admin/users.php');
+                    header('Location: ' . BASE_URL . '/resources/views/admin/users.php');
                     exit();
                 }
 
@@ -120,10 +120,10 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
                         $_SESSION['full_name'] . ' updated user record',
                     );
                     FlashMessage::setFlash('success', 'User updated successfully');
-                    header('Location: ../../../resources/views/admin/users.php');
+                    header('Location: ' . BASE_URL . '/resources/views/admin/users.php');
                 }else{
                     FlashMessage::setFlash("error", "Failed to update user");
-                    header("Location: ../../../resources/views/admin/users.php");
+                    header("Location: " . BASE_URL . "/resources/views/admin/users.php");
                     exit();
                 }
             }catch(Exception $e){
@@ -136,7 +136,7 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
             try{
                 if(strlen($newPassword ?? '') < 8){
                     FlashMessage::setFlash('error', 'Password must be at least 8 characters.');
-                    header('Location: ../../../resources/views/admin/users.php');
+                    header('Location: ' . BASE_URL . '/resources/views/admin/users.php');
                     exit();
                 }
 
@@ -153,10 +153,10 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
                         $_SESSION['full_name'] . ' reset the password for user ID: ' . $id,
                     );
                     FlashMessage::setFlash('success', 'Password reset successfully');
-                    header('Location: ../../../resources/views/admin/users.php');
+                    header('Location: ' . BASE_URL . '/resources/views/admin/users.php');
                 }else{
                     FlashMessage::setFlash('error', 'Failed to reset password');
-                    header('Location: ../../../resources/views/admin/users.php');
+                    header('Location: ' . BASE_URL . '/resources/views/admin/users.php');
                 }
                 exit();
             }catch(Exception $e){
@@ -169,7 +169,7 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
             try{
                 if((int)$id === (int)($_SESSION['id'] ?? 0)){
                     FlashMessage::setFlash('error', 'You cannot delete your own account while logged in.');
-                    header('Location: ../../../resources/views/admin/users.php');
+                    header('Location: ' . BASE_URL . '/resources/views/admin/users.php');
                     exit();
                 }
 
@@ -184,11 +184,11 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
                         $_SESSION['full_name'] . ' Deleted user record',
                     );
                     FlashMessage::setFlash("success", "User deleted successfully.");
-                    header("Location: ../../../resources/views/admin/users.php");
+                    header("Location: " . BASE_URL . "/resources/views/admin/users.php");
                     exit();
                 }else{
                     FlashMessage::setFlash("success", "There's something wrong with the server. Please try again.");
-                    header("Location: ../../../resources/views/admin/users.php");
+                    header("Location: " . BASE_URL . "/resources/views/admin/users.php");
                     exit();
                 }
             }catch(Exception $e){
@@ -203,7 +203,7 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
         $controller = new UsersController($con);
 
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
-            Csrf::requireValidOnPost('../../../resources/views/admin/users.php');
+            Csrf::requireValidOnPost(BASE_URL . '/resources/views/admin/users.php');
 
             if(isset($_POST['create_user'])){
                 $controller->create(

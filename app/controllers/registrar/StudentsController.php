@@ -79,7 +79,7 @@ require_once __DIR__ . '/../../helpers/csrf.php';
                 // Check if LRN exists
                 if($this->lrnExists($data['lrn'])){
                     FlashMessage::setFlash("error", "LRN already exists. Please use a unique LRN.");
-                    header("Location: ../../../resources/views/registrar/student-records.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php");
                     exit();
                 }
                 if($this->model->create($data)){
@@ -93,11 +93,11 @@ require_once __DIR__ . '/../../helpers/csrf.php';
                         $_SESSION['full_name'] . ' added student record',
                     );
                     FlashMessage::setFlash("success", "Student added successfully.");
-                    header("Location: ../../../resources/views/registrar/student-records.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php");
                     exit();
                 }else{
                     FlashMessage::setFlash("error", "Failed to enroll student. Please try again.");
-                    header("Location: ../../../resources/views/registrar/student-records.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php");
                     exit();
                 }
             }catch(Exception $e){
@@ -120,11 +120,11 @@ require_once __DIR__ . '/../../helpers/csrf.php';
                         $_SESSION['full_name'] . ' updated student record with ID: ' . $id,
                     );
                     FlashMessage::setFlash("success", "Student record updated successfully.");
-                    header("Location: ../../../resources/views/registrar/student-records.php?page=" . intval($page));
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php?page=" . intval($page));
                     exit();
                 }else{
                     FlashMessage::setFlash("error", "Failed to update student record. Please try again.");
-                    header("Location: ../../../resources/views/registrar/student-records.php?page=" . intval($page));
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php?page=" . intval($page));
                     exit();
                 }
             }catch(Exception $e){
@@ -146,11 +146,11 @@ require_once __DIR__ . '/../../helpers/csrf.php';
                         $_SESSION['full_name'] . ' deleted student record with ID: ' . $id,
                     );
                     FlashMessage::setFlash("success", "Student record deleted successfully.");
-                    header("Location: ../../../resources/views/registrar/student-records.php?page=" . intval($page));
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php?page=" . intval($page));
                     exit();
                 }else{
                     FlashMessage::setFlash("error", "Failed to delete student record. Please try again.");
-                    header("Location: ../../../resources/views/registrar/student-records.php?page=" . intval($page));
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php?page=" . intval($page));
                     exit();
                 }
            }catch(Exception $e){
@@ -222,7 +222,7 @@ require_once __DIR__ . '/../../helpers/csrf.php';
 
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
             if(isset($_POST['enroll_student']) || isset($_POST['edit_student']) || isset($_POST['delete_student'])){
-                Csrf::requireValidOnPost('../../../resources/views/registrar/student-records.php');
+                Csrf::requireValidOnPost(BASE_URL . '/resources/views/registrar/student-records.php');
             }
 
             if(isset($_POST['enroll_student'])){

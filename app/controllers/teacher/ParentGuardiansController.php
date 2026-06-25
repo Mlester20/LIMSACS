@@ -90,7 +90,7 @@ require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
             try{
                 if(!$this->teacherStudents->isStudentOwnedByTeacher($data['student_id'], $teacher_id)){
                     FlashMessage::setFlash("error", "You can only add guardians for your own students.");
-                    header("Location: ../../../resources/views/teachers/parent-guardians.php");
+                    header("Location: " . BASE_URL . "/resources/views/teachers/parent-guardians.php");
                     exit();
                 }
 
@@ -108,7 +108,7 @@ require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
                 }else{
                     FlashMessage::setFlash("error", "Error creating Parent/Guardian record.");
                 }
-                header("Location: ../../../resources/views/teachers/parent-guardians.php");
+                header("Location: " . BASE_URL . "/resources/views/teachers/parent-guardians.php");
                 exit();
             }catch(Exception $e){
                 error_log("Error creating parent guardian: " . $e->getMessage());
@@ -125,7 +125,7 @@ require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
             try{
                 if(!$this->teacherStudents->isStudentOwnedByTeacher($data['student_id'], $teacher_id)){
                     FlashMessage::setFlash("error", "You can only update guardians for your own students.");
-                    header("Location: ../../../resources/views/teachers/parent-guardians.php");
+                    header("Location: " . BASE_URL . "/resources/views/teachers/parent-guardians.php");
                     exit();
                 }
 
@@ -143,7 +143,7 @@ require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
                 }else{
                     FlashMessage::setFlash("error", "Error updating Parent/Guardian record.");
                 }
-                header("Location: ../../../resources/views/teachers/parent-guardians.php");
+                header("Location: " . BASE_URL . "/resources/views/teachers/parent-guardians.php");
                 exit();
             }catch(Exception $e){
                 error_log("Error updating parent guardian: " . $e->getMessage());
@@ -191,7 +191,7 @@ require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
             }
 
             if(isset($_POST['save_guardian']) || isset($_POST['update_guardian'])){
-                Csrf::requireValidOnPost('../../../resources/views/teachers/parent-guardians.php');
+                Csrf::requireValidOnPost(BASE_URL . '/resources/views/teachers/parent-guardians.php');
             }
 
             if(isset($_POST['save_guardian'])){

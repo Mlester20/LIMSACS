@@ -46,7 +46,7 @@ require_once __DIR__ . '/../helpers/auditLogs.php';
                 $this->redirectByRole($row['role']);
             }else{
                 FlashMessage::setFlash('error', 'Invalid email or password');
-                header('Location: ../../index.php');
+                header('Location: ' . BASE_URL . '/index.php');
                 exit();
             }
         }
@@ -61,14 +61,14 @@ require_once __DIR__ . '/../helpers/auditLogs.php';
 
         private function redirectByRole(string $role): void{
             $routes = [
-                "admin" => "../../../resources/views/admin/dashboard.php",
-                "registrar" => "../../../resources/views/registrar/home.php",
-                "teacher" => "../../../resources/views/teachers/home.php",
+                "admin" => BASE_URL . "/resources/views/admin/dashboard.php",
+                "registrar" => BASE_URL . "/resources/views/registrar/home.php",
+                "teacher" => BASE_URL . "/resources/views/teachers/home.php",
                 //if role is not found, redirect to index to avoid unauthorized access
-                "default" => "../../../index.php"
+                "default" => BASE_URL . "/index.php"
             ];
 
-            $location = $routes[$role] ?? '../../../index.php';
+            $location = $routes[$role] ?? $routes["default"];
 
             header('Location: ' . $location);
             exit();
