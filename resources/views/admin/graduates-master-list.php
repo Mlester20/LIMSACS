@@ -189,13 +189,24 @@ $exportQs = function ($type) use ($filters) {
                                 <td><?= !empty($g['graduation_date']) ? date('F j, Y', strtotime($g['graduation_date'])) : '—' ?></td>
                                 <td><?= $e($g['registrar_name'] ?? '—') ?></td>
                                 <td>
-                                    <span class="badge <?= $g['enrollment_status'] === 'Graduated' ? 'bg-label-primary' : 'bg-label-secondary' ?>">
+                                    <?php
+                                        $statusBadges = [
+                                            'Graduated' => 'bg-label-primary',
+                                            'Transferred' => 'bg-label-warning',
+                                            'Dropped' => 'bg-label-danger',
+                                        ];
+                                    ?>
+                                    <span class="badge <?= $statusBadges[$g['enrollment_status']] ?? 'bg-label-secondary' ?>">
                                         <?= $e($g['enrollment_status']) ?>
                                     </span>
                                 </td>
                                 <?php if (!$print_mode): ?>
                                 <td class="no-print">
-                                    <a href="graduate-view.php?id=<?= $e($g['graduate_id']) ?>" class="btn btn-sm btn-outline-primary">View</a>
+                                    <?php if (!empty($g['graduate_id'])): ?>
+                                        <a href="graduate-view.php?id=<?= $e($g['graduate_id']) ?>" class="btn btn-sm btn-outline-primary">View</a>
+                                    <?php else: ?>
+                                        <span class="text-muted small">No graduate profile</span>
+                                    <?php endif; ?>
                                 </td>
                                 <?php endif; ?>
                             </tr>
