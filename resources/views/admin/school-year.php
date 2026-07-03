@@ -246,6 +246,9 @@ AuthRole::allowOnly(['admin']);
 
                                 <?php elseif ($sy['status'] === 'archived'): ?>
                                     <span class="badge bg-label-secondary">Archived</span>
+                                    <?php if (($sy['auto_ended'] ?? 0) == 1 && !empty($sy['ended_at'])): ?>
+                                        <small class="text-muted d-block">Auto-closed on <?php echo date('M d, Y', strtotime($sy['ended_at'])); ?></small>
+                                    <?php endif; ?>
 
                                 <?php endif; ?>
                             </td>

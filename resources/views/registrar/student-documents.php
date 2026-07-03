@@ -268,7 +268,7 @@ $totalDocuments = count($documents);
                                 <td><?php echo date('M d, Y', strtotime($document['uploaded_at'])); ?></td>
                                 <td class="text-nowrap">
                                     <a
-                                        href="<?php echo htmlspecialchars($fileUrl($document['file_path'])); ?>"
+                                        href="<?php echo htmlspecialchars(BASE_URL . $fileUrl($document['file_path'])); ?>"
                                         target="_blank"
                                         class="btn btn-sm btn-outline-secondary"
                                         title="View File"

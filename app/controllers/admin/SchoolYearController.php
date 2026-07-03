@@ -4,16 +4,28 @@ session_start();
 require_once __DIR__ . '/../../../database/config/config.php';
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../models/admin/SchoolYearModel.php';
+require_once __DIR__ . '/../../services/SchoolYearService.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../../helpers/csrf.php';
 
 const VALID_SY_STATUSES = ['active', 'inactive', 'archived'];
 
     class SchoolYearController extends Controller{
+        protected $syService;
+
         public function __construct($con){
             parent::__construct(
                 new SchoolYearModel($con)
             );
+            $this->syService = new SchoolYearService($con, $this->model);
+        }
+
+        /**
+         * Auto-archive active school years whose end_date has passed
+         * @return array the school years that were closed
+         */
+        public function closeExpiredYears(){
+            return $this->syService->closeExpiredYears();
         }
 
         public function index($search = '', $status = '', $page = 1){
@@ -158,6 +170,15 @@ const VALID_SY_STATUSES = ['active', 'inactive', 'archived'];
     //============ bootstrap ============//
     try{
         $controller = new SchoolYearController($con);
+
+        $closedYears = $controller->closeExpiredYears();
+        if(!empty($closedYears)){
+            $names = array_map(function($sy){
+                return $sy['school_year'];
+            }, $closedYears);
+            $label = count($names) > 1 ? 'School years' : 'School year';
+            FlashMessage::setFlash('info', "{$label} " . implode(', ', $names) . ' automatically archived (end date passed).');
+        }
 
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
             Csrf::requireValidOnPost(BASE_URL . '/resources/views/admin/school-year.php');
