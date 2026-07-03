@@ -1,3 +1,5 @@
 <?php
 session_destroy();
-header("Location: ../../../index.php");
+require_once __DIR__ . '/../../database/config/config.php';
+
+header("Location: " . BASE_URL . "/index.php");

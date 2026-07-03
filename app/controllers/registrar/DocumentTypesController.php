@@ -35,11 +35,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         $_SESSION['full_name'] . ' created a new document type: ' . $data['document_name'] . '.',
                     );
                     FlashMessage::setFlash("success", "Document type created successfully.");
-                    header("Location: ../../../resources/views/registrar/document-types.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/document-types.php");
                     exit();
                 }else{
                     FlashMessage::setFlash("error", "Failed to create document type.");
-                    header("Location: ../../../resources/views/registrar/document-types.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/document-types.php");
                     exit();
                 }
             }catch(Exception $e){
@@ -61,11 +61,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         $_SESSION['full_name'] . ' updated a document type with ID: ' . $id . '.',
                     );
                     FlashMessage::setFlash("success", "Document type updated successfully.");
-                    header("Location: ../../../resources/views/registrar/document-types.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/document-types.php");
                     exit();
                 }else{
                     FlashMessage::setFlash("error", "Failed to update document type.");
-                    header("Location: ../../../resources/views/registrar/document-types.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/document-types.php");
                     exit();
                 }
             }catch(Exception $e){
@@ -87,17 +87,17 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         $_SESSION['full_name'] . ' deleted a document type with ID: ' . $id . '.',
                     );
                     FlashMessage::setFlash("success", "Document type deleted successfully.");
-                    header("Location: ../../../resources/views/registrar/document-types.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/document-types.php");
                     exit();
                 }else{
                     FlashMessage::setFlash("error", "Failed to delete document type.");
-                    header("Location: ../../../resources/views/registrar/document-types.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/document-types.php");
                     exit();
                 }
             }catch(Exception $e){
                 error_log($e->getMessage());
                 FlashMessage::setFlash('error', 'Failed to delete document type. Please try again.');
-                header("Location: ../../../resources/views/registrar/document-types.php");
+                header("Location: " . BASE_URL . "/resources/views/registrar/document-types.php");
                 exit();
             }
         }
@@ -120,7 +120,7 @@ require_once __DIR__ . '/../../../database/config/config.php';
         $paginated_documentTypes = array_slice($documentTypes, $offset, $entries_per_page);
 
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
-            Csrf::requireValidOnPost('../../../resources/views/registrar/document-types.php');
+            Csrf::requireValidOnPost(BASE_URL . '/resources/views/registrar/document-types.php');
 
             if(isset($_POST['save_document_type'])){
                 $controller->create(

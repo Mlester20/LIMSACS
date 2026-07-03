@@ -4,16 +4,28 @@ session_start();
 require_once __DIR__ . '/../../../database/config/config.php';
 require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../models/admin/SchoolYearModel.php';
+require_once __DIR__ . '/../../services/SchoolYearService.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../../helpers/csrf.php';
 
 const VALID_SY_STATUSES = ['active', 'inactive', 'archived'];
 
     class SchoolYearController extends Controller{
+        protected $syService;
+
         public function __construct($con){
             parent::__construct(
                 new SchoolYearModel($con)
             );
+            $this->syService = new SchoolYearService($con, $this->model);
+        }
+
+        /**
+         * Auto-archive active school years whose end_date has passed
+         * @return array the school years that were closed
+         */
+        public function closeExpiredYears(){
+            return $this->syService->closeExpiredYears();
         }
 
         public function index($search = '', $status = '', $page = 1){
@@ -69,13 +81,13 @@ const VALID_SY_STATUSES = ['active', 'inactive', 'archived'];
                 $errors = $this->validate($data);
                 if(!empty($errors)){
                     FlashMessage::setFlash('error', implode(' ', $errors));
-                    header('Location: ../../../resources/views/admin/school-year.php');
+                    header('Location: ' . BASE_URL . '/resources/views/admin/school-year.php');
                     exit();
                 }
 
                 if($this->model->create($data)){
                     FlashMessage::setFlash('success', 'School year created successfully');
-                    header("Location: ../../../resources/views/admin/school-year.php");
+                    header("Location: " . BASE_URL . "/resources/views/admin/school-year.php");
                     exit();
                 }else{
                     FlashMessage::setFlash('error', 'Failed to create school year');
@@ -113,13 +125,13 @@ const VALID_SY_STATUSES = ['active', 'inactive', 'archived'];
                 $errors = $this->validate($data);
                 if(!empty($errors)){
                     FlashMessage::setFlash('error', implode(' ', $errors));
-                    header('Location: ../../../resources/views/admin/school-year.php');
+                    header('Location: ' . BASE_URL . '/resources/views/admin/school-year.php');
                     exit();
                 }
 
                 if($this->model->update($id, $data)){
                     FlashMessage::setFlash('success', 'School year updated successfully');
-                    header("Location: ../../../resources/views/admin/school-year.php");
+                    header("Location: " . BASE_URL . "/resources/views/admin/school-year.php");
                     exit();
                 }else{
                     FlashMessage::setFlash('error', 'Failed to update school year');
@@ -135,17 +147,17 @@ const VALID_SY_STATUSES = ['active', 'inactive', 'archived'];
             try{
                 if(!$this->canDelete($id)){
                     FlashMessage::setFlash('error', 'This is an active school year and cannot be deleted.');
-                    header('Location: ../../../resources/views/admin/school-year.php');
+                    header('Location: ' . BASE_URL . '/resources/views/admin/school-year.php');
                     exit();
                 }
 
                 if($this->model->delete($id)){
                     FlashMessage::setFlash('success', 'School year deleted successfully');
-                    header("Location: ../../../resources/views/admin/school-year.php");
+                    header("Location: " . BASE_URL . "/resources/views/admin/school-year.php");
                     exit();                    
                 }else{
                     FlashMessage::setFlash('error', 'Failed to delete school year');
-                    header("Location: ../../../resources/views/admin/school-year.php");
+                    header("Location: " . BASE_URL . "/resources/views/admin/school-year.php");
                     exit();
                 }
             }catch(Exception $e){
@@ -159,8 +171,17 @@ const VALID_SY_STATUSES = ['active', 'inactive', 'archived'];
     try{
         $controller = new SchoolYearController($con);
 
+        $closedYears = $controller->closeExpiredYears();
+        if(!empty($closedYears)){
+            $names = array_map(function($sy){
+                return $sy['school_year'];
+            }, $closedYears);
+            $label = count($names) > 1 ? 'School years' : 'School year';
+            FlashMessage::setFlash('info', "{$label} " . implode(', ', $names) . ' automatically archived (end date passed).');
+        }
+
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
-            Csrf::requireValidOnPost('../../../resources/views/admin/school-year.php');
+            Csrf::requireValidOnPost(BASE_URL . '/resources/views/admin/school-year.php');
 
             if(isset($_POST['create_sy'])){
                 $controller->create([
@@ -178,7 +199,7 @@ const VALID_SY_STATUSES = ['active', 'inactive', 'archived'];
                     //Check if ANOTHER school year is already active
                     if ($controller->checkActiveSy('active', $sy_id)) {
                         FlashMessage::setFlash("error", "Another School Year is already active. ");
-                        header("Location: ../../../resources/views/admin/school-year.php");
+                        header("Location: " . BASE_URL . "/resources/views/admin/school-year.php");
                         exit; 
                     }
                 }

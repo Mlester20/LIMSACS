@@ -88,8 +88,8 @@ require_once __DIR__ . '/../Model.php';
 
                 $query = "SELECT
                         g.id AS graduate_id,
-                        g.student_id,
-                        g.academic_history_id,
+                        ah.student_id,
+                        ah.id AS academic_history_id,
                         g.graduation_date,
                         g.honors,
                         g.remarks,
@@ -103,15 +103,15 @@ require_once __DIR__ . '/../Model.php';
                         sy.school_year,
                         u.full_name AS registrar_name,
                         adv.full_name AS adviser_name
-                    FROM {$this->graduates} g
-                    JOIN {$this->students} s ON g.student_id = s.id
-                    JOIN {$this->academic_history} ah ON g.academic_history_id = ah.id
+                    FROM {$this->academic_history} ah
+                    JOIN {$this->students} s ON ah.student_id = s.id
+                    LEFT JOIN {$this->graduates} g ON g.academic_history_id = ah.id
                     LEFT JOIN {$this->sections} sec ON ah.section_id = sec.id
                     LEFT JOIN {$this->school_year} sy ON ah.school_year_id = sy.id
                     LEFT JOIN {$this->users} u ON g.recorded_by = u.id
                     LEFT JOIN {$this->users} adv ON sec.adviser_id = adv.id
                     {$where}
-                    ORDER BY g.graduation_date DESC
+                    ORDER BY COALESCE(g.graduation_date, ah.created_at) DESC
                     LIMIT ? OFFSET ?
                 ";
                 $params[] = $limit;
@@ -134,9 +134,9 @@ require_once __DIR__ . '/../Model.php';
                 [$where, $params, $types] = $this->buildFilters($filters);
 
                 $query = "SELECT COUNT(*) AS total
-                    FROM {$this->graduates} g
-                    JOIN {$this->students} s ON g.student_id = s.id
-                    JOIN {$this->academic_history} ah ON g.academic_history_id = ah.id
+                    FROM {$this->academic_history} ah
+                    JOIN {$this->students} s ON ah.student_id = s.id
+                    LEFT JOIN {$this->graduates} g ON g.academic_history_id = ah.id
                     LEFT JOIN {$this->sections} sec ON ah.section_id = sec.id
                     LEFT JOIN {$this->school_year} sy ON ah.school_year_id = sy.id
                     {$where}
@@ -169,15 +169,15 @@ require_once __DIR__ . '/../Model.php';
                         g.graduation_date,
                         u.full_name AS registrar_name,
                         adv.full_name AS adviser_name
-                    FROM {$this->graduates} g
-                    JOIN {$this->students} s ON g.student_id = s.id
-                    JOIN {$this->academic_history} ah ON g.academic_history_id = ah.id
+                    FROM {$this->academic_history} ah
+                    JOIN {$this->students} s ON ah.student_id = s.id
+                    LEFT JOIN {$this->graduates} g ON g.academic_history_id = ah.id
                     LEFT JOIN {$this->sections} sec ON ah.section_id = sec.id
                     LEFT JOIN {$this->school_year} sy ON ah.school_year_id = sy.id
                     LEFT JOIN {$this->users} u ON g.recorded_by = u.id
                     LEFT JOIN {$this->users} adv ON sec.adviser_id = adv.id
                     {$where}
-                    ORDER BY g.graduation_date DESC
+                    ORDER BY COALESCE(g.graduation_date, ah.created_at) DESC
                 ";
                 $stmt = $this->con->prepare($query);
                 if($types !== ''){
@@ -238,6 +238,8 @@ require_once __DIR__ . '/../Model.php';
                 $conditions[] = "ah.enrollment_status = ?";
                 $params[] = $status;
                 $types .= 's';
+            }else{
+                $conditions[] = "ah.enrollment_status IN ('Graduated', 'Transferred', 'Dropped')";
             }
 
             $where = $conditions ? ' WHERE ' . implode(' AND ', $conditions) : '';
@@ -444,8 +446,8 @@ require_once __DIR__ . '/../Model.php';
         public function getGradeLevelOptions(): array{
             $result = $this->con->query("
                 SELECT DISTINCT ah.grade_level
-                FROM {$this->graduates} g
-                JOIN {$this->academic_history} ah ON g.academic_history_id = ah.id
+                FROM {$this->academic_history} ah
+                WHERE ah.enrollment_status IN ('Graduated', 'Transferred', 'Dropped')
                 ORDER BY ah.grade_level ASC
             ");
             return $result ? array_column($result->fetch_all(MYSQLI_ASSOC), 'grade_level') : [];

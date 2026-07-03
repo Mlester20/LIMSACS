@@ -23,27 +23,27 @@ $memberSince = $userProfile['created_at'] ? date('M d, Y', strtotime($userProfil
   class="light-style layout-menu-fixed"
   dir="ltr"
   data-theme="theme-default"
-  data-assets-path="../../../public/assets/"
+  data-assets-path="<?= BASE_URL ?>/public/assets/"
   data-template="vertical-menu-template-free"
 >
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> Profile | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?> </title>
-    <link rel="icon" type="image/x-icon" href="../../../public/assets/img/favicon/logo.png" />
+    <link rel="icon" type="image/x-icon" href="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../../../public/assets/vendor/fonts/boxicons.css" />
-    <link rel="stylesheet" href="../../../public/assets/vendor/css/core.css" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="../../../public/assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
-    <link rel="stylesheet" href="../../../public/assets/css/demo.css" />
-    <link rel="stylesheet" href="../../../public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-    <script src="../../../public/assets/vendor/js/helpers.js"></script>
-    <script src="../../../public/assets/js/config.js"></script>
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/vendor/fonts/boxicons.css" />
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/vendor/css/core.css" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/css/demo.css" />
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <script src="<?= BASE_URL ?>/public/assets/vendor/js/helpers.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/js/config.js"></script>
 </head>
 <body>
 
@@ -62,14 +62,14 @@ $memberSince = $userProfile['created_at'] ? date('M d, Y', strtotime($userProfil
                 <div class="card mb-4">
                     <h5 class="card-header">Profile Details</h5>
                     <!-- Account -->
-                    <form action="../../../app/controllers/UpdateProfile.php" method="POST" enctype="multipart/form-data" id="formAccountSettings">
+                    <form action="<?= BASE_URL ?>/app/controllers/UpdateProfile.php" method="POST" enctype="multipart/form-data" id="formAccountSettings">
                     <?php echo Csrf::field(); ?>
                     <div class="card-body">
                         <div class="d-flex align-items-start align-items-sm-center gap-4">
                             <!-- Profile Picture -->
                             <?php
                             $profilePicDb = $userProfile['profile_picture'] ?? null;
-                            $defaultProfilePic = '../../../public/assets/img/avatars/1.png';
+                            $defaultProfilePic = 'public/assets/img/avatars/1.png';
                             $displayProfilePic = $defaultProfilePic;
 
                             if ($profilePicDb) {
@@ -85,12 +85,12 @@ $memberSince = $userProfile['created_at'] ? date('M d, Y', strtotime($userProfil
                                     $absolutePath = $projectRoot . '/' . $normalizedPath;
 
                                     if (file_exists($absolutePath)) {
-                                        $displayProfilePic = '../../../' . $normalizedPath;
+                                        $displayProfilePic = $normalizedPath;
                                     }
                                 }
                             }
 
-                            $profilePic = $displayProfilePic;
+                            $profilePic = BASE_URL . '/' . ltrim($displayProfilePic, '/');
                             ?>
                             <img src="<?php echo htmlspecialchars($profilePic); ?>" alt="user-avatar" 
                                  class="d-block rounded" height="100" width="100" id="uploadedAvatar" style="object-fit: cover;">
@@ -192,12 +192,12 @@ $memberSince = $userProfile['created_at'] ? date('M d, Y', strtotime($userProfil
 
     <?php require_once __DIR__ . '/partials/footer.php'; ?>
     
-    <script src="../../../public/assets/vendor/libs/jquery/jquery.js"></script>
-    <script src="../../../public/assets/vendor/libs/popper/popper.js"></script>
-    <script src="../../../public/assets/vendor/js/bootstrap.js"></script>
-    <script src="../../../public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-    <script src="../../../public/assets/vendor/js/menu.js"></script>
-    <script src="../../../public/assets/js/main.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/vendor/libs/jquery/jquery.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/vendor/libs/popper/popper.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/vendor/js/bootstrap.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/vendor/js/menu.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/js/main.js"></script>
     <script async defer src="https://buttons.github.io/buttons.js"></script>
 
     <!-- Profile Picture Preview Script -->

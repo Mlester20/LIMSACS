@@ -110,7 +110,7 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
             try{
                 if(!$this->model->isStudentOwnedByTeacher($id, $teacher_id)){
                     FlashMessage::setFlash("error", "You do not have permission to update this student.");
-                    header("Location: ../../../resources/views/teachers/students.php?page=" . intval($page));
+                    header("Location: " . BASE_URL . "/resources/views/teachers/students.php?page=" . intval($page));
                     exit();
                 }
 
@@ -128,7 +128,7 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
                 }else{
                     FlashMessage::setFlash("error", "Failed to update student record. Please try again.");
                 }
-                header("Location: ../../../resources/views/teachers/students.php?page=" . intval($page));
+                header("Location: " . BASE_URL . "/resources/views/teachers/students.php?page=" . intval($page));
                 exit();
             }catch(Exception $e){
                 error_log($e->getMessage());
@@ -189,7 +189,7 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
         ];
 
         if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_student'])){
-            Csrf::requireValidOnPost('../../../resources/views/teachers/students.php');
+            Csrf::requireValidOnPost(BASE_URL . '/resources/views/teachers/students.php');
 
             $studentId = $_POST['student_id'];
             $controller->update(

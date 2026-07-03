@@ -54,11 +54,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         $_SESSION['full_name'] . ' created a new student document for student ID: ' . $data['student_id'],
                     );
                     FlashMessage::setFlash('success', 'Document uploaded successfully');
-                    header('Location: ../../../resources/views/registrar/student-documents.php');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/student-documents.php');
                     exit();
                }else{
                     FlashMessage::setFlash("error", "Failed to upload document");
-                    header("Location: ../../../resources/views/registrar/student-documents.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-documents.php");
                     exit();
                }
           }catch(Exception $e){
@@ -87,11 +87,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         $_SESSION['full_name'] . ' updated student document with ID: ' . $id,
                     );
                     FlashMessage::setFlash('success', 'Document updated successfully');
-                    header('Location: ../../../resources/views/registrar/student-documents.php');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/student-documents.php');
                     exit();
                }else{
                     FlashMessage::setFlash("error", "Failed to update document");
-                    header("Location: ../../../resources/views/registrar/student-documents.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-documents.php");
                     exit();
                }
           }catch(Exception $e){
@@ -120,11 +120,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
                          FileUpload::delete($document['file_path']);
                     }
                     FlashMessage::setFlash('success', 'Document deleted successfully');
-                    header('Location: ../../../resources/views/registrar/student-documents.php');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/student-documents.php');
                     exit();
                }else{
                     FlashMessage::setFlash("error", "Failed to delete document");
-                    header("Location: ../../../resources/views/registrar/student-documents.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-documents.php");
                     exit();
                }
           }catch(Exception $e){
@@ -152,7 +152,7 @@ require_once __DIR__ . '/../../../database/config/config.php';
 
      if($_SERVER['REQUEST_METHOD'] === 'POST'){
           if(isset($_POST['submit_document']) || isset($_POST['update_document']) || isset($_POST['delete_document'])){
-               Csrf::requireValidOnPost('../../../resources/views/registrar/student-documents.php');
+               Csrf::requireValidOnPost(BASE_URL . '/resources/views/registrar/student-documents.php');
           }
 
           if(isset($_POST['submit_document'])){

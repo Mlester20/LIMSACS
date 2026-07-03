@@ -9,9 +9,9 @@
     <!-- Menu -->
     <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
       <div class="app-brand demo">
-        <a href="index.html" class="app-brand-link">
+        <a href="<?= BASE_URL ?>/resources/views/teachers/home.php" class="app-brand-link">
           <span class="app-brand-logo demo">
-            <img src="../../../public/assets/img/favicon/logo.png" alt="Logo" style="width: 50x; height: 50px;">
+            <img src="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" alt="Logo" style="width: 50x; height: 50px;">
           </span>
           <span class="app-brand-text demo menu-text fw-bolder ms-2">LIMSACS</span>
         </a>
@@ -24,7 +24,7 @@
 
       <ul class="menu-inner py-1">
         <li class="menu-item <?php echo ($currentPage == 'home.php') ? 'active' : ''; ?>">
-          <a href="home.php" class="menu-link">
+          <a href="<?= BASE_URL ?>/resources/views/teachers/home.php" class="menu-link">
             <i class="menu-icon tf-icons bx bx-home-circle"></i>
             <div data-i18n="Analytics">Dashboard</div>
           </a>
@@ -38,7 +38,7 @@
             <div data-i18n="Account Settings">My Students</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="students.php" class="menu-link"><div data-i18n="Account">Students</div></a></li>
+            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/teachers/students.php" class="menu-link"><div data-i18n="Account">Students</div></a></li>
           </ul>
         </li>
         <li class="menu-item <?php echo ($currentPage == 'parent-guardians.php') ? 'active' : ''; ?>">
@@ -47,7 +47,7 @@
             <div data-i18n="Parents & Guardians">Parents</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="parent-guardians.php" class="menu-link"><div data-i18n="Parents & Guardians">Parents & Guardians</div></a></li>
+            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/teachers/parent-guardians.php" class="menu-link"><div data-i18n="Parents & Guardians">Parents & Guardians</div></a></li>
           </ul>
         </li>
       </ul>

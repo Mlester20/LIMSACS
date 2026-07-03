@@ -11,7 +11,7 @@ AuthRole::allowOnly(['teacher']);
   class="light-style layout-menu-fixed"
   dir="ltr"
   data-theme="theme-default"
-  data-assets-path="../../../public/assets/"
+  data-assets-path="<?= BASE_URL ?>/public/assets/"
   data-template="vertical-menu-template-free"
 >
 <head>
@@ -23,20 +23,20 @@ AuthRole::allowOnly(['teacher']);
     <title>Parents & Guardians | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?></title>
     <meta name="csrf-token" content="<?php echo htmlspecialchars(Csrf::token()); ?>">
     <meta name="description" content="" />
-    <link rel="icon" type="image/x-icon" href="../../../public/assets/img/favicon/logo.png" />
+    <link rel="icon" type="image/x-icon" href="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="../../../public/assets/vendor/fonts/boxicons.css" />
-    <link rel="stylesheet" href="../../../public/assets/vendor/css/core.css" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="../../../public/assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
-    <link rel="stylesheet" href="../../../public/assets/css/demo.css" />
-    <link rel="stylesheet" href="../../../public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-    <script src="../../../public/assets/vendor/js/helpers.js"></script>
-    <script src="../../../public/assets/js/config.js"></script>
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/vendor/fonts/boxicons.css" />
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/vendor/css/core.css" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/css/demo.css" />
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <script src="<?= BASE_URL ?>/public/assets/vendor/js/helpers.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/js/config.js"></script>
 </head>
 <body>
 
@@ -67,7 +67,7 @@ AuthRole::allowOnly(['teacher']);
                     <h6 class="modal-title fw-bold" id="addGuardianModalLabel">Add New Guardian</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="../../../app/controllers/teacher/ParentGuardiansController.php" method="post">
+                <form action="<?= BASE_URL ?>/app/controllers/teacher/ParentGuardiansController.php" method="post">
                     <?php echo Csrf::field(); ?>
                     <div class="modal-body py-2">
                         <div class="alert alert-info py-1 px-3 mb-2">
@@ -185,7 +185,7 @@ AuthRole::allowOnly(['teacher']);
                     <h6 class="modal-title fw-bold" id="editGuardianModalLabel">Edit Guardian</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="../../../app/controllers/teacher/ParentGuardiansController.php" method="post">
+                <form action="<?= BASE_URL ?>/app/controllers/teacher/ParentGuardiansController.php" method="post">
                     <?php echo Csrf::field(); ?>
                     <input type="hidden" name="id" id="edit_id">
                     <div class="modal-body py-2">
@@ -527,12 +527,12 @@ AuthRole::allowOnly(['teacher']);
 
     <?php require_once __DIR__ . '/partials/footer.php'; ?>
 
-    <script src="../../../public/assets/vendor/libs/jquery/jquery.js"></script>
-    <script src="../../../public/assets/vendor/libs/popper/popper.js"></script>
-    <script src="../../../public/assets/vendor/js/bootstrap.js"></script>
-    <script src="../../../public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
-    <script src="../../../public/assets/vendor/js/menu.js"></script>
-    <script src="../../../public/assets/js/main.js"></script>
-    <script src="../../../public/js/teacher/parent-guardians.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/vendor/libs/jquery/jquery.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/vendor/libs/popper/popper.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/vendor/js/bootstrap.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/vendor/js/menu.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/js/main.js"></script>
+    <script src="<?= BASE_URL ?>/public/js/teacher/parent-guardians.js"></script>
 </body>
 </html>

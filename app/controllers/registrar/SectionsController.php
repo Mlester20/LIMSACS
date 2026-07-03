@@ -41,11 +41,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         $_SESSION['full_name'] . ' created section: ' . $data['section_name'],
                     );
                     FlashMessage::setFlash('success', 'Section created successfully.');
-                    header('Location: ../../../resources/views/registrar/sections.php');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/sections.php');
                     exit();
                 }else{
                     FlashMessage::setFlash("error", "Failed to create section. Please try again.");
-                    header('Location: ../../../resources/views/registrar/sections.php');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/sections.php');
                     exit();
                 }
             }catch(Exception $e){
@@ -93,11 +93,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         $_SESSION['full_name'] . ' updated section: ' . $data['section_name'],
                     );
                     FlashMessage::setFlash('success', 'Section updated successfully.');
-                    header('Location: ../../../resources/views/registrar/sections.php');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/sections.php');
                     exit();
                 }else{
                     FlashMessage::setFlash("error", "Failed to update section. Please try again.");
-                    header('Location: ../../../resources/views/registrar/sections.php');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/sections.php');
                     exit();
                 }
             }catch(Exception $e){
@@ -119,11 +119,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         $_SESSION['full_name'] . ' deleted section',
                     );
                     FlashMessage::setFlash('success', 'Section deleted successfully.');
-                    header('Location: ../../../resources/views/registrar/sections.php');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/sections.php');
                     exit();
                 }else{
                     FlashMessage::setFlash("error", "Failed to delete section. Please try again.");
-                    header('Location: ../../../resources/views/registrar/sections.php');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/sections.php');
                     exit();
                 }
             }catch(Exception $e){
@@ -142,7 +142,7 @@ require_once __DIR__ . '/../../../database/config/config.php';
         // Handle POST requests first
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
             if(isset($_POST['save_section']) || isset($_POST['update_section']) || isset($_POST['delete_section'])){
-                Csrf::requireValidOnPost('../../../resources/views/registrar/sections.php');
+                Csrf::requireValidOnPost(BASE_URL . '/resources/views/registrar/sections.php');
             }
 
             if(isset($_POST['save_section'])){

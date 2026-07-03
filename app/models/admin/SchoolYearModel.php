@@ -156,4 +156,40 @@ require_once __DIR__ . '/../Model.php';
                 return false;
             }
         }
+
+        /**
+         * Find all school years currently marked active
+         * @return array|false
+         */
+        public function findActive(){
+            try{
+                $query = "SELECT * FROM {$this->sy} WHERE status = 'active'";
+                $stmt = $this->con->prepare($query);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                return $result->fetch_all(MYSQLI_ASSOC);
+            }catch(Exception $e){
+                error_log($e->getMessage());
+                return false;
+            }
+        }
+
+        /**
+         * Close (archive) a school year that has passed its end_date
+         * @param int $id
+         * @param string $endedAt datetime string, e.g. date('Y-m-d H:i:s')
+         * @return bool
+         */
+        public function closeYear($id, $endedAt){
+            try{
+                $query = "UPDATE {$this->sy} SET status = 'archived', ended_at = ?, auto_ended = 1 WHERE id = ?";
+                $stmt = $this->con->prepare($query);
+                $stmt->bind_param("si", $endedAt, $id);
+                $stmt->execute();
+                return true;
+            }catch(Exception $e){
+                error_log($e->getMessage());
+                return false;
+            }
+        }
     }
