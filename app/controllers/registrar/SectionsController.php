@@ -4,6 +4,7 @@ session_start();
 require_once __DIR__ . '/../../models/registrar/SectionsModel.php';
 require_once __DIR__ . '/../../models/registrar/AcademicHistoryModel.php';
 require_once __DIR__ . '/../Controller.php';
+require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../helpers/fLashMessage.php';
 require_once __DIR__ . '/../../helpers/csrf.php';
@@ -49,7 +50,7 @@ require_once __DIR__ . '/../../../database/config/config.php';
                     exit();
                 }
             }catch(Exception $e){
-                error_log("Error creating section: " . $e->getMessage());
+                ErrorHandler::log($e, 'SectionsController::create');
                 return false;
             }
         }
@@ -101,9 +102,9 @@ require_once __DIR__ . '/../../../database/config/config.php';
                     exit();
                 }
             }catch(Exception $e){
-                error_log("Error updating section: " . $e->getMessage());
+                ErrorHandler::log($e, 'SectionsController::update');
                 exit();
-            }       
+            }
         }
 
         public function delete($id){
@@ -127,7 +128,7 @@ require_once __DIR__ . '/../../../database/config/config.php';
                     exit();
                 }
             }catch(Exception $e){
-                error_log("Error deleting section: " . $e->getMessage());
+                ErrorHandler::log($e, 'SectionsController::delete');
                 return false;
             }
         }
@@ -183,6 +184,6 @@ require_once __DIR__ . '/../../../database/config/config.php';
         $sy = $controller->getActiveSchoolYear();
 
     }catch(Exception $e){
-        error_log($e->getMessage());
+        ErrorHandler::log($e, 'SectionsController (bootstrap)');
         exit();
     }

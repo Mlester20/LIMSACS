@@ -2,6 +2,7 @@
 session_start();
 
 require_once __DIR__ . '/../../models/admin/AuditLogsModel.php';
+require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../../helpers/csrf.php';
@@ -64,5 +65,5 @@ require_once __DIR__ . '/../../helpers/csrf.php';
         $entries_per_page = $listing['limit'];
         $offset = ($current_page - 1) * $entries_per_page;
     }catch(Exception $e){
-        error_log("Error " . $e->getMessage());
+        ErrorHandler::log($e, 'AuditLogsController (bootstrap)');
     }

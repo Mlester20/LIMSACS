@@ -2,6 +2,7 @@
 session_start();
 
 require_once __DIR__ . '/../../models/admin/AcademicHistoryModel.php';
+require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 
     class AcademicHistoryController{
@@ -56,7 +57,7 @@ try{
     // For the school-year filter dropdown
     $school_year_options = $con->query("SELECT id, school_year FROM school_year ORDER BY school_year DESC")->fetch_all(MYSQLI_ASSOC);
 }catch(Exception $e){
-    error_log($e->getMessage());
+    ErrorHandler::log($e, 'AcademicHistoryController (bootstrap)');
     $academic_histories = [];
     $current_page = 1;
     $total_pages = 1;

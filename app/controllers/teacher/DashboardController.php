@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../../database/config/config.php';
+require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../models/teacher/DashboardModel.php';
 
 class DashboardController
@@ -34,14 +35,15 @@ try {
     $controller = new DashboardController($con, (int) ($_SESSION['id'] ?? 0));
     $data       = $controller->index();
 } catch (Throwable $dashboardException) {
-    error_log('[teacher/DashboardController] ' . $dashboardException->getMessage()
-        . ' in ' . $dashboardException->getFile()
-        . ' on line ' . $dashboardException->getLine());
     $data = [
         'active_school_year' => null,
         'total_students'     => 0,
         'sections'           => [],
         'grade_levels'       => [],
-        'error'              => 'Dashboard data could not be loaded. Please try again.',
+        'error'              => ErrorHandler::safeMessage(
+            $dashboardException,
+            'Dashboard data could not be loaded. Please try again.',
+            'teacher/DashboardController::index'
+        ),
     ];
 }

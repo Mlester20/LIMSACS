@@ -2,6 +2,7 @@
 session_start();
 
 require_once __DIR__ . '/../../models/registrar/LogsModel.php';
+require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 
 class LogsController {
@@ -67,7 +68,7 @@ try {
         ];
     }
 } catch (Exception $e) {
-    error_log("Error in Controller: " . $e->getMessage());
+    ErrorHandler::log($e, 'LogsController (bootstrap)');
     $logs = [];
     $pagination = [
         'currentPage' => 1,

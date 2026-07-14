@@ -2,6 +2,7 @@
 session_start();
 
 require_once __DIR__ . '/../../../database/config/config.php';
+require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../helpers/csrf.php';
@@ -111,7 +112,7 @@ require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
                 header("Location: " . BASE_URL . "/resources/views/teachers/parent-guardians.php");
                 exit();
             }catch(Exception $e){
-                error_log("Error creating parent guardian: " . $e->getMessage());
+                ErrorHandler::log($e, 'teacher/ParentGuardiansController::create');
             }
         }
 
@@ -146,7 +147,7 @@ require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
                 header("Location: " . BASE_URL . "/resources/views/teachers/parent-guardians.php");
                 exit();
             }catch(Exception $e){
-                error_log("Error updating parent guardian: " . $e->getMessage());
+                ErrorHandler::log($e, 'teacher/ParentGuardiansController::update');
             }
         }
     }
@@ -233,6 +234,6 @@ require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
             }
         }
     }catch(Exception $e){
-        error_log("Error " . $e->getMessage());
+        ErrorHandler::log($e, 'teacher/ParentGuardiansController (bootstrap)');
     }
 ?>

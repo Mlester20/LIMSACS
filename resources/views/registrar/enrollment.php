@@ -421,6 +421,7 @@ try {
     <script src="<?= BASE_URL ?>/public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/vendor/js/menu.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/js/main.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/js/toast.js"></script>
     <script src="<?= BASE_URL ?>/public/js/registrar/enrollment.js"></script>
 </body>
 </html>

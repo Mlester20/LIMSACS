@@ -2,6 +2,7 @@
 session_start();
 
 require_once __DIR__ . '/../Controller.php';
+require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../models/registrar/DocumentTypesModel.php';
 require_once __DIR__ . '/../../helpers/csrf.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
@@ -43,7 +44,7 @@ require_once __DIR__ . '/../../../database/config/config.php';
                     exit();
                 }
             }catch(Exception $e){
-                error_log($e->getMessage());
+                ErrorHandler::log($e, 'DocumentTypesController::create');
                 FlashMessage::setFlash('error', 'Failed to create document type. Please try again.');
             }
         }
@@ -69,7 +70,7 @@ require_once __DIR__ . '/../../../database/config/config.php';
                     exit();
                 }
             }catch(Exception $e){
-                error_log($e->getMessage());
+                ErrorHandler::log($e, 'DocumentTypesController::update');
                 FlashMessage::setFlash('error', 'Failed to update document type. Please try again.');
             }
         }
@@ -95,10 +96,12 @@ require_once __DIR__ . '/../../../database/config/config.php';
                     exit();
                 }
             }catch(Exception $e){
-                error_log($e->getMessage());
-                FlashMessage::setFlash('error', 'Failed to delete document type. Please try again.');
-                header("Location: " . BASE_URL . "/resources/views/registrar/document-types.php");
-                exit();
+                ErrorHandler::redirect(
+                    $e,
+                    BASE_URL . '/resources/views/registrar/document-types.php',
+                    'Failed to delete document type. Please try again.',
+                    'DocumentTypesController::delete'
+                );
             }
         }
     }
@@ -151,6 +154,6 @@ require_once __DIR__ . '/../../../database/config/config.php';
             }
         }
     }catch(Exception $e){
-        error_log($e->getMessage());
+        ErrorHandler::log($e, 'DocumentTypesController (bootstrap)');
         exit();
     }

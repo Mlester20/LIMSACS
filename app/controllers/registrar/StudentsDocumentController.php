@@ -5,6 +5,7 @@ require_once __DIR__ . '/../../models/registrar/StudentsDocumentModel.php';
 require_once __DIR__ . '/../../models/registrar/StudentsModel.php';
 require_once __DIR__ . '/../../models/registrar/DocumentTypesModel.php';
 require_once __DIR__ . '/../Controller.php';
+require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../helpers/fileUpload.php';
 require_once __DIR__ . '/../../helpers/FlashMessage.php';
@@ -62,7 +63,7 @@ require_once __DIR__ . '/../../../database/config/config.php';
                     exit();
                }
           }catch(Exception $e){
-               error_log($e->getMessage());
+               ErrorHandler::log($e, 'StudentsDocumentController::create');
                return false;
           }
      }
@@ -95,7 +96,7 @@ require_once __DIR__ . '/../../../database/config/config.php';
                     exit();
                }
           }catch(Exception $e){
-               error_log($e->getMessage());
+               ErrorHandler::log($e, 'StudentsDocumentController::update');
                return false;
           }
      }
@@ -128,7 +129,7 @@ require_once __DIR__ . '/../../../database/config/config.php';
                     exit();
                }
           }catch(Exception $e){
-               error_log($e->getMessage());
+               ErrorHandler::log($e, 'StudentsDocumentController::delete');
                return false;
           }
      }
@@ -195,6 +196,6 @@ require_once __DIR__ . '/../../../database/config/config.php';
           }
      }
    }catch(Exception $e){
-     error_log($e->getMessage());
+     ErrorHandler::log($e, 'StudentsDocumentController (bootstrap)');
      FlashMessage::setFlash('error', 'An error occurred while processing your request.');
    }

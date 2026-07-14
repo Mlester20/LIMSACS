@@ -3,6 +3,7 @@ session_start();
 
 require_once __DIR__ . '/../../../database/config/config.php';
 require_once __DIR__ . '/../Controller.php';
+require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../models/admin/SchoolYearModel.php';
 require_once __DIR__ . '/../../services/SchoolYearService.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
@@ -94,7 +95,7 @@ const VALID_SY_STATUSES = ['active', 'inactive', 'archived'];
                     exit();
                 }
             }catch(Exception $e){
-                error_log($e->getMessage());
+                ErrorHandler::log($e, 'admin/SchoolYearController::create');
                 exit();
             }
         }
@@ -138,7 +139,7 @@ const VALID_SY_STATUSES = ['active', 'inactive', 'archived'];
                     exit();
                 }
             }catch(Exception $e){
-                error_log($e->getMessage());
+                ErrorHandler::log($e, 'admin/SchoolYearController::update');
                 exit();
             }
         }
@@ -161,7 +162,7 @@ const VALID_SY_STATUSES = ['active', 'inactive', 'archived'];
                     exit();
                 }
             }catch(Exception $e){
-                error_log($e->getMessage());
+                ErrorHandler::log($e, 'admin/SchoolYearController::delete');
                 exit();
             }
         }
@@ -230,5 +231,5 @@ const VALID_SY_STATUSES = ['active', 'inactive', 'archived'];
         $total_pages = $listing['total_pages'];
         $total_records = $listing['total_records'];
     }catch(Exception $e){
-        error_log($e->getMessage());
+        ErrorHandler::log($e, 'admin/SchoolYearController (bootstrap)');
     }
