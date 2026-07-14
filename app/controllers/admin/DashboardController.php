@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../../database/config/config.php';
+require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../models/admin/DashboardModel.php';
 
 class DashboardController
@@ -43,9 +44,6 @@ try {
     $controller = new DashboardController($con);
     $data       = $controller->index();
 } catch (Throwable $dashboardException) {
-    error_log('[DashboardController] ' . $dashboardException->getMessage()
-        . ' in ' . $dashboardException->getFile()
-        . ' on line ' . $dashboardException->getLine());
     $data = array_fill_keys([
         'total_students', 'enrolled_students', 'total_sections', 'active_school_years',
         'required_documents', 'pending_documents', 'verified_documents', 'rejected_documents',
@@ -53,5 +51,9 @@ try {
         'registration_trend', 'enrollment_status_summary', 'total_graduates',
         'graduates_active_year', 'section_capacity',
     ], null);
-    $data['error'] = 'Dashboard data could not be loaded. Please try again.';
+    $data['error'] = ErrorHandler::safeMessage(
+        $dashboardException,
+        'Dashboard data could not be loaded. Please try again.',
+        'admin/DashboardController::index'
+    );
 }

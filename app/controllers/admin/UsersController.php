@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../helpers/password.php';
 require_once __DIR__ . '/../../helpers/csrf.php';
 require_once __DIR__ . '/../Controller.php';
+require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../models/admin/UsersModel.php';
 
 const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
@@ -95,7 +96,7 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
                     exit();
                 }
             }catch(Exception $e){
-                error_log($e->getMessage());
+                ErrorHandler::log($e, 'UsersController::create');
                 exit();
             }
         }
@@ -127,7 +128,7 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
                     exit();
                 }
             }catch(Exception $e){
-                error_log($e->getMessage());
+                ErrorHandler::log($e, 'UsersController::update');
                 exit();
             }
         }
@@ -160,7 +161,7 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
                 }
                 exit();
             }catch(Exception $e){
-                error_log($e->getMessage());
+                ErrorHandler::log($e, 'UsersController::resetPassword');
                 exit();
             }
         }
@@ -192,7 +193,7 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
                     exit();
                 }
             }catch(Exception $e){
-                error_log($e->getMessage());
+                ErrorHandler::log($e, 'UsersController::delete');
                 exit();
             }
         }
@@ -250,6 +251,6 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
         $total_pages = $listing['total_pages'];
         $total_records = $listing['total_records'];
     }catch(Exception $e){
-        error_log($e->getMessage());
+        ErrorHandler::log($e, 'UsersController (bootstrap)');
         exit();
     }

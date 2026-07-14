@@ -2,6 +2,7 @@
 session_start();
 
 require_once __DIR__ . '/../../../database/config/config.php';
+require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../helpers/csrf.php';
@@ -94,7 +95,7 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
                     'document_types' => $documentTypes ?: []
                 ];
             }catch(Exception $e){
-                error_log("Get student profile error: " . $e->getMessage());
+                ErrorHandler::log($e, 'teacher/StudentController::getStudentProfile');
                 return $empty;
             }
         }
@@ -131,7 +132,7 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
                 header("Location: " . BASE_URL . "/resources/views/teachers/students.php?page=" . intval($page));
                 exit();
             }catch(Exception $e){
-                error_log($e->getMessage());
+                ErrorHandler::log($e, 'teacher/StudentController::update');
                 return false;
             }
         }
@@ -214,7 +215,7 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
             );
         }
     }catch(Exception $e){
-        error_log($e->getMessage());
+        ErrorHandler::log($e, 'teacher/StudentController (bootstrap)');
         exit();
     }
 

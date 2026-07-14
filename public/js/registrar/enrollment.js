@@ -180,7 +180,7 @@ const enrollmentController = {
                 document.getElementById('searchResults').innerHTML = '';
             },
             error: function() {
-                alert('Error loading student details');
+                Toast.error('Error loading student details.');
             }
         });
     },
@@ -429,13 +429,15 @@ const enrollmentController = {
             },
             dataType: 'json',
             success: function(response) {
-                alert(response.message);
                 if (response.success) {
-                    window.location.reload();
+                    Toast.success(response.message);
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    Toast.error(response.message);
                 }
             },
             error: function() {
-                alert('Error updating student status.');
+                Toast.error('Error updating student status.');
             }
         });
     },
@@ -456,13 +458,15 @@ const enrollmentController = {
             },
             dataType: 'json',
             success: function(response) {
-                alert(response.message);
                 if (response.success) {
-                    window.location.reload();
+                    Toast.success(response.message);
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    Toast.error(response.message);
                 }
             },
             error: function() {
-                alert('Error updating student status.');
+                Toast.error('Error updating student status.');
             }
         });
     },
@@ -483,7 +487,7 @@ const enrollmentController = {
         const remarks = document.getElementById('graduateRemarks').value;
 
         if (!graduationDate) {
-            alert('Graduation date is required.');
+            Toast.warning('Graduation date is required.');
             return;
         }
 
@@ -501,14 +505,16 @@ const enrollmentController = {
             },
             dataType: 'json',
             success: function(response) {
-                alert(response.message);
                 if (response.success) {
+                    Toast.success(response.message);
                     bootstrap.Modal.getInstance(document.getElementById('graduateModal')).hide();
-                    window.location.reload();
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    Toast.error(response.message);
                 }
             },
             error: function() {
-                alert('Error recording graduation.');
+                Toast.error('Error recording graduation.');
             }
         });
     },

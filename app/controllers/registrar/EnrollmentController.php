@@ -2,6 +2,7 @@
 session_start();
 
 require_once __DIR__ . '/../Controller.php';
+require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
@@ -45,7 +46,7 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
                 // Limit to 10 results
                 return array_slice($results, 0, 10);
             } catch (Exception $e) {
-                error_log("Search student error: " . $e->getMessage());
+                ErrorHandler::log($e, 'EnrollmentController::searchStudent');
                 return [];
             }
         }
@@ -65,7 +66,7 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
 
                 return $student;
             } catch (Exception $e) {
-                error_log("Get student with history error: " . $e->getMessage());
+                ErrorHandler::log($e, 'EnrollmentController::getStudentWithHistory');
                 return null;
             }
         }
@@ -391,7 +392,7 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
             }
         }
     } catch (Exception $e) {
-        error_log("Enrollment controller error: " . $e->getMessage());
+        ErrorHandler::log($e, 'EnrollmentController (bootstrap)');
         exit();
     }
 ?>

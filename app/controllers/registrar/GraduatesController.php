@@ -2,6 +2,7 @@
 session_start();
 
 require_once __DIR__ . '/../../models/registrar/GraduatesModel.php';
+require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 
     class GraduatesController{
@@ -138,7 +139,7 @@ require_once __DIR__ . '/../../../database/config/config.php';
             }
         }
     }catch(Exception $e){
-        error_log($e->getMessage());
+        ErrorHandler::log($e, 'registrar/GraduatesController (bootstrap)');
         $controller = null;
     }
 ?>

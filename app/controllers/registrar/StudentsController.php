@@ -2,6 +2,7 @@
 session_start();
 
 require_once __DIR__ . '/../Controller.php';
+require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
@@ -101,7 +102,7 @@ require_once __DIR__ . '/../../helpers/csrf.php';
                     exit();
                 }
             }catch(Exception $e){
-                error_log($e->getMessage());
+                ErrorHandler::log($e, 'StudentsController::create');
                 return false;
             }
         }
@@ -128,7 +129,7 @@ require_once __DIR__ . '/../../helpers/csrf.php';
                     exit();
                 }
             }catch(Exception $e){
-                error_log($e->getMessage());
+                ErrorHandler::log($e, 'StudentsController::update');
                 return false;
             }
         }
@@ -154,7 +155,7 @@ require_once __DIR__ . '/../../helpers/csrf.php';
                     exit();
                 }
            }catch(Exception $e){
-               error_log($e->getMessage());
+               ErrorHandler::log($e, 'StudentsController::delete');
                return false;
            }
         }
@@ -193,7 +194,7 @@ require_once __DIR__ . '/../../helpers/csrf.php';
                     'document_types' => $documentTypes ?: []
                 ];
             } catch (Exception $e) {
-                error_log("Get student profile error: " . $e->getMessage());
+                ErrorHandler::log($e, 'StudentsController::getStudentProfile');
                 return [
                     'student' => null,
                     'academic_history' => [],
@@ -275,7 +276,7 @@ require_once __DIR__ . '/../../helpers/csrf.php';
             }
         }
     }catch(Exception $e){
-        error_log($e->getMessage());
+        ErrorHandler::log($e, 'StudentsController (bootstrap)');
         exit();
     }
 

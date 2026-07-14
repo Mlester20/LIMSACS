@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../models/registrar/StudentsModel.php';
 require_once __DIR__ . '/../../services/StudentsService.php';
 require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../Controller.php';
+require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../helpers/csrf.php';
 require_once __DIR__ . '/../../../database/config/config.php';
@@ -78,7 +79,7 @@ require_once __DIR__ . '/../../../database/config/config.php';
                     exit();
                 }
             }catch(Exception $e){
-                error_log("Error creating parent guardian: " . $e->getMessage(), 500); //500 Internal Server Error
+                ErrorHandler::log($e, 'ParentGuardiansController::create');
             }
         }
 
@@ -103,7 +104,7 @@ require_once __DIR__ . '/../../../database/config/config.php';
                     exit();
                 }
             }catch(Exception $e){
-                error_log("Error updating parent guardian: " . $e->getMessage(), 500); //500 Internal Server Error
+                ErrorHandler::log($e, 'ParentGuardiansController::update');
             }
         }
 
@@ -128,7 +129,7 @@ require_once __DIR__ . '/../../../database/config/config.php';
                     exit();
                 }
             }catch(Exception $e){
-                error_log("Error deleting parent guardian: " . $e->getMessage(), 500); //500 Internal Server Error
+                ErrorHandler::log($e, 'ParentGuardiansController::delete');
                 return false;
             }
         }
@@ -220,5 +221,5 @@ require_once __DIR__ . '/../../../database/config/config.php';
             }
         }
     }catch(Exception $e){
-        error_log("Error " . $e->getMessage(), 500); //500 Internal Server Error
+        ErrorHandler::log($e, 'ParentGuardiansController (bootstrap)');
     }
