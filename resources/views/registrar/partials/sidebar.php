@@ -33,7 +33,7 @@
         <li class="menu-header small text-uppercase">
           <span class="menu-header-text">Student Management</span>
         </li>
-        <li class="menu-item <?php echo ($currentPage == 'enrollment.php' || $currentPage == 'student-records.php') ? 'active' : ''; ?>">
+        <li class="menu-item <?php echo (in_array($currentPage, ['enrollment.php', 'student-records.php', 'import-students.php'])) ? 'active' : ''; ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
             <i class="menu-icon tf-icons bx bx-user"></i>
             <div data-i18n="Account Settings">Enroll Students</div>
@@ -41,6 +41,7 @@
           <ul class="menu-sub">
             <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/enrollment.php" class="menu-link"><div data-i18n="Account">Enrollment</div></a></li>
             <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/student-records.php" class="menu-link"><div data-i18n="Account">Student Information</div></a></li>
+            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/import-students.php" class="menu-link"><div data-i18n="Import Students">Import Students</div></a></li>
           </ul>
         </li>
         <li class="menu-item <?php echo ($currentPage == 'parent-guardians.php') ? 'active' : ''; ?>">

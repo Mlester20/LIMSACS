@@ -5,14 +5,19 @@ class FileUpload {
      * @param $file
      * @param string $folder  - subfolder under storage/ (e.g. 'student_documents')
      * @param string $prefix  - filename prefix (e.g. 'doc_1' for student ID 1)
+     * @param int|null $maxSizeBytes - optional max allowed size; null skips the check (default, existing callers unaffected)
      * @return string         - relative path to the uploaded file
      * @throws Exception
      */
-    public static function upload($file, string $folder = 'student_documents', string $prefix = 'doc'): string {
+    public static function upload($file, string $folder = 'student_documents', string $prefix = 'doc', ?int $maxSizeBytes = null): string {
         try {
             // Validate file presence and errors
             if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
                 throw new Exception('No file uploaded or upload error occurred.');
+            }
+
+            if ($maxSizeBytes !== null && $file['size'] > $maxSizeBytes) {
+                throw new Exception('File exceeds the maximum allowed size.');
             }
 
             // Resolve storage base path.
@@ -35,7 +40,7 @@ class FileUpload {
             $ext = strtolower(pathinfo($original_name, PATHINFO_EXTENSION));
 
             // Documents-focused allowed extensions
-            $allowed_extensions = ['pdf', 'docx', 'doc', 'xlsx', 'xls', 'png', 'jpg', 'jpeg'];
+            $allowed_extensions = ['pdf', 'docx', 'doc', 'xlsx', 'xls', 'csv', 'png', 'jpg', 'jpeg'];
             if (!in_array($ext, $allowed_extensions)) {
                 throw new Exception("File type '.{$ext}' is not allowed.");
             }

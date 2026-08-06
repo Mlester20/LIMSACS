@@ -95,6 +95,28 @@ require_once __DIR__ . '/../Model.php';
         } 
 
         /**
+         * All non-empty LRNs currently in the table, as a lookup set.
+         * Used by bulk import to avoid one SELECT per row.
+         * @return array<string,true>
+         */
+        public function getExistingLrns(){
+            try{
+                $query = "SELECT lrn FROM {$this->students} WHERE lrn IS NOT NULL AND lrn <> ''";
+                $stmt = $this->con->prepare($query);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $out = [];
+                while($row = $result->fetch_assoc()){
+                    $out[$row['lrn']] = true;
+                }
+                return $out;
+            }catch(Exception $e){
+                error_log($e->getMessage());
+                return [];
+            }
+        }
+
+        /**
          * Create new student record
          * @param array $data Student data
          */

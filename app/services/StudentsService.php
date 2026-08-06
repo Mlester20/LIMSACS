@@ -42,6 +42,28 @@ require_once __DIR__ . '/../models/Model.php';
         }
 
         /**
+         * Compute age from a birth date. Port of the client-side calculation in
+         * public/js/registrar/students.js (auto-calculated age on the enroll form).
+         * @param string $birthDateYmd 'Y-m-d'
+         * @return int|null null if $birthDateYmd is invalid or in the future
+         */
+        public static function calculateAge($birthDateYmd) {
+            $birth = DateTime::createFromFormat('Y-m-d', $birthDateYmd);
+            if (!$birth) return null;
+
+            $today = new DateTime('today');
+            if ($birth > $today) return null;
+
+            $age = (int)$today->format('Y') - (int)$birth->format('Y');
+            $monthDiff = (int)$today->format('n') - (int)$birth->format('n');
+            if ($monthDiff < 0 || ($monthDiff === 0 && (int)$today->format('j') < (int)$birth->format('j'))) {
+                $age--;
+            }
+
+            return $age;
+        }
+
+        /**
          * Search Specific Students
          * Prepare the Like keyword
         */

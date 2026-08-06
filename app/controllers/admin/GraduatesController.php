@@ -4,6 +4,7 @@ session_start();
 require_once __DIR__ . '/../../models/admin/GraduatesModel.php';
 require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../../database/config/config.php';
+require_once __DIR__ . '/../../helpers/graduatesPdfTemplate.php';
 
     class GraduatesController{
         private $model;
@@ -106,14 +107,21 @@ require_once __DIR__ . '/../../../database/config/config.php';
         }
 
         /**
-         * PDF export stub. No PDF library (e.g. Dompdf/TCPDF) is installed in this
-         * project yet, so this records intent and bounces back with a flash notice.
-         * Wire up a real library here when one is added.
+         * Stream the full filtered result set as a landscape PDF via Dompdf.
          */
         public function exportPdf($filters = []): void{
-            require_once __DIR__ . '/../../helpers/flashMessage.php';
-            FlashMessage::setFlash('info', 'PDF export is not yet available. Install a PDF library (e.g. Dompdf) to enable this feature.');
-            header('Location: ' . BASE_URL . '/resources/views/admin/graduates-master-list.php');
+            require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
+
+            $records = $this->model->getAllForExport($filters);
+            $html = GraduatesPdfTemplate::render($records);
+
+            $options = new \Dompdf\Options();
+            $options->set('isRemoteEnabled', false);
+            $dompdf = new \Dompdf\Dompdf($options);
+            $dompdf->setPaper('legal', 'landscape');
+            $dompdf->loadHtml($html);
+            $dompdf->render();
+            $dompdf->stream('graduates-master-list-' . date('Y-m-d') . '.pdf', ['Attachment' => true]);
             exit();
         }
     }
