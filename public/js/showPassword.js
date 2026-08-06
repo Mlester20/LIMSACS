@@ -1,9 +1,15 @@
-function togglePassword(){
-    const pw = document.getElementById("password");
-    const toggleBtn = document.getElementById("togglePassword");
-    pw.type = pw.type === "password" ? "text" : "password";
+function togglePassword(button){
+    if (!button) return;
 
-    //toggle the eye icon
-    toggleBtn.classList.toggle("fa-eye-slash");
+    const inputGroup = button.closest('.input-group');
+    const passwordInput = inputGroup?.querySelector('input');
+    const icon = button.querySelector('i');
 
+    if (!passwordInput || !icon) return;
+
+    const show = passwordInput.type === 'password';
+    passwordInput.type = show ? 'text' : 'password';
+
+    icon.classList.toggle('bx-hide', !show);
+    icon.classList.toggle('bx-show', show);
 }

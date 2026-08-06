@@ -146,13 +146,23 @@ AuthRole::allowOnly(['admin']);
                                     Password
                                 </label>
 
-                                <input
-                                    type="password"
-                                    class="form-control"
-                                    id="password"
-                                    name="password"
-                                    placeholder="Enter password"
-                                    required>
+                                <div class="input-group">
+                                    <input
+                                        type="password"
+                                        class="form-control"
+                                        id="password"
+                                        name="password"
+                                        placeholder="Enter password"
+                                        required
+                                    />
+                                    <button
+                                        class="btn btn-outline-secondary"
+                                        type="button"
+                                        onclick="togglePassword(this)"
+                                        aria-label="Toggle password visibility">
+                                        <i class="bx bx-hide"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Role -->
@@ -311,6 +321,29 @@ AuthRole::allowOnly(['admin']);
                                     name="email"
                                     placeholder="example@email.com"
                                     required>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_password" class="form-label">
+                                    Password
+                                </label>
+
+                                <div class="input-group">
+                                    <input
+                                        type="password"
+                                        class="form-control"
+                                        id="edit_password"
+                                        name="password"
+                                        placeholder="Enter a new password to change it">
+                                    <button
+                                        class="btn btn-outline-secondary"
+                                        type="button"
+                                        onclick="togglePassword(this)"
+                                        aria-label="Toggle password visibility">
+                                        <i class="bx bx-hide"></i>
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Role -->
@@ -564,14 +597,10 @@ AuthRole::allowOnly(['admin']);
     <script src="<?= BASE_URL ?>/public/assets/vendor/libs/jquery/jquery.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/vendor/libs/popper/popper.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/vendor/js/bootstrap.js"></script>
-    <script src="<?= BASE_URL ?>/public/assets/vendor/libs/node-waves/node-waves.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/vendor/js/menu.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/js/main.js"></script>
-
-    <!-- ── Chart.js ── -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-    <script src="<?= BASE_URL ?>/public/js/admin/dashboard.js"></script>
     <script src="<?= BASE_URL ?>/public/js/admin/users.js"></script>
+    <script src="<?= BASE_URL ?>/public/js/showPassword.js"></script>
 </body>
 </html>
