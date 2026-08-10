@@ -2,6 +2,7 @@
 
 require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
 require_once __DIR__ . '/StudentsService.php';
+require_once __DIR__ . '/EnrollmentService.php';
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
@@ -11,9 +12,18 @@ use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
         const REQUIRED_HEADERS = ['first_name', 'last_name', 'gender', 'birth_date'];
 
         const TEMPLATE_HEADERS = [
+            // Group A — student masters-list info (required subset enforced via REQUIRED_HEADERS)
             'lrn', 'first_name', 'middle_name', 'last_name', 'suffix', 'gender',
             'birth_date', 'age', 'place_of_birth', 'nationality', 'religion',
             'address', 'contact_number',
+            // Group B — parent/guardian (optional, all-or-nothing per row)
+            'father_name', 'father_occupation', 'father_contact',
+            'mother_name', 'mother_occupation', 'mother_contact',
+            'guardian_name', 'guardian_relationship', 'guardian_contact',
+            // Group C — academic history / enrollment (optional)
+            'school_year', 'grade_level', 'section', 'enrollment_status',
+            // Group D — graduation info (optional, only used when Group C's enrollment_status = Graduated)
+            'graduation_date', 'honors', 'remarks',
         ];
 
         /**
@@ -114,7 +124,7 @@ use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
                 $errors[] = 'gender must be Male or Female';
             }
 
-            $birthDate = self::normalizeBirthDate($cells['birth_date'] ?? null);
+            $birthDate = self::normalizeDate($cells['birth_date'] ?? null);
             if ($birthDate === null) {
                 $errors[] = 'birth_date is required and must be a valid date';
             }
@@ -173,6 +183,146 @@ use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
             ];
         }
 
+        /**
+         * Group B — parent/guardian info. All-or-nothing: if every cell is blank,
+         * there's nothing to insert for this row.
+         * @return array|null null if all 9 fields are blank ("no data")
+         */
+        public function validateGroupB(array $cells): ?array {
+            $data = [
+                'father_name' => self::nullIfBlank($cells['father_name'] ?? null),
+                'father_occupation' => self::nullIfBlank($cells['father_occupation'] ?? null),
+                'father_contact' => self::nullIfBlank($cells['father_contact'] ?? null),
+                'mother_name' => self::nullIfBlank($cells['mother_name'] ?? null),
+                'mother_occupation' => self::nullIfBlank($cells['mother_occupation'] ?? null),
+                'mother_contact' => self::nullIfBlank($cells['mother_contact'] ?? null),
+                'guardian_name' => self::nullIfBlank($cells['guardian_name'] ?? null),
+                'guardian_relationship' => self::nullIfBlank($cells['guardian_relationship'] ?? null),
+                'guardian_contact' => self::nullIfBlank($cells['guardian_contact'] ?? null),
+            ];
+
+            foreach ($data as $v) {
+                if ($v !== null) return $data;
+            }
+            return null;
+        }
+
+        /**
+         * @return array{value:string, note:?string}
+         */
+        private static function normalizeEnrollmentStatus($raw): array {
+            $valid = ['enrolled' => 'Enrolled', 'transferred' => 'Transferred', 'graduated' => 'Graduated', 'dropped' => 'Dropped'];
+            $v = trim((string)($raw ?? ''));
+            if ($v === '') {
+                return ['value' => 'Enrolled', 'note' => null];
+            }
+            $key = strtolower($v);
+            if (isset($valid[$key])) {
+                return ['value' => $valid[$key], 'note' => null];
+            }
+            return ['value' => 'Enrolled', 'note' => "enrollment_status '{$v}' not recognized; defaulted to Enrolled"];
+        }
+
+        /**
+         * Group C — academic history / enrollment.
+         * @param array<string,int> $schoolYearLookup normalized 'yyyy-yyyy' string => school_year_id
+         * @param array<string,int> $sectionLookup 'normalized section name|school_year_id' => section_id
+         * @param array<string,array> $sectionsById section_id => raw section row (for the grade_level cross-check note)
+         * @return array{status:string, reason:?string, note:?string, data:?array}
+         */
+        public function validateGroupC(array $cells, array $schoolYearLookup, array $sectionLookup, array $sectionsById = []): array {
+            $schoolYearRaw = self::nullIfBlank($cells['school_year'] ?? null);
+            $gradeLevelRaw = self::nullIfBlank($cells['grade_level'] ?? null);
+            $sectionRaw = self::nullIfBlank($cells['section'] ?? null);
+            $statusRaw = self::nullIfBlank($cells['enrollment_status'] ?? null);
+
+            if ($schoolYearRaw === null && $gradeLevelRaw === null && $sectionRaw === null && $statusRaw === null) {
+                return ['status' => 'none', 'reason' => null, 'note' => null, 'data' => null];
+            }
+
+            if ($schoolYearRaw === null || $gradeLevelRaw === null) {
+                return ['status' => 'skip', 'reason' => 'school_year and grade_level are both required when any enrollment data is provided', 'note' => null, 'data' => null];
+            }
+
+            $schoolYearKey = self::normalizeSchoolYearKey($schoolYearRaw);
+            if (!isset($schoolYearLookup[$schoolYearKey])) {
+                return ['status' => 'skip', 'reason' => "school year '{$schoolYearRaw}' not found", 'note' => null, 'data' => null];
+            }
+            $schoolYearId = $schoolYearLookup[$schoolYearKey];
+
+            $sectionId = null;
+            $note = null;
+            if ($sectionRaw !== null) {
+                $sectionKey = strtolower($sectionRaw) . '|' . $schoolYearId;
+                if (isset($sectionLookup[$sectionKey])) {
+                    $sectionId = $sectionLookup[$sectionKey];
+                    $sectionRow = $sectionsById[$sectionId] ?? null;
+                    if ($sectionRow && !empty($sectionRow['grade_level']) && $sectionRow['grade_level'] !== $gradeLevelRaw) {
+                        $note = "section's grade level ({$sectionRow['grade_level']}) doesn't match row's grade_level ({$gradeLevelRaw})";
+                    }
+                } else {
+                    $note = "section '{$sectionRaw}' not found for that school year; enrolled without a section";
+                }
+            }
+
+            $statusNorm = self::normalizeEnrollmentStatus($statusRaw);
+            if ($statusNorm['note'] !== null) {
+                $note = $note !== null ? ($note . '; ' . $statusNorm['note']) : $statusNorm['note'];
+            }
+
+            return [
+                'status' => 'ok',
+                'reason' => null,
+                'note' => $note,
+                'data' => [
+                    'school_year_id' => $schoolYearId,
+                    'grade_level' => $gradeLevelRaw,
+                    'section_id' => $sectionId,
+                    'enrollment_status' => $statusNorm['value'],
+                ],
+            ];
+        }
+
+        /**
+         * Group D — graduation info. Only relevant when Group C's enrollment_status is Graduated.
+         * @return array{status:string, reason:?string, data:?array}
+         */
+        public function validateGroupD(array $cells, string $enrollmentStatus, string $gradeLevel): array {
+            if ($enrollmentStatus !== 'Graduated') {
+                return ['status' => 'none', 'reason' => null, 'data' => null];
+            }
+
+            if ($gradeLevel !== EnrollmentService::TERMINAL_GRADE_LEVEL) {
+                return ['status' => 'skip', 'reason' => 'only ' . EnrollmentService::TERMINAL_GRADE_LEVEL . ' students are eligible to graduate; graduate record not created', 'data' => null];
+            }
+
+            $graduationDate = self::normalizeDate($cells['graduation_date'] ?? null);
+            if ($graduationDate === null) {
+                return ['status' => 'skip', 'reason' => 'graduation_date is missing or invalid; graduate record not created', 'data' => null];
+            }
+
+            return [
+                'status' => 'ok',
+                'reason' => null,
+                'data' => [
+                    'graduation_date' => $graduationDate,
+                    'honors' => self::nullIfBlank($cells['honors'] ?? null),
+                    'remarks' => self::nullIfBlank($cells['remarks'] ?? null),
+                ],
+            ];
+        }
+
+        /**
+         * Normalize a school-year string for lookup: trim, lowercase, and collapse
+         * common dash variants (en-dash, em-dash, spaced hyphen) to a plain '-'.
+         */
+        private static function normalizeSchoolYearKey(string $raw): string {
+            $v = strtolower(trim($raw));
+            $v = str_replace(['–', '—'], '-', $v);
+            $v = preg_replace('/\s*-\s*/', '-', $v);
+            return $v;
+        }
+
         private static function canonicalizeHeader($raw): ?string {
             if ($raw === null) return null;
             $key = strtolower(trim((string)$raw));
@@ -194,9 +344,10 @@ use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
 
         /**
          * Handles both Excel serial date numbers and plain date strings.
+         * Used for both birth_date and graduation_date.
          * @return string|null 'Y-m-d', or null if blank/unparseable
          */
-        private static function normalizeBirthDate($raw): ?string {
+        private static function normalizeDate($raw): ?string {
             if ($raw === null) return null;
 
             if (is_numeric($raw)) {

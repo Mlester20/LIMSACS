@@ -71,18 +71,39 @@ unset($_SESSION['import_results']);
         </div>
     </div>
 
+    <?php
+        // Renders a small colored badge for a Group B/C/D sub-status cell.
+        // $sub is null ("—", student row itself wasn't imported so nothing was
+        // attempted) or ['status'=>'added'|'skipped'|'failed','reason'=>?string].
+        $renderSubBadge = function($sub){
+            if($sub === null){
+                echo '<span class="text-muted">&mdash;</span>';
+                return;
+            }
+            $badgeClass = [
+                'added' => 'bg-label-success',
+                'skipped' => 'bg-label-warning',
+                'failed' => 'bg-label-danger',
+            ][$sub['status']] ?? 'bg-label-secondary';
+            echo '<span class="badge ' . $badgeClass . '">' . htmlspecialchars(ucfirst($sub['status'])) . '</span>';
+            if(!empty($sub['reason'])){
+                echo '<div class="small text-muted">' . htmlspecialchars($sub['reason']) . '</div>';
+            }
+        };
+    ?>
+
     <?php if($importResults): ?>
     <div class="card">
         <h5 class="card-header">Import Results</h5>
         <div class="card-body">
-            <div class="row text-center mb-3">
+            <div class="row text-center mb-2">
                 <div class="col">
                     <div class="fw-bold fs-5"><?php echo (int)$importResults['total']; ?></div>
                     <div class="text-muted">Total Processed</div>
                 </div>
                 <div class="col">
                     <div class="fw-bold fs-5 text-success"><?php echo (int)$importResults['inserted']; ?></div>
-                    <div class="text-muted">Inserted</div>
+                    <div class="text-muted">Students Inserted</div>
                 </div>
                 <div class="col">
                     <div class="fw-bold fs-5 text-warning"><?php echo (int)$importResults['skipped']; ?></div>
@@ -93,11 +114,27 @@ unset($_SESSION['import_results']);
                     <div class="text-muted">Failed</div>
                 </div>
             </div>
+            <div class="row text-center mb-3">
+                <div class="col">
+                    <div class="fw-bold fs-6"><?php echo (int)$importResults['parents_added']; ?></div>
+                    <div class="text-muted small">Parent/Guardian Added</div>
+                </div>
+                <div class="col">
+                    <div class="fw-bold fs-6"><?php echo (int)$importResults['academic_added']; ?> <span class="text-muted small">/ <?php echo (int)$importResults['academic_skipped']; ?> skipped</span></div>
+                    <div class="text-muted small">Academic History Added</div>
+                </div>
+                <div class="col">
+                    <div class="fw-bold fs-6"><?php echo (int)$importResults['graduates_added']; ?> <span class="text-muted small">/ <?php echo (int)$importResults['graduates_skipped']; ?> skipped</span></div>
+                    <div class="text-muted small">Graduate Records Added</div>
+                </div>
+            </div>
 
             <?php if($importResults['inserted'] > 0): ?>
                 <div class="alert alert-info">
-                    Students imported to the masters list. To record enrollment or graduation history for these students,
-                    use the <a href="<?= BASE_URL ?>/resources/views/registrar/enrollment.php">Enrollment page</a>.
+                    Students imported to the masters list. Enrollment and graduation history were recorded automatically
+                    wherever the file provided that data (see the table below) &mdash; use the
+                    <a href="<?= BASE_URL ?>/resources/views/registrar/enrollment.php">Enrollment page</a> for any students
+                    not covered by the import.
                 </div>
             <?php endif; ?>
 
@@ -111,6 +148,9 @@ unset($_SESSION['import_results']);
                                 <th>Name</th>
                                 <th>Status</th>
                                 <th>Reason</th>
+                                <th>Parent/Guardian</th>
+                                <th>Academic History</th>
+                                <th>Graduate</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -121,6 +161,9 @@ unset($_SESSION['import_results']);
                                     <td><?php echo htmlspecialchars($detail['name']); ?></td>
                                     <td><?php echo htmlspecialchars(ucfirst($detail['status'])); ?></td>
                                     <td><?php echo htmlspecialchars($detail['reason'] ?? ''); ?></td>
+                                    <td><?php $renderSubBadge($detail['parent']); ?></td>
+                                    <td><?php $renderSubBadge($detail['academic']); ?></td>
+                                    <td><?php $renderSubBadge($detail['graduate']); ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
