@@ -42,67 +42,86 @@ require_once __DIR__ . '/database/config/config.php';
 
     <?php FlashMessage::showFlash(); ?>
 
-    <div class="container-xxl">
-      <div class="authentication-wrapper authentication-basic container-p-y">
-        <div class="authentication-inner">
+    <div class="auth-page">
+      <div class="auth-shell">
 
-          <div class="card">
-            <div class="card-body">
-
-              <!-- Logo -->
-              <!-- <div class="app-brand justify-content-center">
-                <div class="brand-icon-wrap">
-                  <img src="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" alt="Logo" class="brand-logo" />
-                </div>
-              </div> -->
-              <!-- /Logo -->
-
-              <h1 class="auth-title">Limsacs</h1>
-              <p class="auth-school">Aurora Central School</p>
-              
-              <hr class="auth-divider" />
-              <p class="auth-desc">Sign in to your account to access the Limsacs system.</p>
-
-              <form id="formAuthentication" class="mb-3" action="<?= BASE_URL ?>/app/controllers/Auth.php" method="POST">
-
-                <div class="mb-3">
-                  <label for="email" class="auth-label">Email Address</label>
-                  <div class="input-icon-wrap">
-                    <span class="input-icon"><i class='bx bx-envelope'></i></span>
-                    <input
-                      type="text"
-                      class="form-control auth-input"
-                      id="email"
-                      name="email"
-                      placeholder="you@school.edu.ph"
-                      autofocus
-                    />
-                  </div>
-                </div>
-
-                <div class="mb-3">
-                  <label for="password" class="auth-label">Password</label>
-                  <div class="input-icon-wrap">
-                    <span class="input-icon"><i class='bx bx-lock'></i></span>
-                    <input
-                      type="password"
-                      id="password"
-                      class="form-control auth-input"
-                      name="password"
-                      placeholder="··········"
-                    />
-                    <span class="input-icon-right toggle-password" onclick="togglePassword()" style="cursor:pointer;">
-                      <i class='bx bx-hide' id="toggleIcon"></i>
-                    </span>
-                  </div>
-                </div>
-                <div class="mb-3">
-                  <button class="btn auth-btn w-100" type="submit">Sign in</button>
-                </div>
-              </form>
+        <!-- Brand / hero panel -->
+        <aside class="auth-hero">
+          <div class="auth-hero-pattern"></div>
+          <div class="auth-hero-content">
+            <div class="auth-hero-seal">
+              <img src="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" alt="Aurora Central School seal" />
             </div>
+            <div class="auth-hero-heading">
+              <span class="auth-hero-kicker">Student Information Management System</span>
+              <h2 class="auth-hero-title">Limsacs</h2>
+            </div>
+            <p class="auth-hero-tagline">
+              One record for every learner &mdash; from enrollment to graduation, kept accurate and secure.
+            </p>
+            <ul class="auth-hero-points">
+              <li><i class='bx bx-shield-quarter'></i> Role-based, permissioned access</li>
+              <li><i class='bx bx-id-card'></i> Centralized learner records</li>
+              <li><i class='bx bxs-graduation'></i> Enrollment through graduation history</li>
+            </ul>
           </div>
-        </div>
+          <p class="auth-hero-footer">Aurora Central School &middot; Aurora, Isabela</p>
+        </aside>
+
+        <!-- Form panel -->
+        <main class="auth-form-panel">
+          <div class="auth-form-inner">
+
+            <div class="auth-form-brand">
+              <img src="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" alt="Limsacs logo" />
+              <span>Limsacs</span>
+            </div>
+
+            <h1 class="auth-title">Welcome back</h1>
+            <p class="auth-desc">Sign in to your account to access the Limsacs system.</p>
+
+            <form id="formAuthentication" class="mb-3" action="<?= BASE_URL ?>/app/controllers/Auth.php" method="POST">
+
+              <div class="mb-3">
+                <label for="email" class="auth-label">Email Address</label>
+                <div class="input-icon-wrap">
+                  <span class="input-icon"><i class='bx bx-envelope'></i></span>
+                  <input
+                    type="text"
+                    class="form-control auth-input"
+                    id="email"
+                    name="email"
+                    placeholder="you@school.edu.ph"
+                    autofocus
+                  />
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="password" class="auth-label">Password</label>
+                <div class="input-icon-wrap">
+                  <span class="input-icon"><i class='bx bx-lock'></i></span>
+                  <input
+                    type="password"
+                    id="password"
+                    class="form-control auth-input"
+                    name="password"
+                    placeholder="··········"
+                  />
+                  <span class="input-icon-right toggle-password" onclick="togglePassword()" style="cursor:pointer;">
+                    <i class='bx bx-hide' id="toggleIcon"></i>
+                  </span>
+                </div>
+              </div>
+              <div class="mb-3">
+                <button class="btn auth-btn w-100" type="submit">Sign in</button>
+              </div>
+            </form>
+
+            <p class="auth-footer-text">Protected access &middot; Aurora Central School</p>
+          </div>
+        </main>
+
       </div>
     </div>
 
