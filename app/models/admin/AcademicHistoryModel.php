@@ -8,12 +8,13 @@ require_once __DIR__ . '/../Model.php';
         protected $section = 'sections';
         protected $school_year = 'school_year';
 
-        public function getPaginated($limit, $offset, $search = '', $schoolYearId = ''){
+        public function getPaginated($limit, $offset, $search = '', $schoolYearId = '', $gradeLevel = '', $enrollmentStatus = ''){
             try{
-                [$where, $params, $types] = $this->buildFilters($search, $schoolYearId);
+                [$where, $params, $types] = $this->buildFilters($search, $schoolYearId, $gradeLevel, $enrollmentStatus);
 
                 $query = "SELECT
                         ah.*,
+                        s.lrn AS student_lrn,
                         s.first_name AS student_first_name,
                         s.last_name AS student_last_name,
                         u.full_name AS enrolled_by_registrar_name,
@@ -50,9 +51,9 @@ require_once __DIR__ . '/../Model.php';
          * Get the total number of academic history records matching the given filters.
          * Needed to calculate total pages for pagination.
          */
-        public function getTotalCount($search = '', $schoolYearId = ''){
+        public function getTotalCount($search = '', $schoolYearId = '', $gradeLevel = '', $enrollmentStatus = ''){
             try{
-                [$where, $params, $types] = $this->buildFilters($search, $schoolYearId);
+                [$where, $params, $types] = $this->buildFilters($search, $schoolYearId, $gradeLevel, $enrollmentStatus);
 
                 $query = "SELECT COUNT(*) AS total
                           FROM {$this->academic_history} ah
@@ -72,7 +73,7 @@ require_once __DIR__ . '/../Model.php';
             }
         }
 
-        private function buildFilters($search, $schoolYearId){
+        private function buildFilters($search, $schoolYearId, $gradeLevel = '', $enrollmentStatus = ''){
             $conditions = [];
             $params = [];
             $types = '';
@@ -87,6 +88,18 @@ require_once __DIR__ . '/../Model.php';
                 $conditions[] = "ah.school_year_id = ?";
                 $params[] = (int)$schoolYearId;
                 $types .= 'i';
+            }
+
+            if($gradeLevel !== ''){
+                $conditions[] = "ah.grade_level = ?";
+                $params[] = $gradeLevel;
+                $types .= 's';
+            }
+
+            if($enrollmentStatus !== ''){
+                $conditions[] = "ah.enrollment_status = ?";
+                $params[] = $enrollmentStatus;
+                $types .= 's';
             }
 
             $where = $conditions ? ' WHERE ' . implode(' AND ', $conditions) : '';

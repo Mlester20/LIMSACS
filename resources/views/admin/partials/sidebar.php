@@ -32,6 +32,12 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <li class="menu-header small text-uppercase">
           <span class="menu-header-text">Pages</span>
         </li>
+        <li class="menu-item <?php echo ($currentPage === 'student-records.php') ? 'active' : ''; ?>">
+          <a href="<?= BASE_URL ?>/resources/views/admin/student-records.php" class="menu-link">
+            <i class="menu-icon tf-icons bx bx-id-card"></i>
+            <div data-i18n="Student Master List">Student Master List</div>
+          </a>
+        </li>
         <li class="menu-item <?php echo ($currentPage === 'academic-history.php') ? 'active' : ''; ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
             <i class="menu-icon tf-icons bx bx-user"></i>
@@ -59,6 +65,24 @@ $currentPage = basename($_SERVER['PHP_SELF']);
           <ul class="menu-sub">
             <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/admin/school-year.php" class="menu-link"><div data-i18n="Basic">School Year</div></a></li>
           </ul>
+        </li>
+        <li class="menu-item <?php echo ($currentPage === 'student-documents.php') ? 'active' : ''; ?>">
+          <a href="<?= BASE_URL ?>/resources/views/admin/student-documents.php" class="menu-link">
+            <i class="menu-icon tf-icons bx bx-file-blank"></i>
+            <div data-i18n="Student Documents">Student Documents</div>
+          </a>
+        </li>
+        <li class="menu-item <?php echo ($currentPage === 'parent-guardians.php') ? 'active' : ''; ?>">
+          <a href="<?= BASE_URL ?>/resources/views/admin/parent-guardians.php" class="menu-link">
+            <i class="menu-icon tf-icons bx bx-group"></i>
+            <div data-i18n="Parents & Guardians">Parents & Guardians</div>
+          </a>
+        </li>
+        <li class="menu-item <?php echo ($currentPage === 'sections.php') ? 'active' : ''; ?>">
+          <a href="<?= BASE_URL ?>/resources/views/admin/sections.php" class="menu-link">
+            <i class="menu-icon tf-icons bx bx-collection"></i>
+            <div data-i18n="Sections">Sections</div>
+          </a>
         </li>
         <li class="menu-item <?php echo ($currentPage === 'users.php') ? 'active' : ''; ?>">
           <a href="javascript:void(0);" class="menu-link menu-toggle">

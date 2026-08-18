@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/../../../app/controllers/admin/AcademicHistoryController.php';
+require_once __DIR__ . '/../../../app/controllers/admin/StudentsController.php';
 require_once __DIR__ . '/../../../app/middleware/auth.php';
-AuthRole::allowOnly(['admin']); 
+AuthRole::allowOnly(['admin']);
 ?>
 
 <!DOCTYPE html>
@@ -16,7 +16,7 @@ AuthRole::allowOnly(['admin']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Academic History | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?> </title>
+    <title> Student Master List | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?> </title>
     <link rel="icon" type="image/x-icon" href="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -39,92 +39,47 @@ AuthRole::allowOnly(['admin']);
     <?php require_once __DIR__ . '/partials/topbar.php'; ?>
 
     <div class="card">
-        <h5 class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-            Academic History
-            <form method="GET" class="d-flex gap-2">
-                <input
-                    type="text"
-                    name="search"
-                    class="form-control"
-                    style="max-width: 220px;"
-                    placeholder="Search student name"
-                    value="<?php echo htmlspecialchars($search_term); ?>">
-
-                <select name="school_year_id" class="form-select" style="max-width: 180px;">
-                    <option value="">All School Years</option>
-                    <?php foreach ($school_year_options as $option): ?>
-                        <option value="<?php echo htmlspecialchars($option['id']); ?>" <?php echo (string)$school_year_filter === (string)$option['id'] ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($option['school_year']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-
-                <select name="grade_level" class="form-select" style="max-width: 160px;">
-                    <option value="">All Grade Levels</option>
-                    <?php foreach ($grade_level_options as $option): ?>
-                        <option value="<?php echo htmlspecialchars($option['grade_level']); ?>" <?php echo $grade_level_filter === $option['grade_level'] ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($option['grade_level']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-
-                <select name="enrollment_status" class="form-select" style="max-width: 170px;">
-                    <option value="">All Statuses</option>
-                    <?php foreach ($enrollment_status_options as $status): ?>
-                        <option value="<?php echo htmlspecialchars($status); ?>" <?php echo $enrollment_status_filter === $status ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($status); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-
-                <button type="submit" class="btn btn-outline-secondary">Filter</button>
-                <?php if ($search_term !== '' || $school_year_filter !== '' || $grade_level_filter !== '' || $enrollment_status_filter !== ''): ?>
-                    <a href="academic-history.php" class="btn btn-outline-secondary">Clear</a>
-                <?php endif; ?>
-            </form>
-        </h5>
+        <h5 class="card-header">Student Master List</h5>
         <div class="table-responsive nowrap">
             <table class="table">
                 <tr>
                     <th>#</th>
                     <th>LRN</th>
-                    <th>Student Name</th>
-                    <th>Grade & Section</th>
-                    <th>School Year</th>
-                    <th>Status</th>
-                    <th>Enrolled By</th>
-                    <th>Enrolled At</th>
+                    <th>Full Name</th>
+                    <th>Gender</th>
+                    <th>Birth Date</th>
+                    <th>Address</th>
+                    <th>Contact Number</th>
                 </tr>
 
-                <?php
-                    // Same status->color mapping used in registrar/enrollment.php, kept consistent app-wide
-                    $badgeColors = ['Enrolled' => 'success', 'Graduated' => 'primary', 'Transferred' => 'warning', 'Dropped' => 'danger'];
-                ?>
-                <?php if (!empty($academic_histories)): ?>
+                <?php if (!empty($students)): ?>
                     <?php
                         // Row numbering should continue across pages, not reset to 1
                         $rowNumber = (($current_page - 1) * $limit) + 1;
                     ?>
-                    <?php foreach ($academic_histories as $history): ?>
-                        <?php $rowBadgeColor = $badgeColors[$history['enrollment_status']] ?? 'secondary'; ?>
+                    <?php foreach ($students as $student): ?>
+                        <?php
+                            $fullName = trim(
+                                ($student['first_name'] ?? '') . ' ' .
+                                ($student['middle_name'] ?? '') . ' ' .
+                                ($student['last_name'] ?? '') . ' ' .
+                                ($student['suffix'] ?? '')
+                            );
+                            $fullName = preg_replace('/\s+/', ' ', $fullName);
+                        ?>
                         <tr>
                             <td><?= $rowNumber++ ?></td>
-                            <td><?= htmlspecialchars($history['student_lrn'] ?? '') ?></td>
-                            <td><?= htmlspecialchars($history['student_full_name'] ?? '') ?></td>
-                            <td>
-                                <?= htmlspecialchars($history['section_grade_level'] ?? '') ?>
-                                <?= !empty($history['section_name']) ? '- ' . htmlspecialchars($history['section_name']) : '' ?>
-                            </td>
-                            <td><?= htmlspecialchars($history['school_year'] ?? '') ?></td>
-                            <td><span class="badge bg-<?= $rowBadgeColor ?>"><?= htmlspecialchars($history['enrollment_status'] ?? '') ?></span></td>
-                            <td><?= htmlspecialchars($history['enrolled_by_registrar_name'] ?? '') ?></td>
-                            <!-- format into month name and date -->
-                            <td><?= !empty($history['created_at']) ? date('F j, Y', strtotime($history['created_at'])) : '' ?></td>
+                            <td><?= htmlspecialchars($student['lrn'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($fullName) ?></td>
+                            <td><?= htmlspecialchars($student['gender'] ?? '') ?></td>
+                            <td><?= !empty($student['birth_date']) ? date('F j, Y', strtotime($student['birth_date'])) : '' ?></td>
+                            <td><?= htmlspecialchars($student['address'] ?? '') ?></td>
+                            <td><?= htmlspecialchars($student['contact_number'] ?? '') ?></td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="8" class="text-center">No academic history records found.</td>
+                        <td colspan="7" class="text-center">No student records found.</td>
                     </tr>
                 <?php endif; ?>
             </table>
@@ -138,7 +93,7 @@ AuthRole::allowOnly(['admin']);
                 </span>
 
                 <nav>
-                    <?php $qs = function ($p) use ($search_term, $school_year_filter, $grade_level_filter, $enrollment_status_filter) { return '?' . http_build_query(['search' => $search_term, 'school_year_id' => $school_year_filter, 'grade_level' => $grade_level_filter, 'enrollment_status' => $enrollment_status_filter, 'page' => $p]); }; ?>
+                    <?php $qs = function ($p) { return '?' . http_build_query(['page' => $p]); }; ?>
                     <ul class="pagination mb-0">
                         <!-- Previous -->
                         <li class="page-item <?= $current_page <= 1 ? 'disabled' : '' ?>">
@@ -184,7 +139,7 @@ AuthRole::allowOnly(['admin']);
     </div>
 
     <?php require_once __DIR__ . '/partials/footer.php'; ?>
-    
+
     <!-- ── Vendor scripts ── -->
     <script src="<?= BASE_URL ?>/public/assets/vendor/libs/jquery/jquery.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/vendor/libs/popper/popper.js"></script>
@@ -193,9 +148,5 @@ AuthRole::allowOnly(['admin']);
     <script src="<?= BASE_URL ?>/public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/vendor/js/menu.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/js/main.js"></script>
-
-    <!-- ── Chart.js ── -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-    <script src="<?= BASE_URL ?>/public/js/admin/dashboard.js"></script>
 </body>
 </html>

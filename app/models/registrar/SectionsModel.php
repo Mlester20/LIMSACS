@@ -23,6 +23,34 @@ require_once __DIR__ . '/../Model.php';
             return $result->fetch_all(MYSQLI_ASSOC);
         }
 
+        /**
+         * Same shape as index(), plus a real enrolled-student count per section
+         * (computed from academic_history, since `sections` has no such column).
+         */
+        public function getWithEnrollmentCounts(){
+            try{
+                $query = "SELECT
+                        s.*,
+                        u.full_name as adviser_name,
+                        sy.school_year,
+                        COUNT(ah.id) as total_students
+                        FROM {$this->sections} s
+                        LEFT JOIN {$this->users} u ON s.adviser_id = u.id
+                        LEFT JOIN {$this->school_year} sy ON s.school_year_id = sy.id
+                        LEFT JOIN {$this->academic_history} ah ON ah.section_id = s.id AND ah.enrollment_status = 'Enrolled'
+                        GROUP BY s.id, u.full_name, sy.school_year
+                        ORDER BY sy.school_year DESC, s.grade_level ASC, s.section_name ASC
+                    ";
+                $stmt = $this->con->prepare($query);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                return $result->fetch_all(MYSQLI_ASSOC);
+            }catch(Exception $e){
+                error_log($e->getMessage());
+                return [];
+            }
+        }
+
         public function create($data){
             try {
                 $query = "INSERT INTO {$this->sections} (section_name, grade_level, adviser_id, school_year_id, max_students) VALUES (?, ?, ?, ?, ?)";

@@ -32,6 +32,57 @@ require_once __DIR__ . '/../Model.php';
             }
         }
 
+        public function getPaginated($limit, $offset, $status = ''){
+            try{
+                $where = $status !== '' ? 'WHERE sd.status = ?' : '';
+                $query ="SELECT
+                    sd.*,
+                    s.first_name as student_first_name,
+                    s.last_name as student_last_name,
+                    dt.document_name as document_type_name,
+                    u.full_name as uploaded_by_name,
+                    sd.uploaded_at
+                    FROM {$this->student_documents} sd
+                    LEFT JOIN {$this->students} s ON sd.student_id = s.id
+                    LEFT JOIN {$this->document_types} dt ON sd.document_type_id = dt.id
+                    LEFT JOIN {$this->user} u ON sd.uploaded_by = u.id
+                    {$where}
+                    ORDER BY s.last_name, s.first_name, sd.uploaded_at DESC
+                    LIMIT ? OFFSET ?
+                ";
+                $stmt = $this->con->prepare($query);
+                if($status !== ''){
+                    $stmt->bind_param("sii", $status, $limit, $offset);
+                }else{
+                    $stmt->bind_param("ii", $limit, $offset);
+                }
+                $stmt->execute();
+                $result = $stmt->get_result();
+                return $result->fetch_all(MYSQLI_ASSOC);
+            }catch(Exception $e){
+                error_log("Error " . $e->getMessage());
+                return [];
+            }
+        }
+
+        public function getTotalCount($status = ''){
+            try{
+                $where = $status !== '' ? 'WHERE sd.status = ?' : '';
+                $query = "SELECT COUNT(*) as total FROM {$this->student_documents} sd {$where}";
+                $stmt = $this->con->prepare($query);
+                if($status !== ''){
+                    $stmt->bind_param("s", $status);
+                }
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $row = $result->fetch_assoc();
+                return (int)$row['total'];
+            }catch(Exception $e){
+                error_log("Error " . $e->getMessage());
+                return 0;
+            }
+        }
+
         public function create($data){
             try{
                 $query = "INSERT INTO {$this->student_documents} (student_id, document_type_id, file_path, status, remarks, uploaded_by) VALUES (?, ?, ?, ?, ?, ?)";

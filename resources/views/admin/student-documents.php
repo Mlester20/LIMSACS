@@ -1,7 +1,28 @@
 <?php
-require_once __DIR__ . '/../../../app/controllers/admin/AcademicHistoryController.php';
+require_once __DIR__ . '/../../../app/controllers/admin/StudentsDocumentController.php';
 require_once __DIR__ . '/../../../app/middleware/auth.php';
-AuthRole::allowOnly(['admin']); 
+AuthRole::allowOnly(['admin']);
+
+// Status -> [badge class, icon] used for the status badge (matches registrar/student-documents.php).
+$statusMeta = function (string $status): array {
+    return match ($status) {
+        'Verified'  => ['bg-label-success', 'bx-check-circle'],
+        'Submitted' => ['bg-label-info', 'bx-upload'],
+        'Pending'   => ['bg-label-warning', 'bx-time-five'],
+        'Rejected'  => ['bg-label-danger', 'bx-x-circle'],
+        default     => ['bg-label-secondary', 'bx-file'],
+    };
+};
+
+// Normalize the stored relative path into the absolute /storage/... URL used for previews.
+$fileUrl = function (?string $path): string {
+    if (empty($path)) {
+        return '#';
+    }
+    return '/storage/student_documents/' . basename($path);
+};
+
+$status_options = ['Submitted', 'Pending', 'Verified', 'Rejected'];
 ?>
 
 <!DOCTYPE html>
@@ -16,7 +37,7 @@ AuthRole::allowOnly(['admin']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Academic History | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?> </title>
+    <title> Student Documents | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?> </title>
     <link rel="icon" type="image/x-icon" href="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -40,46 +61,20 @@ AuthRole::allowOnly(['admin']);
 
     <div class="card">
         <h5 class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-            Academic History
+            Student Documents
             <form method="GET" class="d-flex gap-2">
-                <input
-                    type="text"
-                    name="search"
-                    class="form-control"
-                    style="max-width: 220px;"
-                    placeholder="Search student name"
-                    value="<?php echo htmlspecialchars($search_term); ?>">
-
-                <select name="school_year_id" class="form-select" style="max-width: 180px;">
-                    <option value="">All School Years</option>
-                    <?php foreach ($school_year_options as $option): ?>
-                        <option value="<?php echo htmlspecialchars($option['id']); ?>" <?php echo (string)$school_year_filter === (string)$option['id'] ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($option['school_year']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-
-                <select name="grade_level" class="form-select" style="max-width: 160px;">
-                    <option value="">All Grade Levels</option>
-                    <?php foreach ($grade_level_options as $option): ?>
-                        <option value="<?php echo htmlspecialchars($option['grade_level']); ?>" <?php echo $grade_level_filter === $option['grade_level'] ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($option['grade_level']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-
-                <select name="enrollment_status" class="form-select" style="max-width: 170px;">
+                <select name="status" class="form-select" style="max-width: 180px;">
                     <option value="">All Statuses</option>
-                    <?php foreach ($enrollment_status_options as $status): ?>
-                        <option value="<?php echo htmlspecialchars($status); ?>" <?php echo $enrollment_status_filter === $status ? 'selected' : ''; ?>>
+                    <?php foreach ($status_options as $status): ?>
+                        <option value="<?php echo htmlspecialchars($status); ?>" <?php echo $status_filter === $status ? 'selected' : ''; ?>>
                             <?php echo htmlspecialchars($status); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
 
                 <button type="submit" class="btn btn-outline-secondary">Filter</button>
-                <?php if ($search_term !== '' || $school_year_filter !== '' || $grade_level_filter !== '' || $enrollment_status_filter !== ''): ?>
-                    <a href="academic-history.php" class="btn btn-outline-secondary">Clear</a>
+                <?php if ($status_filter !== ''): ?>
+                    <a href="student-documents.php" class="btn btn-outline-secondary">Clear</a>
                 <?php endif; ?>
             </form>
         </h5>
@@ -87,44 +82,46 @@ AuthRole::allowOnly(['admin']);
             <table class="table">
                 <tr>
                     <th>#</th>
-                    <th>LRN</th>
                     <th>Student Name</th>
-                    <th>Grade & Section</th>
-                    <th>School Year</th>
+                    <th>Document Type</th>
                     <th>Status</th>
-                    <th>Enrolled By</th>
-                    <th>Enrolled At</th>
+                    <th>Uploaded By</th>
+                    <th>Uploaded At</th>
+                    <th>File</th>
                 </tr>
 
-                <?php
-                    // Same status->color mapping used in registrar/enrollment.php, kept consistent app-wide
-                    $badgeColors = ['Enrolled' => 'success', 'Graduated' => 'primary', 'Transferred' => 'warning', 'Dropped' => 'danger'];
-                ?>
-                <?php if (!empty($academic_histories)): ?>
+                <?php if (!empty($documents)): ?>
                     <?php
                         // Row numbering should continue across pages, not reset to 1
                         $rowNumber = (($current_page - 1) * $limit) + 1;
                     ?>
-                    <?php foreach ($academic_histories as $history): ?>
-                        <?php $rowBadgeColor = $badgeColors[$history['enrollment_status']] ?? 'secondary'; ?>
+                    <?php foreach ($documents as $document): ?>
+                        <?php [$statusBadgeClass, $statusIcon] = $statusMeta($document['status']); ?>
                         <tr>
                             <td><?= $rowNumber++ ?></td>
-                            <td><?= htmlspecialchars($history['student_lrn'] ?? '') ?></td>
-                            <td><?= htmlspecialchars($history['student_full_name'] ?? '') ?></td>
+                            <td><?= htmlspecialchars(trim(($document['student_first_name'] ?? '') . ' ' . ($document['student_last_name'] ?? ''))) ?></td>
+                            <td><?= htmlspecialchars($document['document_type_name'] ?? '') ?></td>
                             <td>
-                                <?= htmlspecialchars($history['section_grade_level'] ?? '') ?>
-                                <?= !empty($history['section_name']) ? '- ' . htmlspecialchars($history['section_name']) : '' ?>
+                                <span class="badge <?= $statusBadgeClass ?>">
+                                    <i class="bx <?= $statusIcon ?> me-1"></i><?= htmlspecialchars($document['status'] ?? '') ?>
+                                </span>
                             </td>
-                            <td><?= htmlspecialchars($history['school_year'] ?? '') ?></td>
-                            <td><span class="badge bg-<?= $rowBadgeColor ?>"><?= htmlspecialchars($history['enrollment_status'] ?? '') ?></span></td>
-                            <td><?= htmlspecialchars($history['enrolled_by_registrar_name'] ?? '') ?></td>
-                            <!-- format into month name and date -->
-                            <td><?= !empty($history['created_at']) ? date('F j, Y', strtotime($history['created_at'])) : '' ?></td>
+                            <td><?= htmlspecialchars($document['uploaded_by_name'] ?? '—') ?></td>
+                            <td><?= !empty($document['uploaded_at']) ? date('F j, Y', strtotime($document['uploaded_at'])) : '' ?></td>
+                            <td>
+                                <a
+                                    href="<?php echo htmlspecialchars(BASE_URL . $fileUrl($document['file_path'])); ?>"
+                                    target="_blank"
+                                    class="btn btn-sm btn-outline-secondary"
+                                >
+                                    <i class="bx bx-show"></i> View
+                                </a>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="8" class="text-center">No academic history records found.</td>
+                        <td colspan="7" class="text-center">No student documents found.</td>
                     </tr>
                 <?php endif; ?>
             </table>
@@ -138,7 +135,7 @@ AuthRole::allowOnly(['admin']);
                 </span>
 
                 <nav>
-                    <?php $qs = function ($p) use ($search_term, $school_year_filter, $grade_level_filter, $enrollment_status_filter) { return '?' . http_build_query(['search' => $search_term, 'school_year_id' => $school_year_filter, 'grade_level' => $grade_level_filter, 'enrollment_status' => $enrollment_status_filter, 'page' => $p]); }; ?>
+                    <?php $qs = function ($p) use ($status_filter) { return '?' . http_build_query(['status' => $status_filter, 'page' => $p]); }; ?>
                     <ul class="pagination mb-0">
                         <!-- Previous -->
                         <li class="page-item <?= $current_page <= 1 ? 'disabled' : '' ?>">
@@ -184,7 +181,7 @@ AuthRole::allowOnly(['admin']);
     </div>
 
     <?php require_once __DIR__ . '/partials/footer.php'; ?>
-    
+
     <!-- ── Vendor scripts ── -->
     <script src="<?= BASE_URL ?>/public/assets/vendor/libs/jquery/jquery.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/vendor/libs/popper/popper.js"></script>
@@ -193,9 +190,5 @@ AuthRole::allowOnly(['admin']);
     <script src="<?= BASE_URL ?>/public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/vendor/js/menu.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/js/main.js"></script>
-
-    <!-- ── Chart.js ── -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-    <script src="<?= BASE_URL ?>/public/js/admin/dashboard.js"></script>
 </body>
 </html>
