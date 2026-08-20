@@ -49,9 +49,6 @@ require_once __DIR__ . '/database/config/config.php';
         <aside class="auth-hero">
           <div class="auth-hero-pattern"></div>
           <div class="auth-hero-content">
-            <div class="auth-hero-seal">
-              <img src="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" alt="Aurora Central School seal" />
-            </div>
             <div class="auth-hero-heading">
               <span class="auth-hero-kicker">Student Information Management System</span>
               <h2 class="auth-hero-title">Limsacs</h2>
@@ -74,10 +71,10 @@ require_once __DIR__ . '/database/config/config.php';
 
             <div class="auth-form-brand">
               <img src="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" alt="Limsacs logo" />
-              <span>Limsacs</span>
             </div>
 
-            <h1 class="auth-title">Welcome back</h1>
+            <h1 class="auth-title text-center">Welcome back</h1>
+            <!-- <hr> -->
             <p class="auth-desc">Sign in to your account to access the Limsacs system.</p>
 
             <form id="formAuthentication" class="mb-3" action="<?= BASE_URL ?>/app/controllers/Auth.php" method="POST">

@@ -109,25 +109,10 @@ body {
 
 .auth-hero-content {
   position: relative;
-}
-
-.auth-hero-seal {
-  width: 68px;
-  height: 68px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.10);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  flex: 1;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-}
-
-.auth-hero-seal img {
-  width: 46px;
-  height: 46px;
-  object-fit: contain;
 }
 
 .auth-hero-kicker {
@@ -200,25 +185,19 @@ body {
   max-width: 340px;
 }
 
-/* Compact brand row — hidden on desktop (hero panel already carries
-   the brand), shown once the hero panel collapses on small screens. */
+/* Brand row — the seal isn't legible against the dark hero panel at small
+   sizes, so it lives here on the white panel instead, on every screen size. */
 .auth-form-brand {
-  display: none;
+  display: flex;
   align-items: center;
-  gap: 0.6rem;
+  justify-content: center;
   margin-bottom: 1.75rem;
 }
 
 .auth-form-brand img {
-  width: 34px;
-  height: 34px;
+  width: 80px;
+  height: 80px;
   object-fit: contain;
-}
-
-.auth-form-brand span {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--auth-text-900);
 }
 
 /* ─── Typography ────────────────────────────────────────────────── */
@@ -391,18 +370,6 @@ button:focus-visible {
     min-width: 0;
   }
 
-  .auth-hero-seal {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 0;
-    flex: none;
-  }
-
-  .auth-hero-seal img {
-    width: 32px;
-    height: 32px;
-  }
-
   .auth-hero-heading {
     min-width: 0;
   }
@@ -428,10 +395,6 @@ button:focus-visible {
 
   .auth-form-panel {
     padding: 2rem 2rem 2.25rem;
-  }
-
-  .auth-form-brand {
-    display: flex;
   }
 }
 
