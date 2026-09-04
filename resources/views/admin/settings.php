@@ -180,9 +180,11 @@ $memberSince = $userProfile['created_at'] ? date('M d, Y', strtotime($userProfil
 
                             <div class="mt-2">
                                 <button type="submit" class="btn btn-primary me-2">Save changes</button>
-                                <button type="reset" class="btn btn-outline-secondary">Cancel</button>
+                                <a href="dashboard.php" class="btn btn-outline-secondary">
+                                    Cancel
+                                </a>
                             </div>
-                    </div>
+                        </div>
                     </form>
                     <!-- /Account -->
                 </div>
