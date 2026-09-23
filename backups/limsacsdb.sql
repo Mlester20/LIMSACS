@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 22, 2026 at 01:21 PM
+-- Generation Time: Sep 23, 2026 at 09:21 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -43,9 +43,13 @@ CREATE TABLE `academic_history` (
 --
 
 INSERT INTO `academic_history` (`id`, `student_id`, `enrolled_by`, `school_year_id`, `grade_level`, `section_id`, `enrollment_status`, `created_at`) VALUES
-(8, 11, 3, 3, 'Grade 1', 6, 'Enrolled', '2026-06-21 12:59:02'),
-(9, 34, 3, 3, 'Grade 6', 7, 'Graduated', '2026-06-21 13:00:35'),
-(10, 19, 3, 3, 'Grade 1', 6, 'Enrolled', '2026-06-22 11:16:39');
+(1, 4, 3, 1, 'Grade 1', NULL, 'Enrolled', '2026-08-15 14:51:41'),
+(2, 5, 3, 1, 'Grade 1', NULL, 'Enrolled', '2026-08-15 14:51:41'),
+(3, 6, 3, 1, 'Grade 1', NULL, 'Enrolled', '2026-08-15 14:51:41'),
+(4, 7, 3, 1, 'Grade 1', NULL, 'Transferred', '2026-08-15 14:51:41'),
+(5, 8, 3, 1, 'Grade 1', NULL, 'Dropped', '2026-08-15 14:51:41'),
+(6, 9, 3, 2, 'Grade 6', NULL, 'Graduated', '2026-08-15 14:51:41'),
+(7, 10, 3, 1, 'Grade 6', NULL, 'Graduated', '2026-08-15 14:51:41');
 
 -- --------------------------------------------------------
 
@@ -72,249 +76,17 @@ CREATE TABLE `audit_logs` (
 --
 
 INSERT INTO `audit_logs` (`id`, `user_id`, `role`, `action`, `module`, `reference_id`, `reference_table`, `description`, `ip_address`, `status`, `created_at`) VALUES
-(4, 1, 'admin', 'DELETED USER', 'USER', NULL, 'users', 'admin Deleted user record', '::1', 'success', '2026-06-07 14:08:40'),
-(5, 1, 'admin', 'CREATE USER', 'USER', NULL, 'users', 'admin created a new user record', '::1', 'success', '2026-06-07 14:11:52'),
-(6, 1, 'admin', 'UPDATE USER', 'USER', NULL, 'users', 'admin updated user record', '::1', 'success', '2026-06-07 14:27:55'),
-(7, 1, 'admin', 'DELETED USER', 'USER', NULL, 'users', 'admin Deleted user record', '::1', 'success', '2026-06-07 14:28:00'),
-(8, 3, 'registrar', 'CREATE SECTION', 'SECTIONS', NULL, 'sections', 'registrar created section: Pine', '::1', 'success', '2026-06-08 12:36:01'),
-(9, 3, 'registrar', 'DELETE SECTION', 'SECTIONS', NULL, 'sections', 'registrar deleted section', '::1', 'success', '2026-06-08 12:39:37'),
-(10, 3, 'registrar', 'UPDATE SECTION', 'SECTIONS', NULL, 'sections', 'registrar updated section: Mahogani', '::1', 'success', '2026-06-08 12:41:30'),
-(12, 3, 'registrar', 'UPDATE SECTION', 'SECTIONS', NULL, 'sections', 'registrar updated section: Mahogani', '::1', 'success', '2026-06-08 12:54:07'),
-(13, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-08 15:31:12'),
-(14, 3, 'registrar', 'DELETE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar deleted section', '::1', 'success', '2026-06-08 15:38:29'),
-(15, 3, 'registrar', 'CREATE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar created section: Pine', '::1', 'success', '2026-06-08 15:38:40'),
-(16, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-08 15:45:55'),
-(17, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-08 15:46:16'),
-(18, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-08 16:02:06'),
-(19, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-08 16:44:36'),
-(20, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-09 09:03:43'),
-(21, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-09 09:52:16'),
-(22, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-09 13:21:42'),
-(23, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-09 13:27:43'),
-(24, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-09 13:28:57'),
-(25, 3, 'registrar', 'CREATE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar created section: Mahogani', '::1', 'success', '2026-06-09 13:29:58'),
-(26, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 2', '::1', 'success', '2026-06-09 13:30:27'),
-(27, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-09 13:33:28'),
-(28, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-09 13:34:01'),
-(29, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-09 13:49:11'),
-(30, 3, 'registrar', 'DELETE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar deleted section', '::1', 'success', '2026-06-09 13:50:28'),
-(31, 3, 'registrar', 'UPDATE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar updated section: Mahogani', '::1', 'success', '2026-06-09 13:51:29'),
-(32, 3, 'registrar', 'DELETE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar deleted a document type with ID: 9.', '::1', 'success', '2026-06-09 15:14:14'),
-(33, 3, 'registrar', 'DELETE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar deleted a document type with ID: 1.', '::1', 'success', '2026-06-09 15:14:19'),
-(34, 3, 'registrar', 'DELETE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar deleted a document type with ID: 8.', '::1', 'success', '2026-06-09 15:14:24'),
-(35, 3, 'registrar', 'DELETE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar deleted a document type with ID: 7.', '::1', 'success', '2026-06-09 15:14:53'),
-(36, 3, 'registrar', 'DELETE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar deleted a document type with ID: 6.', '::1', 'success', '2026-06-09 15:14:58'),
-(37, 3, 'registrar', 'DELETE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar deleted a document type with ID: 5.', '::1', 'success', '2026-06-09 15:15:01'),
-(38, 3, 'registrar', 'DELETE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar deleted a document type with ID: 4.', '::1', 'success', '2026-06-09 15:15:05'),
-(39, 3, 'registrar', 'DELETE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar deleted a document type with ID: 3.', '::1', 'success', '2026-06-09 15:15:09'),
-(40, 3, 'registrar', 'DELETE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar deleted a document type with ID: 2.', '::1', 'success', '2026-06-09 15:15:13'),
-(41, 3, 'registrar', 'CREATE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar created a new document type: Birth Certificate.', '::1', 'success', '2026-06-09 15:16:56'),
-(42, 3, 'registrar', 'DELETE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar deleted a document type with ID: 10.', '::1', 'success', '2026-06-09 15:17:00'),
-(43, 3, 'registrar', 'DELETE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar deleted a document type with ID: 16.', '::1', 'success', '2026-06-09 15:18:54'),
-(44, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-09 15:27:04'),
-(45, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-09 15:31:52'),
-(46, 3, 'registrar', 'UPDATE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar updated a document type with ID: 19.', '::1', 'success', '2026-06-09 15:34:06'),
-(47, 3, 'registrar', 'DELETE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar deleted a document type with ID: 19.', '::1', 'success', '2026-06-09 15:34:26'),
-(48, 3, 'registrar', 'UPDATE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar updated a document type with ID: 18.', '::1', 'success', '2026-06-09 15:35:27'),
-(49, 3, 'registrar', 'DELETE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar deleted a document type with ID: 18.', '::1', 'success', '2026-06-09 15:35:59'),
-(50, 3, 'registrar', 'UPDATE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar updated a document type with ID: 17.', '::1', 'success', '2026-06-09 15:36:59'),
-(51, 3, 'registrar', 'UPDATE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar updated a document type with ID: 15.', '::1', 'success', '2026-06-09 15:37:05'),
-(52, 3, 'registrar', 'UPDATE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar updated a document type with ID: 14.', '::1', 'success', '2026-06-09 15:37:11'),
-(53, 3, 'registrar', 'UPDATE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar updated a document type with ID: 13.', '::1', 'success', '2026-06-09 15:37:18'),
-(54, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-10 12:58:29'),
-(55, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-10 14:13:26'),
-(56, 3, 'registrar', 'DELETE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar deleted parent/guardian record with ID: 1', '::1', 'success', '2026-06-10 15:22:42'),
-(57, 3, 'registrar', 'DELETE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar deleted parent/guardian record with ID: 2', '::1', 'success', '2026-06-10 15:25:48'),
-(58, 3, 'registrar', 'DELETE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar deleted parent/guardian record with ID: 3', '::1', 'success', '2026-06-10 16:14:17'),
-(59, 3, 'registrar', 'CREATE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar created a new parent/guardian record for student ID: 11', '::1', 'success', '2026-06-10 16:28:52'),
-(60, 3, 'registrar', 'UPDATE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', 4, 'parents_guardians', 'Registrar updated parent/guardian record with ID: 4', '::1', 'success', '2026-06-10 16:51:50'),
-(61, 3, 'registrar', 'DELETE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar deleted parent/guardian record with ID: 4', '::1', 'success', '2026-06-10 16:51:59'),
-(62, 3, 'registrar', 'CREATE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar created a new parent/guardian record for student ID: 11', '::1', 'success', '2026-06-10 16:58:46'),
-(63, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 2', '::1', 'success', '2026-06-10 16:59:30'),
-(64, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-11 07:42:23'),
-(65, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-12 08:54:57'),
-(66, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 2', '::1', 'success', '2026-06-12 08:57:02'),
-(67, 3, 'registrar', 'CREATE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar created a new parent/guardian record for student ID: 11', '::1', 'success', '2026-06-12 08:57:21'),
-(68, 3, 'registrar', 'UPDATE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', 5, 'parents_guardians', 'Registrar updated parent/guardian record with ID: 5', '::1', 'success', '2026-06-12 08:57:30'),
-(69, 3, 'registrar', 'UPDATE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', 5, 'parents_guardians', 'Registrar updated parent/guardian record with ID: 5', '::1', 'success', '2026-06-12 08:57:58'),
-(70, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-12 09:08:28'),
-(71, 3, 'registrar', 'DELETE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar deleted parent/guardian record with ID: 6', '::1', 'success', '2026-06-12 09:13:33'),
-(72, 3, 'registrar', 'DELETE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar deleted parent/guardian record with ID: 5', '::1', 'success', '2026-06-12 09:13:41'),
-(73, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-12 11:45:13'),
-(74, 3, 'registrar', 'UPDATE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar updated section: Mahogani', '::1', 'success', '2026-06-12 12:51:11'),
-(75, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 13:20:58'),
-(76, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 13:32:54'),
-(77, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 13:33:15'),
-(78, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 13:33:41'),
-(79, 3, 'registrar', 'CREATE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar created section: Pine', '::1', 'success', '2026-06-12 13:34:47'),
-(80, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 13:36:49'),
-(81, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 13:47:42'),
-(82, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 13:47:59'),
-(83, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 13:48:14'),
-(84, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 13:48:26'),
-(85, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 13:51:46'),
-(86, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 13:52:26'),
-(87, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 13:53:22'),
-(88, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 13:54:16'),
-(89, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 13:54:32'),
-(90, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 13:55:00'),
-(91, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 13:55:19'),
-(92, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 13:56:33'),
-(93, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:00:02'),
-(94, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:01:54'),
-(95, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:02:34'),
-(96, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:03:11'),
-(97, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:04:05'),
-(98, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:05:48'),
-(99, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:07:53'),
-(100, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:11:03'),
-(101, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:12:33'),
-(102, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:13:24'),
-(103, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:14:33'),
-(104, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:16:07'),
-(105, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:17:37'),
-(106, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:18:45'),
-(107, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:20:48'),
-(108, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-12 14:23:38'),
-(109, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-14 14:46:36'),
-(110, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-14 15:01:25'),
-(111, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-14 15:03:32'),
-(112, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-14 15:04:35'),
-(113, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-14 15:06:31'),
-(114, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-14 15:11:51'),
-(115, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-14 15:34:53'),
-(116, 3, 'registrar', 'ADD STUDENT', 'STUDENT', NULL, 'students', 'Registrar added student record', '::1', 'success', '2026-06-14 15:47:51'),
-(117, 3, 'registrar', 'CREATE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar created a new parent/guardian record for student ID: 11', '::1', 'success', '2026-06-14 16:03:17'),
-(118, 3, 'registrar', 'UPDATE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', 7, 'parents_guardians', 'Registrar updated parent/guardian record with ID: 7', '::1', 'success', '2026-06-14 16:18:47'),
-(119, 3, 'registrar', 'CREATE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar created a new parent/guardian record for student ID: 11', '::1', 'success', '2026-06-14 16:19:19'),
-(120, 3, 'registrar', 'DELETE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar deleted parent/guardian record with ID: 8', '::1', 'success', '2026-06-14 16:19:47'),
-(121, 3, 'registrar', 'DELETE PARENT/GUARDIAN', 'PARENTS_GUARDIANS', NULL, 'parents_guardians', 'Registrar deleted parent/guardian record with ID: 7', '::1', 'success', '2026-06-14 16:19:51'),
-(122, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Pogi si Lester logged in', '::1', 'success', '2026-06-14 16:30:40'),
-(123, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-14 16:39:59'),
-(124, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-15 06:30:31'),
-(125, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-16 05:51:21'),
-(126, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-16 11:53:30'),
-(127, 3, 'registrar', 'UPLOAD DOCUMENT', 'STUDENT_DOCUMENTS', NULL, 'student_documents', 'Document uploaded for student ID 13', '::1', 'success', '2026-06-16 12:49:47'),
-(128, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-16 13:35:40'),
-(129, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 12', '::1', 'success', '2026-06-16 14:10:28'),
-(130, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 2', '::1', 'success', '2026-06-16 14:20:55'),
-(131, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 1', '::1', 'success', '2026-06-16 14:20:58'),
-(132, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 11', '::1', 'success', '2026-06-16 14:22:09'),
-(133, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 11', '::1', 'success', '2026-06-16 14:23:24'),
-(134, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 4', '::1', 'success', '2026-06-16 14:23:29'),
-(135, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 3', '::1', 'success', '2026-06-16 14:24:23'),
-(136, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 3', '::1', 'success', '2026-06-16 14:29:10'),
-(137, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-16 14:31:53'),
-(138, 3, 'registrar', 'ADD STUDENT', 'STUDENT', NULL, 'students', 'Registrar added student record', '::1', 'success', '2026-06-16 14:33:24'),
-(139, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-16 14:33:50'),
-(140, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 3', '::1', 'success', '2026-06-16 15:04:48'),
-(141, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 12', '::1', 'success', '2026-06-16 15:05:25'),
-(142, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 44', '::1', 'success', '2026-06-16 15:10:16'),
-(143, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 5', '::1', 'success', '2026-06-16 15:14:42'),
-(144, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 6', '::1', 'success', '2026-06-16 15:22:05'),
-(145, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 5', '::1', 'success', '2026-06-16 15:22:08'),
-(146, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 43', '::1', 'success', '2026-06-16 15:23:08'),
-(147, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 1', '::1', 'success', '2026-06-16 15:24:19'),
-(148, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 1', '::1', 'success', '2026-06-16 15:25:32'),
-(149, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-16 15:26:04'),
-(150, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 11', '::1', 'success', '2026-06-16 15:26:31'),
-(151, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 2', '::1', 'success', '2026-06-16 15:31:43'),
-(152, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 2', '::1', 'success', '2026-06-16 15:35:30'),
-(153, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 22', '::1', 'success', '2026-06-16 15:35:51'),
-(154, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 3', '::1', 'success', '2026-06-16 15:36:15'),
-(155, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 3', '::1', 'success', '2026-06-16 15:36:42'),
-(156, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 3', '::1', 'success', '2026-06-16 15:36:50'),
-(157, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-17 06:37:43'),
-(158, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-17 06:38:04'),
-(159, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-17 06:42:59'),
-(160, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-17 06:44:10'),
-(161, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-17 06:49:24'),
-(162, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-17 06:51:37'),
-(163, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 17', '::1', 'success', '2026-06-17 07:01:42'),
-(164, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 4', '::1', 'success', '2026-06-17 07:02:26'),
-(165, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 4', '::1', 'success', '2026-06-17 07:03:01'),
-(166, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-17 13:32:49'),
-(167, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 12', '::1', 'success', '2026-06-17 13:52:30'),
-(168, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 11', '::1', 'success', '2026-06-17 13:53:27'),
-(169, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 5', '::1', 'success', '2026-06-17 13:53:44'),
-(170, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 11', '::1', 'success', '2026-06-17 13:56:52'),
-(171, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 5', '::1', 'success', '2026-06-17 14:04:18'),
-(172, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 6', '::1', 'success', '2026-06-17 14:04:21'),
-(173, 3, 'registrar', 'DELETE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar deleted a student document with ID: 7', '::1', 'success', '2026-06-17 14:04:24'),
-(174, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-17 14:08:22'),
-(175, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-18 04:21:18'),
-(176, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-18 05:50:32'),
-(177, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-18 05:51:15'),
-(178, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-18 06:55:27'),
-(179, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-18 06:55:56'),
-(180, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-18 06:58:11'),
-(181, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 11', '::1', 'success', '2026-06-18 07:00:01'),
-(182, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 8', '::1', 'success', '2026-06-18 07:00:47'),
-(183, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-18 07:23:14'),
-(184, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-18 07:24:39'),
-(185, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-18 07:25:38'),
-(186, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-18 13:49:25'),
-(187, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-18 14:12:20'),
-(188, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-18 14:36:12'),
-(189, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 8', '::1', 'success', '2026-06-18 14:38:30'),
-(190, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-18 14:40:55'),
-(191, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-18 15:12:27'),
-(192, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-18 15:20:43'),
-(193, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-19 05:14:28'),
-(194, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-19 05:59:25'),
-(195, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 33', '::1', 'success', '2026-06-19 06:00:06'),
-(196, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 9', '::1', 'success', '2026-06-19 06:00:47'),
-(197, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-19 06:10:04'),
-(198, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-19 06:35:44'),
-(199, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-19 06:46:07'),
-(200, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-19 06:46:55'),
-(201, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-19 06:55:54'),
-(202, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-19 07:06:05'),
-(203, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-19 11:57:54'),
-(204, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-19 12:17:03'),
-(205, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-19 12:56:05'),
-(206, 3, 'registrar', 'DROP STUDENT', 'ENROLLMENT', 3, 'academic_history', 'Marked Mark Lester  Raguindin as Dropped', '::1', 'success', '2026-06-19 13:03:26'),
-(207, 3, 'registrar', 'GRADUATE STUDENT', 'ENROLLMENT', 2, 'academic_history', 'Marked Armando Raguindin as Graduated', '::1', 'success', '2026-06-19 13:14:40'),
-(208, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-19 13:28:34'),
-(209, 3, 'registrar', 'UPDATE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar updated section: Mahogani', '::1', 'success', '2026-06-19 13:30:31'),
-(210, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 6', '::1', 'success', '2026-06-19 13:31:20'),
-(211, 3, 'registrar', 'GRADUATE STUDENT', 'ENROLLMENT', 5, 'academic_history', 'Marked Mark Lester  Raguindin as Graduated', '::1', 'success', '2026-06-19 13:32:39'),
-(212, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-19 13:53:38'),
-(213, 3, 'registrar', 'DELETE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar deleted section', '::1', 'success', '2026-06-19 14:00:33'),
-(214, 3, 'registrar', 'DELETE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar deleted section', '::1', 'success', '2026-06-19 14:00:35'),
-(215, 3, 'registrar', 'CREATE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar created section: Pine', '::1', 'success', '2026-06-19 14:23:34'),
-(216, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-19 14:23:54'),
-(217, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 01:52:40'),
-(218, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-21 02:14:53'),
-(219, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-21 02:16:03'),
-(220, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 12:30:25'),
-(221, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-21 12:30:51'),
-(222, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 12:46:41'),
-(223, 3, 'registrar', 'CREATE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar created a new document type: Test.', '::1', 'success', '2026-06-21 12:47:07'),
-(224, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 12:47:28'),
-(225, 3, 'registrar', 'DELETE DOCUMENT TYPE', 'DOCUMENT_TYPE', NULL, 'document_types', 'Registrar deleted a document type with ID: 20.', '::1', 'success', '2026-06-21 12:49:22'),
-(226, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-21 12:59:02'),
-(227, 3, 'registrar', 'CREATE SECTION', 'SECTIONS', NULL, 'sections', 'Registrar created section: Mahogani', '::1', 'success', '2026-06-21 12:59:42'),
-(228, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 6', '::1', 'success', '2026-06-21 13:00:35'),
-(229, 3, 'registrar', 'GRADUATE STUDENT', 'ENROLLMENT', 9, 'academic_history', 'Marked Maria Flores as Graduated', '::1', 'success', '2026-06-21 13:00:57'),
-(230, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-21 13:04:53'),
-(231, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 13:05:33'),
-(232, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-21 13:39:29'),
-(233, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 14:09:55'),
-(234, 3, 'registrar', 'CREATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar created a new student document for student ID: 34', '::1', 'success', '2026-06-21 14:12:20'),
-(235, 3, 'registrar', 'UPDATE DOCUMENT', 'STUDENTS_DOCUMENTS', NULL, 'students_documents', 'Registrar updated student document with ID: 10', '::1', 'success', '2026-06-21 14:12:39'),
-(236, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-21 14:51:39'),
-(237, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 15:01:13'),
-(238, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 15:11:08'),
-(239, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-21 15:28:02'),
-(240, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-21 15:30:29'),
-(241, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-22 09:00:22'),
-(242, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-22 09:01:29'),
-(243, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-22 09:22:25'),
-(244, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-22 09:25:56'),
-(245, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-06-22 09:42:19'),
-(246, 3, 'registrar', 'ENROLL STUDENT', 'ENROLLMENT', NULL, 'academic_history', 'Student enrolled in Grade 1', '::1', 'success', '2026-06-22 11:16:39'),
-(247, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-06-22 11:20:49');
+(1, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-08-15 14:50:33'),
+(2, 3, 'registrar', 'IMPORT STUDENTS', 'STUDENTS', NULL, 'students', '10 students inserted, 0 skipped, 0 failed; 3 parent/guardian records added; 7 academic history records added (0 skipped); 2 graduate records added (0 skipped)', '::1', 'success', '2026-08-15 14:51:41'),
+(3, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-08-20 16:06:04'),
+(4, 1, 'admin', 'LOGIN', 'AUTH', NULL, NULL, 'admin logged in', '::1', 'success', '2026-08-20 16:25:32'),
+(5, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-08-20 16:25:53'),
+(6, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-08-22 14:41:07'),
+(7, 3, 'registrar', 'UPDATE SCHOOL YEAR', 'SCHOOL_YEAR', 1, 'school_year', 'Registrar updated school year with ID: 1', '::1', 'success', '2026-08-22 14:41:33'),
+(8, 3, 'registrar', 'UPDATE SCHOOL YEAR', 'SCHOOL_YEAR', 1, 'school_year', 'Registrar updated school year with ID: 1', '::1', 'success', '2026-08-22 14:41:47'),
+(9, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-09-18 15:47:57'),
+(10, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-09-18 17:25:34'),
+(11, 3, 'registrar', 'LOGIN', 'AUTH', NULL, NULL, 'Registrar logged in', '::1', 'success', '2026-09-23 07:18:53');
 
 -- --------------------------------------------------------
 
@@ -328,18 +100,6 @@ CREATE TABLE `document_types` (
   `is_required` tinyint(1) DEFAULT 1,
   `is_active` tinyint(1) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `document_types`
---
-
-INSERT INTO `document_types` (`id`, `document_name`, `is_required`, `is_active`) VALUES
-(11, 'Birth Certificate', 1, 1),
-(12, 'Report Card', 1, 1),
-(13, 'Form 137', 1, 1),
-(14, 'Good Moral Certificate', 1, 1),
-(15, 'Medical Certificate', 1, 1),
-(17, 'Certificate of Completion', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -363,7 +123,8 @@ CREATE TABLE `graduates` (
 --
 
 INSERT INTO `graduates` (`id`, `student_id`, `academic_history_id`, `graduation_date`, `honors`, `remarks`, `recorded_by`, `created_at`) VALUES
-(1, 34, 9, '2026-06-24', 'Test', NULL, 3, '2026-06-21 13:00:57');
+(1, 9, 6, '2011-04-05', 'With Honors', 'Graduated in the oldest school year on record', 3, '2026-08-15 14:51:41'),
+(2, 10, 7, '2026-04-06', 'With High Honors', 'Graduated in the current/latest school year', 3, '2026-08-15 14:51:41');
 
 -- --------------------------------------------------------
 
@@ -386,6 +147,15 @@ CREATE TABLE `parents_guardians` (
   `created_at` date NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `parents_guardians`
+--
+
+INSERT INTO `parents_guardians` (`id`, `student_id`, `father_name`, `father_occupation`, `father_contact`, `mother_name`, `mother_occupation`, `mother_contact`, `guardian_name`, `guardian_relationship`, `guardian_contact`, `created_at`) VALUES
+(1, 3, 'Pedro Garcia', 'Driver', '09181234563', 'Ana Garcia', 'Vendor', '09191234563', NULL, NULL, NULL, '2026-08-15'),
+(2, 6, 'Ramon Aquino', NULL, '09201234566', 'Liza Aquino', NULL, '09211234566', NULL, NULL, NULL, '2026-08-15'),
+(3, 10, 'Carlos Lopez', NULL, '09221234570', 'Grace Lopez', NULL, '09231234570', NULL, NULL, NULL, '2026-08-15');
+
 -- --------------------------------------------------------
 
 --
@@ -407,9 +177,22 @@ CREATE TABLE `school_year` (
 --
 
 INSERT INTO `school_year` (`id`, `school_year`, `start_date`, `end_date`, `status`, `created_at`, `updated_at`) VALUES
-(3, '2026-2027', '2026-06-08', '2027-04-05', 'active', '2026-06-06 15:01:38', '2026-06-09 13:33:49'),
-(6, '2027-2028', '2027-06-07', '2028-04-03', 'archived', '2026-06-09 13:28:47', '2026-06-21 13:05:10'),
-(7, '2028-2029', '2028-06-05', '2029-04-09', 'archived', '2026-06-21 12:33:31', '2026-06-21 13:05:15');
+(1, '2025-2026', '2025-06-09', '2026-04-06', 'active', '2026-08-10 13:09:56', '2026-08-22 14:41:47'),
+(2, '2010-2011', '2010-06-01', '2011-04-05', 'archived', '2026-08-10 13:17:48', '2026-08-10 13:17:48'),
+(3, '2011-2012', '2011-06-01', '2012-04-05', 'archived', '2026-08-10 13:17:48', '2026-08-10 13:17:48'),
+(4, '2012-2013', '2012-06-01', '2013-04-05', 'archived', '2026-08-10 13:17:48', '2026-08-10 13:17:48'),
+(5, '2013-2014', '2013-06-01', '2014-04-05', 'archived', '2026-08-10 13:17:48', '2026-08-10 13:17:48'),
+(6, '2014-2015', '2014-06-01', '2015-04-05', 'archived', '2026-08-10 13:17:48', '2026-08-10 13:17:48'),
+(7, '2015-2016', '2015-06-01', '2016-04-05', 'archived', '2026-08-10 13:17:48', '2026-08-10 13:17:48'),
+(8, '2016-2017', '2016-06-01', '2017-04-05', 'archived', '2026-08-10 13:17:48', '2026-08-10 13:17:48'),
+(9, '2017-2018', '2017-06-01', '2018-04-05', 'archived', '2026-08-10 13:17:48', '2026-08-10 13:17:48'),
+(10, '2018-2019', '2018-06-01', '2019-04-05', 'archived', '2026-08-10 13:17:48', '2026-08-10 13:17:48'),
+(11, '2019-2020', '2019-06-01', '2020-04-05', 'archived', '2026-08-10 13:17:48', '2026-08-10 13:17:48'),
+(12, '2020-2021', '2020-06-01', '2021-04-05', 'archived', '2026-08-10 13:17:48', '2026-08-10 13:17:48'),
+(13, '2021-2022', '2021-06-01', '2022-04-05', 'archived', '2026-08-10 13:17:48', '2026-08-10 13:17:48'),
+(14, '2022-2023', '2022-06-01', '2023-04-05', 'archived', '2026-08-10 13:17:48', '2026-08-10 13:17:48'),
+(15, '2023-2024', '2023-06-01', '2024-04-05', 'archived', '2026-08-10 13:17:48', '2026-08-10 13:17:48'),
+(16, '2024-2025', '2024-06-01', '2025-04-05', 'archived', '2026-08-10 13:17:48', '2026-08-10 13:17:48');
 
 -- --------------------------------------------------------
 
@@ -426,14 +209,6 @@ CREATE TABLE `sections` (
   `max_students` int(11) NOT NULL DEFAULT 35,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `sections`
---
-
-INSERT INTO `sections` (`id`, `section_name`, `grade_level`, `adviser_id`, `school_year_id`, `max_students`, `created_at`) VALUES
-(6, 'Pine', 'Grade 1', 7, 3, 35, '2026-06-19 14:23:34'),
-(7, 'Mahogani', 'Grade 6', 8, 3, 35, '2026-06-21 12:59:42');
 
 -- --------------------------------------------------------
 
@@ -464,39 +239,16 @@ CREATE TABLE `students` (
 --
 
 INSERT INTO `students` (`id`, `lrn`, `first_name`, `middle_name`, `last_name`, `suffix`, `gender`, `birth_date`, `age`, `place_of_birth`, `nationality`, `religion`, `address`, `contact_number`, `created_at`) VALUES
-(11, '20242110365', 'Mark Lester ', 'Suguitan', 'Raguindin', '', 'Male', '2002-12-20', 23, 'Ilagan City, Isabela', 'Filipino', 'Roman Catholic', 'Rizal, Roxas, Isabela', '', '2026-06-09 15:49:56'),
-(12, '20242111365', 'Armando', 'Suguitan', 'Raguindin', 'Jr', 'Male', '2004-10-14', 22, 'Ilagan City, Isabela', 'Filipino', '', 'Rizal, Roxas, Isabela', '', '2026-06-12 08:56:37'),
-(13, '102345678906', 'Angelo', 'Mercado', 'Aquino', NULL, 'Male', '2008-11-04', 17, 'Roxas', 'Filipino', 'Roman Catholic', 'Zone 1, Brgy. San Jose, Roxas, Cagayan', '09152223344', '2026-06-12 13:05:21'),
-(14, '102345678907', 'Princess', 'Mae', 'Villanueva', NULL, 'Female', '2009-04-12', 17, 'Tuguegarao', 'Filipino', 'Roman Catholic', 'Blk 3 Lot 5, Stella Subdivision, Roxas, Cagayan', '09278889900', '2026-06-12 13:05:21'),
-(15, '102345678908', 'Christian', 'Bautista', 'Reyes', NULL, 'Male', '2007-09-25', 18, 'Manila', 'Filipino', 'Christian', '14 Mabini St, Brgy. Centro, Roxas, Cagayan', '09061112233', '2026-06-12 13:05:21'),
-(16, '102345678909', 'Samantha', 'Gomez', 'Santos', NULL, 'Female', '2008-07-19', 17, 'Ilagan', 'Filipino', 'Roman Catholic', 'Zone 3, Brgy. Muñoz, Roxas, Cagayan', '09174445566', '2026-06-12 13:05:21'),
-(17, '102345678910', 'Alexander', 'Lim', 'Chua', 'III', 'Male', '2008-02-02', 18, 'Quezon City', 'Filipino', 'Christian', '88 Lotus St, Brgy. New Vargas, Roxas, Cagayan', '09193334455', '2026-06-12 13:05:21'),
-(18, '102345678911', 'Chloe', 'Nicole', 'Dizon', NULL, 'Female', '2009-10-14', 16, 'Roxas', 'Filipino', 'Iglesia ni Cristo', 'Zone 5, Brgy. Bantug, Roxas, Cagayan', '09367778899', '2026-06-12 13:05:21'),
-(19, '102345678912', 'Joshua', 'Gabriel', 'Torres', NULL, 'Male', '2008-06-30', 17, 'Santiago', 'Filipino', 'Roman Catholic', '22 Luna St, Brgy. Central, Roxas, Cagayan', '09985554433', '2026-06-12 13:05:21'),
-(20, '102345678913', 'Beatriz', 'Amor', 'Castillo', NULL, 'Female', '2007-11-11', 18, 'Tuguegarao', 'Filipino', 'Roman Catholic', 'Zone 2, Brgy. San Jone, Roxas, Cagayan', '09452221100', '2026-06-12 13:05:21'),
-(21, '102345678914', 'Gabriel', 'Jose', 'Mendoza', NULL, 'Male', '2009-03-08', 17, 'Roxas', 'Filipino', 'Aglipayan', 'Zone 6, Brgy. Matusalem, Roxas, Cagayan', '09263337788', '2026-06-12 13:05:21'),
-(22, '102345678915', 'Hannah', 'Sophia', 'Ramos', NULL, 'Female', '2008-12-21', 17, 'Cauayan', 'Filipino', 'Born Again Christian', '19 Del Pilar St, Brgy. Centro, Roxas, Cagayan', '09774441122', '2026-06-12 13:05:21'),
-(23, '102345678916', 'Nathaniel', 'David', 'Castro', NULL, 'Male', '2008-01-17', 18, 'Manila', 'Filipino', 'Roman Catholic', 'Zone 1, Brgy. Quibal, Peñablanca, Cagayan', '09178883344', '2026-06-12 13:05:21'),
-(24, '102345678917', 'Sofia', 'Isabella', 'Fernandez', NULL, 'Female', '2009-07-04', 16, 'Tuguegarao', 'Filipino', 'Roman Catholic', '45 Caritan Norte, Tuguegarao City, Cagayan', '09184445533', '2026-06-12 13:05:21'),
-(25, '102345678918', 'Ethan', 'Jacob', 'Soriano', NULL, 'Male', '2007-10-29', 18, 'Aparri', 'Filipino', 'Methodist', 'Poblacion, Aparri, Cagayan', '09226667788', '2026-06-12 13:05:21'),
-(26, '102345678919', 'Althea', 'Rose', 'Guzman', NULL, 'Female', '2008-05-23', 18, 'Roxas', 'Filipino', 'Roman Catholic', 'Zone 4, Brgy. San Quirino, Roxas, Cagayan', '09351119900', '2026-06-12 13:05:21'),
-(27, '102345678920', 'Michael', 'Kevin', 'Pascual', NULL, 'Male', '2009-02-11', 17, 'Lal-lo', 'Filipino', 'Iglesia ni Cristo', 'Brgy. Bagumbayan, Lal-lo, Cagayan', '09054443322', '2026-06-12 13:05:21'),
-(28, '102345678921', 'Camila', 'Jane', 'Valdez', NULL, 'Female', '2008-08-08', 17, 'Tuguegarao', 'Filipino', 'Roman Catholic', 'Zone 2, Brgy. Carig Sur, Tuguegarao City, Cagayan', '09167772211', '2026-06-12 13:05:21'),
-(29, '102345678922', 'Daniel', 'Luis', 'Bermudez', NULL, 'Male', '2007-12-15', 18, 'Roxas', 'Filipino', 'Roman Catholic', 'Zone 3, Brgy. Marcos, Roxas, Cagayan', '09991114455', '2026-06-12 13:05:21'),
-(30, '102345678923', 'Janine', 'Marie', 'Salamat', NULL, 'Female', '2009-05-19', 17, 'Ilagan', 'Filipino', 'Christian', 'Zone 1, Brgy. Sotero, Roxas, Cagayan', '09473332211', '2026-06-12 13:05:21'),
-(31, '102345678924', 'Elijah', 'Paul', 'Corpuz', NULL, 'Male', '2008-04-03', 18, 'Tuguegarao', 'Filipino', 'Aglipayan', 'Zone 7, Brgy. Pengue Ruyu, Tuguegarao City, Cagayan', '09362228833', '2026-06-12 13:05:21'),
-(32, '102345678925', 'Alyssa', 'Faith', 'Domingo', NULL, 'Female', '2008-09-12', 17, 'Roxas', 'Filipino', 'Roman Catholic', 'Zone 2, Brgy. Vira, Roxas, Cagayan', '09154449988', '2026-06-12 13:05:21'),
-(33, '102345678926', 'Justin', 'Mark', 'Santiago', NULL, 'Male', '2009-11-20', 16, 'Manila', 'Filipino', 'Roman Catholic', '12 Bonifacio St, Brgy. Centro, Roxas, Cagayan', '09273334411', '2026-06-12 13:05:21'),
-(34, '102345678927', 'Maria', 'Theresa', 'Flores', NULL, 'Female', '2008-03-14', 18, 'Tuguegarao', 'Filipino', 'Roman Catholic', 'Zone 4, Brgy. Cataggaman Pardo, Tuguegarao City, Cagayan', '09192225588', '2026-06-12 13:05:21'),
-(35, '102345678928', 'Matthew', 'James', 'Salvador', NULL, 'Male', '2007-08-27', 18, 'Roxas', 'Filipino', 'Jehovah\'s Witness', 'Zone 5, Brgy. Doña Concha, Roxas, Cagayan', '09063334499', '2026-06-12 13:05:21'),
-(36, '102345678929', 'Samantha', 'Joy', 'Pineda', NULL, 'Female', '2009-01-05', 17, 'Santiago', 'Filipino', 'Christian', 'Zone 1, Brgy. Simimba, Roxas, Cagayan', '09172229900', '2026-06-12 13:05:21'),
-(37, '102345678930', 'Kyle', 'Andrew', 'Gatbonton', NULL, 'Male', '2008-10-10', 17, 'Quezon City', 'Filipino', 'Roman Catholic', 'Zone 3, Brgy. Imelda, Roxas, Cagayan', '09984441122', '2026-06-12 13:05:21'),
-(38, '102345678931', 'Angelica', 'Mae', 'De Leon', NULL, 'Female', '2008-06-17', 17, 'Roxas', 'Filipino', 'Roman Catholic', 'Zone 2, Brgy. Lucban, Roxas, Cagayan', '09356662233', '2026-06-12 13:05:21'),
-(39, '102345678932', 'Timothy', 'John', 'Villafuerte', NULL, 'Male', '2007-07-22', 18, 'Tuguegarao', 'Filipino', 'Iglesia ni Cristo', 'Zone 1, Brgy. San Gabriel, Tuguegarao City, Cagayan', '09458883344', '2026-06-12 13:05:21'),
-(40, '102345678933', 'Nicole', 'Anne', 'Manalo', NULL, 'Female', '2009-09-02', 16, 'Roxas', 'Filipino', 'Roman Catholic', 'Zone 4, Brgy. San Pedro, Roxas, Cagayan', '09264445511', '2026-06-12 13:05:21'),
-(41, '102345678934', 'Patrick', 'Neil', 'Bautista', 'Jr.', 'Male', '2008-02-28', 18, 'Manila', 'Filipino', 'Christian', 'Zone 2, Brgy. Holy Monday, Roxas, Cagayan', '09773336644', '2026-06-12 13:05:21'),
-(42, '102345678935', 'Erica', 'Louise', 'Javier', NULL, 'Female', '2008-12-05', 17, 'Ilagan', 'Filipino', 'Roman Catholic', 'Zone 3, Brgy. Masaya, Roxas, Cagayan', '09157774433', '2026-06-12 13:05:21'),
-(44, '0943588103', 'Russel Gio', 'Guerra', 'Briva', '', 'Male', '2018-08-26', 7, 'Yumena Hospital, Roxas', 'Filipino', 'Roman Catholic', 'Rizal, Roxas, Isabela', '', '2026-06-14 15:34:03');
+(1, '136000000001', 'Juan', NULL, 'Dela Cruz', NULL, 'Male', '2015-06-12', 11, 'Manila', 'Filipino', 'Catholic', '123 Rizal St, Manila', '09171234561', '2026-08-15 14:51:41'),
+(2, '136000000002', 'Maria', NULL, 'Santos', NULL, 'Female', '2015-08-20', 10, 'Quezon City', 'Filipino', 'Catholic', '45 Bonifacio Ave, QC', '09171234562', '2026-08-15 14:51:41'),
+(3, '136000000003', 'Jose', NULL, 'Garcia', NULL, 'Male', '2015-03-05', 11, 'Cebu City', 'Filipino', 'Catholic', '78 Mabini St, Cebu', NULL, '2026-08-15 14:51:41'),
+(4, '136000000004', 'Angela', NULL, 'Reyes', NULL, 'Female', '2015-01-15', 11, 'Manila', 'Filipino', 'Catholic', '12 Luna St, Manila', NULL, '2026-08-15 14:51:41'),
+(5, '136000000005', 'Mark', NULL, 'Villanueva', NULL, 'Male', '2015-09-02', 10, 'Pasig', 'Filipino', 'Catholic', '9 Ortigas Ave, Pasig', NULL, '2026-08-15 14:51:41'),
+(6, '136000000006', 'Krystal', NULL, 'Aquino', NULL, 'Female', '2015-11-30', 10, 'Makati', 'Filipino', 'Catholic', '5 Ayala Ave, Makati', NULL, '2026-08-15 14:51:41'),
+(7, '136000000007', 'Paolo', NULL, 'Torres', NULL, 'Male', '2014-07-18', 12, 'Taguig', 'Filipino', 'Catholic', '3 McKinley Rd, Taguig', NULL, '2026-08-15 14:51:41'),
+(8, '136000000008', 'Bea', NULL, 'Fernandez', NULL, 'Female', '2014-04-25', 12, 'Manila', 'Filipino', 'Catholic', '21 Taft Ave, Manila', NULL, '2026-08-15 14:51:41'),
+(9, '136000000009', 'Miguel', NULL, 'Ramos', NULL, 'Male', '1998-02-10', 28, 'Manila', 'Filipino', 'Catholic', '14 Espana Blvd, Manila', NULL, '2026-08-15 14:51:41'),
+(10, '136000000010', 'Samantha', NULL, 'Lopez', NULL, 'Female', '2013-05-22', 13, 'Manila', 'Filipino', 'Catholic', '30 Recto Ave, Manila', NULL, '2026-08-15 14:51:41');
 
 -- --------------------------------------------------------
 
@@ -514,15 +266,6 @@ CREATE TABLE `student_documents` (
   `uploaded_by` int(11) NOT NULL,
   `uploaded_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `student_documents`
---
-
-INSERT INTO `student_documents` (`id`, `student_id`, `document_type_id`, `file_path`, `status`, `remarks`, `uploaded_by`, `uploaded_at`) VALUES
-(8, 11, 17, 'storage/student_documents/doc_1781766001.pdf', 'Verified', 'Verified', 3, '2026-06-18 07:00:01'),
-(9, 11, 15, 'storage/student_documents/doc_1781848806.docx', 'Verified', 'Verified', 3, '2026-06-19 06:00:06'),
-(10, 34, 14, 'storage/student_documents/doc_1782051140.pdf', 'Verified', 'Verified', 3, '2026-06-21 14:12:20');
 
 -- --------------------------------------------------------
 
@@ -637,55 +380,55 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `academic_history`
 --
 ALTER TABLE `academic_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `audit_logs`
 --
 ALTER TABLE `audit_logs`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=248;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `document_types`
 --
 ALTER TABLE `document_types`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `graduates`
 --
 ALTER TABLE `graduates`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `parents_guardians`
 --
 ALTER TABLE `parents_guardians`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `school_year`
 --
 ALTER TABLE `school_year`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `sections`
 --
 ALTER TABLE `sections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `student_documents`
 --
 ALTER TABLE `student_documents`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
