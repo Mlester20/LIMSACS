@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../helpers/csrf.php';
 require_once __DIR__ . '/../../helpers/fileUpload.php';
-require_once __DIR__ . '/../../middleware/auth.php';
+require_once __DIR__ . '/../../middleware/Auth.php';
 require_once __DIR__ . '/../../models/registrar/StudentsModel.php';
 require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
 require_once __DIR__ . '/../../models/registrar/AcademicHistoryModel.php';

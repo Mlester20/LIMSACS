@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../../../app/controllers/registrar/StudentImportController.php';
 require_once __DIR__ . '/../../../app/helpers/flashMessage.php';
-require_once __DIR__ . '/../../../app/middleware/auth.php';
+require_once __DIR__ . '/../../../app/middleware/Auth.php';
 AuthRole::allowOnly(['registrar']);
 
 $importResults = $_SESSION['import_results'] ?? null;

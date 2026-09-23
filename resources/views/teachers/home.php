@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once __DIR__ . '/../../../app/middleware/auth.php';
+require_once __DIR__ . '/../../../app/middleware/Auth.php';
 AuthRole::allowOnly(['teacher']);
 require_once __DIR__ . '/../../../app/controllers/teacher/DashboardController.php';
 

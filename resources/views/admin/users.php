@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../../../app/controllers/admin/UsersController.php';
 require_once __DIR__ . '/../../../app/helpers/flashMessage.php';
-require_once __DIR__ . '/../../../app/middleware/auth.php';
+require_once __DIR__ . '/../../../app/middleware/Auth.php';
 AuthRole::allowOnly(['admin']); 
 ?>
 

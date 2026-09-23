@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../../../app/controllers/admin/AcademicHistoryController.php';
-require_once __DIR__ . '/../../../app/middleware/auth.php';
+require_once __DIR__ . '/../../../app/middleware/Auth.php';
 AuthRole::allowOnly(['admin']); 
 ?>
 

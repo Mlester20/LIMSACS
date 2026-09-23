@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../../../app/controllers/admin/StudentsDocumentController.php';
-require_once __DIR__ . '/../../../app/middleware/auth.php';
+require_once __DIR__ . '/../../../app/middleware/Auth.php';
 AuthRole::allowOnly(['admin']);
 
 // Status -> [badge class, icon] used for the status badge (matches registrar/student-documents.php).
