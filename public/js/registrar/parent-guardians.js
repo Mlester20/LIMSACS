@@ -169,12 +169,14 @@ function renderSearchResults(results) {
                             '${escapeJsString(guardian.guardian_relationship || '')}',
                             '${escapeJsString(guardian.guardian_contact || '')}',
                             '${escapeJsString(guardian.monthly_income || '')}'
-                        )" 
+                        )"
+                        title="View"
+                        aria-label="View"
                     >
-                        View
+                        <i class="bx bx-show"></i>
                     </button>
 
-                    <button 
+                    <button
                         class="btn btn-sm btn-warning"
                         data-bs-toggle="modal"
                         data-bs-target="#editGuardianModal"
@@ -191,9 +193,11 @@ function renderSearchResults(results) {
                             '${escapeJsString(guardian.guardian_relationship || '')}',
                             '${escapeJsString(guardian.guardian_contact || '')}',
                             '${escapeJsString(guardian.monthly_income || '')}'
-                        )" 
+                        )"
+                        title="Edit"
+                        aria-label="Edit"
                     >
-                        Edit
+                        <i class="bx bx-edit"></i>
                     </button>
 
                     <form action="../../../app/controllers/registrar/ParentGuardiansController.php" method="post" style="display: inline;">
@@ -204,8 +208,10 @@ function renderSearchResults(results) {
                             name="delete_guardian"
                             class="btn btn-sm btn-danger"
                             onclick="return confirm('Are you sure you want to delete this guardian?');"
+                            title="Delete"
+                            aria-label="Delete"
                         >
-                            Delete
+                            <i class="bx bx-trash"></i>
                         </button>
                     </form>
                 </td>

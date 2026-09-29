@@ -149,9 +149,10 @@ AuthRole::allowOnly(['registrar']);
                                             <?php echo $documentType['is_required'] ? 'true' : 'false'; ?>,
                                             <?php echo $documentType['is_active'] ? 'true' : 'false'; ?>
                                         )"
-                                        
+                                        title="Edit"
+                                        aria-label="Edit"
                                     >
-                                        Edit
+                                        <i class="bx bx-edit"></i>
                                     </button>
 
                                     <form action="<?= BASE_URL ?>/app/controllers/registrar/DocumentTypesController.php" method="post" style="display: inline";>
@@ -162,8 +163,10 @@ AuthRole::allowOnly(['registrar']);
                                             type="submit" 
                                             name="delete_document_type" 
                                             onclick="return confirm('Are you sure you want to delete this document type?');"
+                                            title="Delete"
+                                            aria-label="Delete"
                                         >
-                                            Delete
+                                            <i class="bx bx-trash"></i>
                                         </button>
                                     </form>
                                 </td>

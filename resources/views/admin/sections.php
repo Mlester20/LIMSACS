@@ -170,8 +170,10 @@ AuthRole::allowOnly(['admin']);
                                             <?= (int)($section['total_students'] ?? 0) ?>,
                                             <?= (int)($section['max_students'] ?? 0) ?>
                                         )"
+                                        title="View"
+                                        aria-label="View"
                                     >
-                                        View
+                                        <i class="bx bx-show"></i>
                                     </button>
                                 </td>
                             </tr>

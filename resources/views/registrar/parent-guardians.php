@@ -338,12 +338,14 @@ AuthRole::allowOnly(['registrar']);
                                                 '<?php echo addslashes($parentGuardian['guardian_relationship']); ?>',
                                                 '<?php echo addslashes($parentGuardian['guardian_contact']); ?>'
                                             )"
+                                            title="Edit"
+                                            aria-label="Edit"
                                         >
-                                            Edit
+                                            <i class="bx bx-edit"></i>
                                         </button>
 
-                                                        <button 
-                                            class="btn btn-sm btn-info" 
+                                                        <button
+                                            class="btn btn-sm btn-info"
                                             data-bs-toggle="modal"
                                             data-bs-target="#viewGuardianModal"
                                             onclick="viewParentGuardian(
@@ -358,8 +360,10 @@ AuthRole::allowOnly(['registrar']);
                                                 '<?php echo htmlspecialchars($parentGuardian['guardian_relationship']); ?>',
                                                 '<?php echo htmlspecialchars($parentGuardian['guardian_contact']); ?>'
                                             )"
+                                            title="View"
+                                            aria-label="View"
                                         >
-                                            View
+                                            <i class="bx bx-show"></i>
                                         </button>
 
                                         <form action="<?= BASE_URL ?>/app/controllers/registrar/ParentGuardiansController.php" method="post" style="display: inline">
@@ -370,8 +374,10 @@ AuthRole::allowOnly(['registrar']);
                                                 class="btn btn-sm btn-danger"
                                                 name="delete_guardian"
                                                 onclick="return confirm('Are you sure you want to delete this guardian?')"
+                                                title="Delete"
+                                                aria-label="Delete"
                                                 >
-                                                Delete
+                                                <i class="bx bx-trash"></i>
                                             </button>
                                         </form>
                                     </td>

@@ -334,13 +334,15 @@ AuthRole::allowOnly(['registrar']);
                         <?php echo $section['total_students']; ?>,
                         <?php echo $section['max_capacity']; ?>
                       )"
+                      title="View"
+                      aria-label="View"
                     >
-                      View
+                      <i class="bx bx-show"></i>
                     </button>
 
-                    <button 
+                    <button
                       class="btn btn-sm btn-primary"
-                      data-bs-toggle="modal" 
+                      data-bs-toggle="modal"
                       data-bs-target="#editSectionModal"
                       onclick="editFunction(
                         <?php echo $section['id']; ?>,
@@ -349,19 +351,23 @@ AuthRole::allowOnly(['registrar']);
                         <?php echo $section['adviser_id']; ?>,
                         <?php echo $section['school_year_id']; ?>
                       )"
+                      title="Edit"
+                      aria-label="Edit"
                     >
-                      Edit
+                      <i class="bx bx-edit"></i>
                     </button>
 
                     <form method="POST" action="<?= BASE_URL ?>/app/controllers/registrar/SectionsController.php" style="display: inline;">
                       <?php echo Csrf::field(); ?>
                       <input type="hidden" name="delete_section" value="<?php echo $section['id']; ?>">
-                      <button 
-                          type="submit" 
-                          class="btn btn-sm btn-danger" 
+                      <button
+                          type="submit"
+                          class="btn btn-sm btn-danger"
                           onclick="return confirm('Are you sure you want to delete this section?')"
+                          title="Delete"
+                          aria-label="Delete"
                           >
-                          Delete
+                          <i class="bx bx-trash"></i>
                       </button>
                     </form>
                   </td>

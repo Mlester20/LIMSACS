@@ -536,14 +536,15 @@ function renderSearchResults(results){
                 <td>${escapeHtml(gender)}</td>
                 <td>${escapeHtml(age)}</td>
                 <td>
-                    <button 
+                    <button
                         class="btn btn-sm btn-primary me-1"
                         title="Edit Student"
+                        aria-label="Edit"
                         data-bs-toggle="modal"
                         data-bs-target="#editStudentModal"
                         onclick='event.stopPropagation(); editStudent(${JSON.stringify(student)})'
                     >
-                        Edit
+                        <i class="bx bx-edit"></i>
                     </button>
                     <form method="POST" action="../../../app/controllers/registrar/StudentsController.php" style="display: inline;">
                         <input type="hidden" name="csrf_token" value="${getCsrfToken()}">
@@ -553,8 +554,10 @@ function renderSearchResults(results){
                             class="btn btn-sm btn-danger"
                             onclick="return confirm('Are you sure you want to delete this student? This action cannot be undone.');"
                             name="delete_student"
+                            title="Delete"
+                            aria-label="Delete"
                         >
-                            Delete
+                            <i class="bx bx-trash"></i>
                         </button>
                     </form>
                 </td>

@@ -97,7 +97,7 @@ $exportQs = function ($type) use ($filters) {
         <?php if (!$print_mode): ?>
         <div class="card-body border-bottom no-print">
             <form method="GET" class="row g-2 align-items-end">
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <label class="form-label small">Search</label>
                     <input type="text" name="search" class="form-control" placeholder="LRN or student name" value="<?= $e($search_term) ?>">
                 </div>
@@ -145,7 +145,7 @@ $exportQs = function ($type) use ($filters) {
                         <option value="Dropped" <?= $status_filter === 'Dropped' ? 'selected' : '' ?>>Dropped</option>
                     </select>
                 </div>
-                <div class="col-md-1 d-flex gap-2">
+                <div class="col-md-2 d-flex gap-2">
                     <button type="submit" class="btn btn-outline-secondary w-100">Filter</button>
                 </div>
             </form>
@@ -203,7 +203,7 @@ $exportQs = function ($type) use ($filters) {
                                 <?php if (!$print_mode): ?>
                                 <td class="no-print">
                                     <?php if (!empty($g['graduate_id'])): ?>
-                                        <a href="graduate-view.php?id=<?= $e($g['graduate_id']) ?>" class="btn btn-sm btn-outline-primary">View</a>
+                                        <a href="graduate-view.php?id=<?= $e($g['graduate_id']) ?>" class="btn btn-sm btn-outline-primary" title="View" aria-label="View"><i class="bx bx-show"></i></a>
                                     <?php else: ?>
                                         <span class="text-muted small">No graduate profile</span>
                                     <?php endif; ?>

@@ -407,8 +407,9 @@ AuthRole::allowOnly(['teacher']);
                                             '<?php echo addslashes($parentGuardian['guardian_relationship']); ?>',
                                             '<?php echo addslashes($parentGuardian['guardian_contact']); ?>'
                                         )"
+                                        aria-label="View"
                                     >
-                                        View
+                                        <i class="bx bx-show"></i>
                                     </button>
 
                                     <button
@@ -430,8 +431,9 @@ AuthRole::allowOnly(['teacher']);
                                             '<?php echo addslashes($parentGuardian['guardian_relationship']); ?>',
                                             '<?php echo addslashes($parentGuardian['guardian_contact']); ?>'
                                         )"
+                                        aria-label="Edit"
                                     >
-                                        Edit
+                                        <i class="bx bx-edit"></i>
                                     </button>
                                 </td>
                             </tr>

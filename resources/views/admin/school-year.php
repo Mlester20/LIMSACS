@@ -264,8 +264,10 @@ AuthRole::allowOnly(['admin']);
                                     '<?= htmlspecialchars($sy['end_date']); ?>', 
                                     '<?= htmlspecialchars($sy['status']); ?>'
                                   )"
+                                  title="Edit"
+                                  aria-label="Edit"
                                 >
-                                  Edit
+                                  <i class="bx bx-edit"></i>
                                 </button>
 
                                 <form action="<?= BASE_URL ?>/app/controllers/admin/SchoolYearController.php" method="POST" class="d-inline">
@@ -279,8 +281,10 @@ AuthRole::allowOnly(['admin']);
                                         type="submit"
                                         name="delete_sy"
                                         class="btn btn-sm btn-danger"
-                                        onclick="return confirm('Are you sure you want to delete this school year? This action cannot be undone.')">
-                                        Delete
+                                        onclick="return confirm('Are you sure you want to delete this school year? This action cannot be undone.')"
+                                        title="Delete"
+                                        aria-label="Delete">
+                                        <i class="bx bx-trash"></i>
                                     </button>
                                 </form>
                             </td>

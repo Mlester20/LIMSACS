@@ -272,13 +272,14 @@ $totalDocuments = count($documents);
                                         target="_blank"
                                         class="btn btn-sm btn-outline-secondary"
                                         title="View File"
+                                        aria-label="View"
                                     >
                                         <i class="bx bx-show"></i>
                                     </a>
-                                    <button class="btn btn-sm btn-warning" title="Edit" data-bs-toggle="modal" data-bs-target="#editDocumentModal" onclick="editDocument(<?php echo htmlspecialchars(json_encode($document)); ?>)">
+                                    <button class="btn btn-sm btn-warning" title="Edit" aria-label="Edit" data-bs-toggle="modal" data-bs-target="#editDocumentModal" onclick="editDocument(<?php echo htmlspecialchars(json_encode($document)); ?>)">
                                         <i class="bx bx-edit"></i>
                                     </button>
-                                    <button class="btn btn-sm btn-danger" title="Delete" onclick="deleteDocument(<?php echo $document['id']; ?>)">
+                                    <button class="btn btn-sm btn-danger" title="Delete" aria-label="Delete" onclick="deleteDocument(<?php echo $document['id']; ?>)">
                                         <i class="bx bx-trash"></i>
                                     </button>
                                 </td>

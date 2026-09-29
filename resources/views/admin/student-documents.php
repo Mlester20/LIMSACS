@@ -113,8 +113,10 @@ $status_options = ['Submitted', 'Pending', 'Verified', 'Rejected'];
                                     href="<?php echo htmlspecialchars(BASE_URL . $fileUrl($document['file_path'])); ?>"
                                     target="_blank"
                                     class="btn btn-sm btn-outline-secondary"
+                                    title="View"
+                                    aria-label="View"
                                 >
-                                    <i class="bx bx-show"></i> View
+                                    <i class="bx bx-show"></i>
                                 </a>
                             </td>
                         </tr>

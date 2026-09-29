@@ -192,24 +192,28 @@ AuthRole::allowOnly(['registrar']);
                                 <td><?php echo htmlspecialchars($student['age'] ?? 'N/A'); ?></td>
                                 <td>
 
-                                    <button 
+                                    <button
                                         class="btn btn-sm btn-primary"
                                         data-bs-toggle="modal"
                                         data-bs-target="#editStudentModal"
-                                        onclick="editStudent(<?php echo htmlspecialchars(json_encode($student)); ?>)">
-                                        Edit
+                                        onclick="editStudent(<?php echo htmlspecialchars(json_encode($student)); ?>)"
+                                        title="Edit"
+                                        aria-label="Edit">
+                                        <i class="bx bx-edit"></i>
                                     </button>
                                     <!-- delete action -->
                                     <form method="POST" action="<?= BASE_URL ?>/app/controllers/registrar/StudentsController.php" style="display: inline;">
                                         <?php echo Csrf::field(); ?>
                                         <input type="hidden" name="student_id" value="<?php echo $student['id']; ?>">
-                                        <button 
-                                            type="submit" 
-                                            class="btn btn-sm btn-danger" 
+                                        <button
+                                            type="submit"
+                                            class="btn btn-sm btn-danger"
                                             onclick="return confirm('Are you sure you want to delete this student? This action cannot be undone.');"
                                             name="delete_student"
+                                            title="Delete"
+                                            aria-label="Delete"
                                             >
-                                            Delete
+                                            <i class="bx bx-trash"></i>
                                         </button>
                                     </form>
                                 </td>

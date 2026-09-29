@@ -88,8 +88,10 @@ AuthRole::allowOnly(['admin']);
                                             class="btn btn-sm btn-danger"
                                             name="delete_logs"
                                             onclick="return confirm('Are you sure you to delete this log?, this action cannot be undone')"
+                                            title="Delete"
+                                            aria-label="Delete"
                                         >
-                                        Delete
+                                        <i class="bx bx-trash"></i>
                                         </button>
                                     </form>
                                 </td>

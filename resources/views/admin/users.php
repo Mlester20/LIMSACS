@@ -521,8 +521,10 @@ AuthRole::allowOnly(['admin']);
                                         class="btn btn-sm btn-warning"
                                         data-bs-toggle="modal"
                                         data-bs-target="#editUserModal"
-                                        onclick="updateUser(<?php echo htmlspecialchars($user['id']); ?>, '<?php echo htmlspecialchars($user['full_name']); ?>', '<?php echo htmlspecialchars($user['email']); ?>', '<?php echo htmlspecialchars($user['role']); ?>')">
-                                        Edit
+                                        onclick="updateUser(<?php echo htmlspecialchars($user['id']); ?>, '<?php echo htmlspecialchars($user['full_name']); ?>', '<?php echo htmlspecialchars($user['email']); ?>', '<?php echo htmlspecialchars($user['role']); ?>')"
+                                        title="Edit"
+                                        aria-label="Edit">
+                                        <i class="bx bx-edit"></i>
                                     </button>
 
                                     <button
@@ -535,7 +537,7 @@ AuthRole::allowOnly(['admin']);
                                     </button>
 
                                     <?php if ((int)$user['id'] === (int)($_SESSION['id'] ?? 0)): ?>
-                                        <button class="btn btn-sm btn-danger" disabled title="You cannot delete your own account">Delete</button>
+                                        <button class="btn btn-sm btn-danger" disabled title="You cannot delete your own account" aria-label="Delete"><i class="bx bx-trash"></i></button>
                                     <?php else: ?>
                                         <form action="<?= BASE_URL ?>/app/controllers/admin/UsersController.php" method="post" style="display: inline;">
                                             <?php echo Csrf::field(); ?>
@@ -545,8 +547,10 @@ AuthRole::allowOnly(['admin']);
                                                 class="btn btn-sm btn-danger"
                                                 onclick="return confirm('Are you sure you want to delete this user? ')"
                                                 name="delete_user"
+                                                title="Delete"
+                                                aria-label="Delete"
                                             >
-                                                Delete
+                                                <i class="bx bx-trash"></i>
                                             </button>
                                         </form>
                                     <?php endif; ?>

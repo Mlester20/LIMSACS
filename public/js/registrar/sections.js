@@ -219,8 +219,9 @@ function renderSearchResults(results) {
                             ${totalStudents},
                             ${section.max_capacity || 35}
                         )"
+                        aria-label="View Section"
                     >
-                        View
+                        <i class="bx bx-show"></i>
                     </button>
 
                     <button 
@@ -235,8 +236,9 @@ function renderSearchResults(results) {
                             ${section.adviser_id},
                             ${section.school_year_id}
                         )"
+                        aria-label="Edit Section"
                     >
-                        Edit
+                        <i class="bx bx-edit"></i>
                     </button>
 
                     <button 
@@ -248,8 +250,9 @@ function renderSearchResults(results) {
                                 body: new URLSearchParams({delete_section: ${sectionId}, csrf_token: getCsrfToken()})
                             }).then(r => location.reload()).catch(e => alert('Error: ' + e));
                         }"
+                        aria-label="Delete Section"
                     >
-                        Delete
+                        <i class="bx bx-trash"></i>
                     </button>
                 </td>
             </tr>
