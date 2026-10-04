@@ -167,6 +167,9 @@ try {
                                                     <i class="bx bx-medal"></i>
                                                 </button>
                                             <?php endif; ?>
+                                            <button class="btn btn-sm btn-outline-dark" title="Revert Enrollment (wrong school year or section)" onclick="enrollmentController.revertEnrollment(<?php echo $enrollment['enrollment_id']; ?>, '<?php echo $fullNameJs; ?>')">
+                                                <i class="bx bx-undo"></i>
+                                            </button>
                                         <?php else: ?>
                                             <span class="badge bg-<?php echo $rowBadgeColor; ?>"><?php echo htmlspecialchars($enrollment['enrollment_status']); ?></span>
                                         <?php endif; ?>

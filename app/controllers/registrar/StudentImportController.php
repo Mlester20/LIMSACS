@@ -254,7 +254,36 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
                     $sheet->getColumnDimension(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i))->setAutoSize(true);
                 }
 
-                $sheet->fromArray($this->sampleRows(), null, 'A2');
+                // These columns are fully numeric strings (LRN, phone numbers) — if left as
+                // Excel's default "General" format, Excel re-interprets them as numbers:
+                // long IDs render as scientific notation (1.36E+11) and any leading zero
+                // (e.g. a 09xx mobile number) is silently stripped. Force them to Text so
+                // what's typed is exactly what's stored, for both the sample rows below and
+                // any rows the registrar adds afterward.
+                $textColumns = ['lrn', 'contact_number', 'father_contact', 'mother_contact', 'guardian_contact'];
+                foreach($textColumns as $key){
+                    $colIndex = array_search($key, StudentImportService::TEMPLATE_HEADERS, true);
+                    if($colIndex === false) continue;
+                    $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1);
+                    $sheet->getStyle("{$colLetter}:{$colLetter}")->getNumberFormat()->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+                }
+
+                $sampleRows = $this->sampleRows();
+                $sheet->fromArray($sampleRows, null, 'A2');
+
+                // Belt-and-suspenders: also force the cell's stored type to string, since
+                // fromArray() infers type from the value itself (a numeric-looking string
+                // still gets written as a number) regardless of the column format set above.
+                foreach($textColumns as $key){
+                    $colIndex = array_search($key, StudentImportService::TEMPLATE_HEADERS, true);
+                    if($colIndex === false) continue;
+                    $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex + 1);
+                    foreach($sampleRows as $rowOffset => $row){
+                        $value = $row[$colIndex] ?? '';
+                        if($value === '') continue;
+                        $sheet->setCellValueExplicit("{$colLetter}" . (2 + $rowOffset), (string)$value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                    }
+                }
 
                 header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 header('Content-Disposition: attachment; filename="students_import_template.xlsx"');

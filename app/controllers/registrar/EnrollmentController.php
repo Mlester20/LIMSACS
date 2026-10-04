@@ -187,6 +187,31 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
         }
 
         /**
+         * Undo a wrongly-made enrollment (wrong school year or section) by
+         * permanently deleting the academic_history row. Only allowed while
+         * the enrollment is still 'Enrolled' — see EnrollmentService::revertEnrollment().
+         * @param int $enrollment_id
+         * @return array ['success' => bool, 'message' => string]
+         */
+        public function revertEnrollment($enrollment_id) {
+            $result = $this->enrollmentService->revertEnrollment($enrollment_id);
+
+            if ($result['success']) {
+                $this->auditLogs->log(
+                    $_SESSION['id'],
+                    $_SESSION['role'],
+                    'REVERT ENROLLMENT',
+                    'ENROLLMENT',
+                    $enrollment_id,
+                    'academic_history',
+                    "Reverted enrollment for {$result['studentName']}"
+                );
+            }
+
+            return $result;
+        }
+
+        /**
          * Abstract method implementation - not used in EnrollmentController
          */
         public function index() {
@@ -387,6 +412,27 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
                 }
 
                 $result = $controller->updateStudentStatus($enrollment_id, $new_status, $graduateData);
+                echo json_encode($result);
+                exit();
+            }
+
+            // Revert (undo) a wrongly-made enrollment — only while still Enrolled
+            if (isset($_POST['revert_enrollment'])) {
+                $enrollment_id = $_POST['enrollment_id'] ?? null;
+
+                header('Content-Type: application/json');
+
+                if (!Csrf::isValid($_POST['csrf_token'] ?? null)) {
+                    echo json_encode(['success' => false, 'message' => 'Your session has expired. Please refresh the page and try again.']);
+                    exit();
+                }
+
+                if (!$enrollment_id) {
+                    echo json_encode(['success' => false, 'message' => 'Missing enrollment id.']);
+                    exit();
+                }
+
+                $result = $controller->revertEnrollment($enrollment_id);
                 echo json_encode($result);
                 exit();
             }

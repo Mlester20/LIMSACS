@@ -134,6 +134,42 @@ class EnrollmentService extends Model {
     }
 
     /**
+     * Permanently delete an enrollment record. Only allowed while the enrollment
+     * is still 'Enrolled' — i.e. undoing a fresh mistake (wrong school year or
+     * wrong section picked at enroll time) before any status change happens —
+     * so this never needs to account for cascading away a `graduates` row.
+     * @param int $enrollment_id academic_history.id of the enrollment record
+     * @return array ['success' => bool, 'message' => string, 'studentName' => string|null]
+     */
+    public function revertEnrollment($enrollment_id) {
+        try {
+            $enrollment = $this->academicHistoryModel->getById($enrollment_id);
+            if (!$enrollment) {
+                return ['success' => false, 'message' => 'Enrollment record not found.'];
+            }
+
+            $studentName = trim($enrollment['first_name'] . ' ' . $enrollment['last_name']);
+
+            if ($enrollment['enrollment_status'] !== 'Enrolled') {
+                return ['success' => false, 'message' => 'Only an enrollment that is still Enrolled can be reverted.'];
+            }
+
+            if (!$this->academicHistoryModel->delete($enrollment_id)) {
+                return ['success' => false, 'message' => 'Failed to revert enrollment.'];
+            }
+
+            return [
+                'success' => true,
+                'message' => "Enrollment reverted for {$studentName}.",
+                'studentName' => $studentName
+            ];
+        } catch (Exception $e) {
+            error_log("Revert enrollment error: " . $e->getMessage());
+            return ['success' => false, 'message' => 'An error occurred while reverting the enrollment.'];
+        }
+    }
+
+    /**
      * Get enrolled students with pagination
      * @param int $page Current page number (default: 1)
      * @param int $itemsPerPage Items per page (default: 10)

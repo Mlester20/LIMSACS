@@ -410,7 +410,39 @@ const enrollmentController = {
                 <i class="bx bx-transfer"></i>
             </button>
             ${graduateBtn}
+            <button class="btn btn-sm btn-outline-dark" title="Revert Enrollment (wrong school year or section)"
+                onclick="enrollmentController.revertEnrollment(${enrollment.enrollment_id}, '${fullName}')">
+                <i class="bx bx-undo"></i>
+            </button>
         `;
+    },
+
+    revertEnrollment: function(enrollmentId, studentName) {
+        if (!confirm(`Revert ${studentName}'s enrollment? This permanently deletes this enrollment record (e.g. wrong school year or section was selected) so the student can be enrolled again correctly. This cannot be undone.`)) {
+            return;
+        }
+
+        $.ajax({
+            url: '../../../app/controllers/registrar/EnrollmentController.php',
+            type: 'POST',
+            data: {
+                revert_enrollment: 1,
+                enrollment_id: enrollmentId,
+                csrf_token: getCsrfToken()
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    Toast.success(response.message);
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    Toast.error(response.message);
+                }
+            },
+            error: function() {
+                Toast.error('Error reverting enrollment.');
+            }
+        });
     },
 
     dropStudent: function(enrollmentId, studentName) {

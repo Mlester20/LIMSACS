@@ -75,9 +75,11 @@ unset($_SESSION['import_results']);
         // Renders a small colored badge for a Group B/C/D sub-status cell.
         // $sub is null ("—", student row itself wasn't imported so nothing was
         // attempted) or ['status'=>'added'|'skipped'|'failed','reason'=>?string].
+        // A 'skipped' with reason 'no data' means the row simply didn't provide
+        // anything for this group — that's "N/A", not a problem to flag amber.
         $renderSubBadge = function($sub){
-            if($sub === null){
-                echo '<span class="text-muted">&mdash;</span>';
+            if($sub === null || ($sub['status'] === 'skipped' && ($sub['reason'] ?? '') === 'no data')){
+                echo '<span class="text-muted">N/A</span>';
                 return;
             }
             $badgeClass = [
