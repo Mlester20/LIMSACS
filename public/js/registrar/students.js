@@ -1,6 +1,12 @@
+// Tracks the student/parent-guardian data currently shown in the Student
+// Profile modal, so the Add/Edit Parent/Guardian button (outside the AJAX
+// callback below) knows which student it's editing for.
+let currentProfileStudentId = null;
+let currentParentGuardianData = null;
+
 function populateStudentModal(student) {
     const studentId = student.id;
-    
+
     $.ajax({
         url: '../../../app/controllers/registrar/StudentsController.php',
         type: 'POST',
@@ -68,6 +74,8 @@ function populateStudentModal(student) {
             renderAcademicHistory(academicHistory);
 
             // Render Parent/Guardians Information
+            currentProfileStudentId = studentData.id || studentId;
+            currentParentGuardianData = parentGuardians;
             renderParentGuardians(parentGuardians);
 
             // Render Documents Checklist
@@ -123,6 +131,11 @@ function renderAcademicHistory(academicHistory) {
 function renderParentGuardians(parentGuardians) {
     const container = document.getElementById('parentGuardiansInfo');
     if (!container) return;
+
+    const btnLabel = document.getElementById('editParentGuardianBtnLabel');
+    if (btnLabel) {
+        btnLabel.textContent = (parentGuardians && parentGuardians.id) ? 'Edit' : 'Add';
+    }
 
     if (!parentGuardians || Object.keys(parentGuardians).length === 0) {
         container.innerHTML = '<p class="text-muted text-center">No parent/guardian information found</p>';
@@ -181,6 +194,42 @@ function renderParentGuardians(parentGuardians) {
 
     html += '</div>';
     container.innerHTML = html;
+}
+
+/**
+ * Open the Add/Edit Parent/Guardian modal for the student currently shown in
+ * the Student Profile modal, pre-filled if a record already exists.
+ */
+function openParentGuardianEditor() {
+    if (!currentProfileStudentId) return;
+
+    const data = currentParentGuardianData || {};
+    const hasExisting = !!data.id;
+
+    document.getElementById('pg_student_id').value = currentProfileStudentId;
+    document.getElementById('pg_id').value = hasExisting ? data.id : '';
+    document.getElementById('pg_father_name').value = data.father_name || '';
+    document.getElementById('pg_father_occupation').value = data.father_occupation || '';
+    document.getElementById('pg_father_contact').value = data.father_contact || '';
+    document.getElementById('pg_mother_name').value = data.mother_name || '';
+    document.getElementById('pg_mother_occupation').value = data.mother_occupation || '';
+    document.getElementById('pg_mother_contact').value = data.mother_contact || '';
+    document.getElementById('pg_guardian_name').value = data.guardian_name || '';
+    document.getElementById('pg_guardian_relationship').value = data.guardian_relationship || '';
+    document.getElementById('pg_guardian_contact').value = data.guardian_contact || '';
+
+    const submitBtn = document.getElementById('pgSubmitBtn');
+    submitBtn.name = hasExisting ? 'update_guardian' : 'save_guardian';
+    submitBtn.textContent = hasExisting ? 'Save Changes' : 'Save';
+
+    // Bootstrap doesn't officially support stacked modals, so close the
+    // Student Profile modal underneath before opening this one.
+    const profileModalEl = document.getElementById('studentDetailsModal');
+    const profileModalInstance = bootstrap.Modal.getInstance(profileModalEl);
+    if (profileModalInstance) profileModalInstance.hide();
+
+    const modalEl = document.getElementById('editParentGuardianModal');
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
 }
 
 /**
@@ -585,7 +634,7 @@ function renderSearchResults(results){
                         <button
                             type="submit"
                             class="btn btn-sm btn-danger"
-                            onclick="return confirm('Are you sure you want to delete this student? This action cannot be undone.');"
+                            onclick="return confirm('Are you sure you want to delete ${escapeForConfirm(studentName || 'this student')} (LRN: ${escapeForConfirm(lrn)})? This action cannot be undone.');"
                             name="delete_student"
                             title="Delete"
                             aria-label="Delete"
@@ -621,6 +670,14 @@ function escapeHtml(text){
         "'": '&#039;'
     };
     return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
+/**
+ * Escape a value for safe interpolation inside a single-quoted confirm()
+ * string that itself sits inside a double-quoted HTML onclick attribute.
+ */
+function escapeForConfirm(text){
+    return String(text ?? '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
 }
 
 /**

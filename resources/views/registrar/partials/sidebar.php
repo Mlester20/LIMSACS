@@ -44,12 +44,6 @@
             <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/import-students.php" class="menu-link"><div data-i18n="Import Students">Import Students</div></a></li>
           </ul>
         </li>
-        <li class="menu-item <?php echo ($currentPage == 'parent-guardians.php') ? 'active' : ''; ?>">
-          <a href="<?= BASE_URL ?>/resources/views/registrar/parent-guardians.php" class="menu-link">
-            <i class="menu-icon tf-icons bx bx-user"></i>
-            <div data-i18n="Parents & Guardians">Parents & Guardians</div>
-          </a>
-        </li>
 
         <!-- Academics -->
         <li class="menu-header small text-uppercase">
@@ -105,6 +99,15 @@
             <a href="<?= BASE_URL ?>/resources/views/registrar/logs.php" class="menu-link">
               <i class="menu-icon tf-icons bx bx-file"></i>
               <div data-i18n="Activity Logs">Logs</div>
+            </a>
+        </li>
+
+        <!-- System -->
+        <li class="menu-header small text-uppercase"><span class="menu-header-text">System</span></li>
+          <li class="menu-item <?php echo ($currentPage === 'backup.php') ? 'active' : '' ?> ">
+            <a href="<?= BASE_URL ?>/resources/views/registrar/backup.php" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-cloud-download"></i>
+              <div data-i18n="Backup">Backup</div>
             </a>
         </li>
       </ul>

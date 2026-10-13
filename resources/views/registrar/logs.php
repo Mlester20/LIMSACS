@@ -49,7 +49,6 @@ AuthRole::allowOnly(['registrar']);
                   <th>Module</th>
                   <th>Reference Table</th>
                   <th>Description</th>
-                  <th>IP Address</th>
                   <th>Status</th>
                   <th>Created At</th>
                 </tr>
@@ -61,15 +60,19 @@ AuthRole::allowOnly(['registrar']);
                       <td><?php echo htmlspecialchars($log['action']); ?></td>
                       <td><?php echo htmlspecialchars($log['module']); ?></td>
                       <td><?php echo htmlspecialchars($log['reference_table']); ?></td>
-                      <td><?php echo htmlspecialchars($log['description']); ?></td>
-                      <td><?php echo htmlspecialchars($log['ip_address']); ?></td>
+                      <td title="<?php echo htmlspecialchars($log['description']); ?>">
+                        <?php
+                          $desc = $log['description'] ?? '';
+                          echo htmlspecialchars(mb_strlen($desc) > 80 ? mb_substr($desc, 0, 80) . '...' : $desc);
+                        ?>
+                      </td>
                       <td><?php echo htmlspecialchars($log['status']); ?></td>
                       <td><?php echo htmlspecialchars($log['created_at']); ?></td>
                     </tr>
                   <?php endforeach; ?>
                   <?php else: ?>
                     <tr>
-                      <td colspan="7" class="text-center">No Logs Found.</td>
+                      <td colspan="6" class="text-center">No Logs Found.</td>
                     </tr>
                   <?php endif; ?>
               </tbody>

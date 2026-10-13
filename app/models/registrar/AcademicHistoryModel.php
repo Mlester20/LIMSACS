@@ -286,5 +286,39 @@ require_once __DIR__ . '/../Model.php';
                 return [];
             }
         }
+
+        /**
+         * Every academic_history record, joined with readable student/section/
+         * school year fields, regardless of enrollment_status. Used for the
+         * Excel backup export (not paginated/filtered).
+         * @return array
+         */
+        public function getAllForExport(){
+            try{
+                $query = "
+                    SELECT
+                        ah.id,
+                        s.lrn,
+                        CONCAT(s.first_name, ' ', s.last_name) AS student_full_name,
+                        sy.school_year,
+                        ah.grade_level,
+                        sec.section_name,
+                        ah.enrollment_status,
+                        ah.created_at
+                    FROM {$this->academic_history} ah
+                    JOIN {$this->students} s ON ah.student_id = s.id
+                    LEFT JOIN {$this->sections} sec ON ah.section_id = sec.id
+                    LEFT JOIN {$this->school_year} sy ON ah.school_year_id = sy.id
+                    ORDER BY ah.id DESC
+                ";
+                $stmt = $this->con->prepare($query);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                return $result->fetch_all(MYSQLI_ASSOC) ?? [];
+            }catch(Exception $e){
+                error_log("Get all academic history for export error: " . $e->getMessage());
+                return [];
+            }
+        }
     }
 ?>

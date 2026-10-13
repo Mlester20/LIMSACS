@@ -233,10 +233,11 @@ AuthRole::allowOnly(['registrar']);
                                     <form method="POST" action="<?= BASE_URL ?>/app/controllers/registrar/StudentsController.php" style="display: inline;">
                                         <?php echo Csrf::field(); ?>
                                         <input type="hidden" name="student_id" value="<?php echo $student['id']; ?>">
+                                        <?php $deleteConfirmName = addslashes(htmlspecialchars($student['full_name'] ?? 'this student', ENT_QUOTES)); ?>
                                         <button
                                             type="submit"
                                             class="btn btn-sm btn-danger"
-                                            onclick="return confirm('Are you sure you want to delete this student? This action cannot be undone.');"
+                                            onclick="return confirm('Are you sure you want to delete <?php echo $deleteConfirmName; ?> (LRN: <?php echo addslashes(htmlspecialchars($student['lrn'] ?? 'N/A', ENT_QUOTES)); ?>)? This action cannot be undone.');"
                                             name="delete_student"
                                             title="Delete"
                                             aria-label="Delete"
@@ -561,6 +562,11 @@ AuthRole::allowOnly(['registrar']);
                         </div>
 
                         <div class="tab-pane fade" id="studentParentGuardiansTab" role="tabpanel" aria-labelledby="studentParentGuardiansTab-tab">
+                            <div class="text-end mb-2">
+                                <button type="button" class="btn btn-sm btn-primary" id="editParentGuardianBtn" onclick="openParentGuardianEditor()">
+                                    <i class="bx bx-edit me-1"></i><span id="editParentGuardianBtnLabel">Add</span>
+                                </button>
+                            </div>
                             <div id="parentGuardiansInfo">
                                 <p class="text-center text-muted">Loading...</p>
                             </div>
@@ -596,6 +602,76 @@ AuthRole::allowOnly(['registrar']);
                     <button type="button" class="btn btn-primary btn-sm">Edit</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Parent/Guardian Modal (opened from the Student Profile modal's Parents/Guardians tab) -->
+    <div class="modal fade" id="editParentGuardianModal" tabindex="-1" aria-labelledby="editParentGuardianModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <form id="editParentGuardianForm" method="POST" action="<?= BASE_URL ?>/app/controllers/registrar/ParentGuardiansController.php">
+                <?php echo Csrf::field(); ?>
+                <input type="hidden" name="student_id" id="pg_student_id">
+                <input type="hidden" name="id" id="pg_id">
+                <div class="modal-content">
+                    <div class="modal-header py-2">
+                        <h6 class="modal-title mb-0" id="editParentGuardianModalLabel">Parent / Guardian Information</h6>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-3">
+                        <p class="text-muted fw-semibold mb-2" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:.05em;">Father</p>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label form-label-sm mb-1">Name</label>
+                                <input type="text" class="form-control form-control-sm" name="father_name" id="pg_father_name">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label form-label-sm mb-1">Occupation</label>
+                                <input type="text" class="form-control form-control-sm" name="father_occupation" id="pg_father_occupation">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label form-label-sm mb-1">Contact</label>
+                                <input type="text" class="form-control form-control-sm" name="father_contact" id="pg_father_contact">
+                            </div>
+                        </div>
+
+                        <p class="text-muted fw-semibold mb-2" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:.05em;">Mother</p>
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label form-label-sm mb-1">Name</label>
+                                <input type="text" class="form-control form-control-sm" name="mother_name" id="pg_mother_name">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label form-label-sm mb-1">Occupation</label>
+                                <input type="text" class="form-control form-control-sm" name="mother_occupation" id="pg_mother_occupation">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label form-label-sm mb-1">Contact</label>
+                                <input type="text" class="form-control form-control-sm" name="mother_contact" id="pg_mother_contact">
+                            </div>
+                        </div>
+
+                        <p class="text-muted fw-semibold mb-2" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:.05em;">Guardian (if not a parent)</p>
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-4">
+                                <label class="form-label form-label-sm mb-1">Name</label>
+                                <input type="text" class="form-control form-control-sm" name="guardian_name" id="pg_guardian_name">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label form-label-sm mb-1">Relationship</label>
+                                <input type="text" class="form-control form-control-sm" name="guardian_relationship" id="pg_guardian_relationship" placeholder="e.g., Aunt, Grandparent">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label form-label-sm mb-1">Contact</label>
+                                <input type="text" class="form-control form-control-sm" name="guardian_contact" id="pg_guardian_contact">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer py-2">
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-sm btn-primary px-3" id="pgSubmitBtn" name="save_guardian">Save</button>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 

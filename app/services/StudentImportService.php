@@ -129,6 +129,20 @@ use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
                 $errors[] = 'birth_date is required and must be a valid date';
             }
 
+            // Age is provided as-is if the file supplies it, otherwise computed from
+            // birth_date — either way, 0 (or less) isn't a valid age for a student
+            // record, matching the same rule enforced on the Add/Edit Student forms.
+            $age = null;
+            if ($birthDate !== null) {
+                $ageRaw = $cells['age'] ?? null;
+                $age = ($ageRaw !== null && trim((string)$ageRaw) !== '')
+                    ? (int)$ageRaw
+                    : StudentsService::calculateAge($birthDate);
+                if ($age === null || $age < 1) {
+                    $errors[] = 'age must be at least 1 (check birth_date)';
+                }
+            }
+
             if (!empty($errors)) {
                 return [
                     'status' => 'fail',
@@ -153,11 +167,6 @@ use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
             if ($lrn !== null) {
                 $seenLrnsInFile[$lrn] = true;
             }
-
-            $ageRaw = $cells['age'] ?? null;
-            $age = ($ageRaw !== null && trim((string)$ageRaw) !== '')
-                ? (int)$ageRaw
-                : StudentsService::calculateAge($birthDate);
 
             return [
                 'status' => 'ok',

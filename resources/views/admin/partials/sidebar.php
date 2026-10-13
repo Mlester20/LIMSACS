@@ -93,6 +93,15 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 <div data-i18n="Activity Logs">Logs</div>
               </a>
           </li>
+
+          <!-- System -->
+          <li class="menu-header small text-uppercase"><span class="menu-header-text">System</span></li>
+            <li class="menu-item <?php echo ($currentPage === 'backup.php') ? 'active' : '' ?> ">
+              <a href="<?= BASE_URL ?>/resources/views/admin/backup.php" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-cloud-download"></i>
+                <div data-i18n="Backup">Backup</div>
+              </a>
+          </li>
       </ul>
     </aside>
     <!-- / Menu -->
