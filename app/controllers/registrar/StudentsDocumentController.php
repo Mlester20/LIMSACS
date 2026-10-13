@@ -157,6 +157,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
           }
 
           if(isset($_POST['submit_document'])){
+               if(($_POST['status'] ?? '') === 'Rejected' && trim($_POST['remarks'] ?? '') === ''){
+                    FlashMessage::setFlash('error', 'Remarks are required when a document is marked as Rejected.');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/student-documents.php');
+                    exit();
+               }
                $controller->create(
                     [
                          'student_id' => $_POST['student_id'] ?? null,
@@ -173,6 +178,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
           }
 
           if(isset($_POST['update_document'])){
+               if(($_POST['status'] ?? '') === 'Rejected' && trim($_POST['remarks'] ?? '') === ''){
+                    FlashMessage::setFlash('error', 'Remarks are required when a document is marked as Rejected.');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/student-documents.php');
+                    exit();
+               }
                $document_id = $_POST['document_id'] ?? null;
                $controller->update(
                     $document_id,

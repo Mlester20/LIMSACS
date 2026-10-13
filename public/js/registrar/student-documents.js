@@ -15,6 +15,7 @@ let allDocumentRows = [];
 let filteredRows = [];
 let currentPage = 1;
 let itemsPerPage = 15;
+let currentStatusFilter = '';
 
 // ============== PAGINATION FUNCTIONS ==============
 
@@ -228,6 +229,14 @@ document.getElementById('addDocumentForm').addEventListener('submit', function(e
         alert('Please select a student before submitting.');
         return false;
     }
+
+    const status = this.querySelector('[name="status"]').value;
+    const remarks = this.querySelector('[name="remarks"]').value.trim();
+    if (status === 'Rejected' && !remarks) {
+        e.preventDefault();
+        alert('Please provide remarks explaining why this document is being rejected.');
+        return false;
+    }
 });
 
 // ============== FILE PREVIEW ERROR HANDLING ==============
@@ -362,6 +371,14 @@ document.getElementById('editDocumentForm').addEventListener('submit', function(
     if (!studentId) {
         e.preventDefault();
         alert('Please select a student before submitting.');
+        return false;
+    }
+
+    const status = document.getElementById('edit_status').value;
+    const remarks = document.getElementById('edit_remarks').value.trim();
+    if (status === 'Rejected' && !remarks) {
+        e.preventDefault();
+        alert('Please provide remarks explaining why this document is being rejected.');
         return false;
     }
 });
@@ -519,40 +536,62 @@ function deleteDocument(documentId) {
     }
 }
 
-// ============== TABLE SEARCH FUNCTIONALITY WITH PAGINATION ==============
+// ============== TABLE SEARCH + STATUS FILTER (combined) ==============
 
-document.getElementById('searchInput').addEventListener('keyup', function() {
-    const searchTerm = this.value.toLowerCase().trim();
-    const tableBody = document.getElementById('documentsTableBody');
-    const rows = Array.from(tableBody.querySelectorAll('tr.document-row'));
+function applyFilters() {
+    const searchTerm = (document.getElementById('searchInput').value || '').toLowerCase().trim();
 
-    // Rows are grouped by student via rowspan, so the student-name cell only
-    // exists on the first row of each group. We can't filter row-by-row using
-    // cell index (it shifts depending on whether the row has that cell), and
-    // we can't hide a group's first row independently of its sibling rows or
-    // the rowspanned name cell disappears for the rows left visible. Instead,
-    // group rows by data-student-id and show/hide the whole group together.
-    const groups = new Map();
-    rows.forEach(row => {
-        const studentId = row.dataset.studentId;
-        if (!groups.has(studentId)) groups.set(studentId, []);
-        groups.get(studentId).push(row);
+    filteredRows = allDocumentRows.filter(row => {
+        const matchesStatus = !currentStatusFilter || row.dataset.status === currentStatusFilter;
+        const matchesSearch = !searchTerm ||
+            (row.dataset.studentName || '').includes(searchTerm) ||
+            (row.dataset.documentType || '').includes(searchTerm);
+        return matchesStatus && matchesSearch;
     });
 
-    filteredRows = [];
-    groups.forEach(groupRows => {
-        const studentName = groupRows[0].dataset.studentName || '';
-        const groupMatches = !searchTerm ||
-            studentName.includes(searchTerm) ||
-            groupRows.some(row => (row.dataset.documentType || '').includes(searchTerm));
-
-        if (groupMatches) {
-            filteredRows.push(...groupRows);
-        }
-    });
-
-    // Reset to page 1 when searching
+    // Reset to page 1 whenever the filter changes
     currentPage = 1;
+    updatePagination();
+}
+
+document.getElementById('searchInput').addEventListener('keyup', applyFilters);
+
+// Click a summary card to filter the table by that status; clicking "Total
+// Documents" (empty status) clears the filter back to showing everything.
+function filterByStatus(status) {
+    currentStatusFilter = status;
+
+    document.querySelectorAll('.status-filter-card').forEach(card => {
+        card.classList.remove('border', 'border-primary');
+    });
+    const activeCard = document.getElementById('statusCard-' + status);
+    if (activeCard) {
+        activeCard.classList.add('border', 'border-primary');
+    }
+
+    const label = document.getElementById('activeStatusFilterLabel');
+    const header = document.getElementById('documentsCardHeader');
+    if (status) {
+        label.innerHTML = `Filtered: <strong>${status}</strong> &mdash; <a href="#" onclick="filterByStatus(''); return false;">Clear</a>`;
+        header.textContent = 'Student Documents — ' + status;
+    } else {
+        label.textContent = '';
+        header.textContent = 'Student Documents';
+    }
+
+    applyFilters();
+}
+
+// ============== PRINT (prints every row matching the current filter, not just the current page) ==============
+
+function printFilteredDocuments() {
+    allDocumentRows.forEach(row => {
+        row.style.display = filteredRows.includes(row) ? '' : 'none';
+    });
+    window.print();
+}
+
+window.addEventListener('afterprint', function () {
     updatePagination();
 });
 

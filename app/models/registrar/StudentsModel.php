@@ -18,16 +18,32 @@ require_once __DIR__ . '/../Model.php';
         }
 
         /**
-         * Get paginated students
+         * Get paginated students, with each student's most recent grade
+         * level/section (from academic_history) attached for display, and
+         * optional filtering by that grade level/section.
          * @param int $limit Records per page
          * @param int $offset Starting position
+         * @param string $gradeLevel Exact grade_level match, or '' for all
+         * @param string|int $sectionId Exact section_id match, or '' for all
          * @return array Paginated student records
          */
-        public function getPaginated($limit = 10, $offset = 0){
+        public function getPaginated($limit = 10, $offset = 0, $gradeLevel = '', $sectionId = ''){
             try{
-                $query = "SELECT * FROM {$this->students} ORDER BY last_name ASC LIMIT ? OFFSET ?";
+                [$where, $params, $types] = $this->buildGradeSectionFilter($gradeLevel, $sectionId);
+
+                $query = "
+                    SELECT s.*, ah.grade_level AS current_grade_level, sec.section_name AS current_section_name
+                    FROM {$this->students} s
+                    LEFT JOIN academic_history ah ON ah.id = (
+                        SELECT ah2.id FROM academic_history ah2 WHERE ah2.student_id = s.id ORDER BY ah2.id DESC LIMIT 1
+                    )
+                    LEFT JOIN sections sec ON ah.section_id = sec.id
+                    {$where}
+                    ORDER BY s.last_name ASC
+                    LIMIT ? OFFSET ?
+                ";
                 $stmt = $this->con->prepare($query);
-                $stmt->bind_param('ii', $limit, $offset);
+                $stmt->bind_param($types . 'ii', ...array_merge($params, [$limit, $offset]));
                 $stmt->execute();
                 $result = $stmt->get_result();
 
@@ -38,13 +54,26 @@ require_once __DIR__ . '/../Model.php';
         }
 
         /**
-         * Get total count of students
+         * Get total count of students, honoring the same grade level/section
+         * filter as getPaginated().
          * @return int Total number of students
          */
-        public function getTotalCount(){
+        public function getTotalCount($gradeLevel = '', $sectionId = ''){
             try{
-                $query = "SELECT COUNT(*) as total FROM {$this->students} ORDER by last_name ASC";
+                [$where, $params, $types] = $this->buildGradeSectionFilter($gradeLevel, $sectionId);
+
+                $query = "
+                    SELECT COUNT(*) as total
+                    FROM {$this->students} s
+                    LEFT JOIN academic_history ah ON ah.id = (
+                        SELECT ah2.id FROM academic_history ah2 WHERE ah2.student_id = s.id ORDER BY ah2.id DESC LIMIT 1
+                    )
+                    {$where}
+                ";
                 $stmt = $this->con->prepare($query);
+                if($types !== ''){
+                    $stmt->bind_param($types, ...$params);
+                }
                 $stmt->execute();
                 $result = $stmt->get_result();
                 $row = $result->fetch_assoc();
@@ -54,6 +83,27 @@ require_once __DIR__ . '/../Model.php';
                 error_log($e->getMessage());
                 return 0;
             }
+        }
+
+        /**
+         * @return array{0:string,1:array,2:string} [WHERE clause, params, bind types]
+         */
+        private function buildGradeSectionFilter($gradeLevel, $sectionId){
+            $conditions = [];
+            $params = [];
+            $types = '';
+            if($gradeLevel !== ''){
+                $conditions[] = "ah.grade_level = ?";
+                $params[] = $gradeLevel;
+                $types .= 's';
+            }
+            if($sectionId !== ''){
+                $conditions[] = "ah.section_id = ?";
+                $params[] = $sectionId;
+                $types .= 'i';
+            }
+            $where = $conditions ? "WHERE " . implode(' AND ', $conditions) : "";
+            return [$where, $params, $types];
         }
 
         /**

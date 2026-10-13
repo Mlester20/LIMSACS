@@ -256,12 +256,20 @@ const enrollmentController = {
         return (input && input.dataset.statusFilter) || 'Enrolled';
     },
 
-    searchEnrolled: function (keyword, page = 1, status = null) {
+    getCurrentGradeFilter: function () {
+        const input = document.getElementById('searchInput');
+        return (input && input.dataset.gradeFilter) || '';
+    },
+
+    searchEnrolled: function (keyword, page = 1, status = null, gradeLevel = null) {
         const tbody = document.querySelector('.table tbody');
         if (!tbody) return;
 
         if (status === null) {
             status = enrollmentController.getCurrentStatusFilter();
+        }
+        if (gradeLevel === null) {
+            gradeLevel = enrollmentController.getCurrentGradeFilter();
         }
 
         // Show loading state
@@ -275,7 +283,8 @@ const enrollmentController = {
                 keyword: keyword,
                 page: page,
                 items_per_page: 10,
-                status: status
+                status: status,
+                grade_level: gradeLevel
             },
             dataType: 'json',
             success: function (data) {
@@ -307,7 +316,7 @@ const enrollmentController = {
                 tbody.innerHTML = html;
 
                 // Update pagination UI
-                enrollmentController.updateSearchPagination(keyword, pagination, status);
+                enrollmentController.updateSearchPagination(keyword, pagination, status, gradeLevel);
             },
             error: function () {
                 tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger py-3">Search error. Please try again.</td></tr>';
@@ -315,15 +324,16 @@ const enrollmentController = {
         });
     },
 
-    updateSearchPagination: function (keyword, pagination, status) {
+    updateSearchPagination: function (keyword, pagination, status, gradeLevel) {
         const paginationEl = document.querySelector('.pagination');
         if (!paginationEl) return;
 
         status = status || enrollmentController.getCurrentStatusFilter();
+        gradeLevel = gradeLevel === undefined ? enrollmentController.getCurrentGradeFilter() : gradeLevel;
 
         if (!keyword || keyword.trim() === '') {
             // Reload the page to restore PHP pagination when search is cleared
-            window.location.href = '?status=' + encodeURIComponent(status) + '&page=1';
+            window.location.href = '?status=' + encodeURIComponent(status) + '&grade_level=' + encodeURIComponent(gradeLevel) + '&page=1';
             return;
         }
 
@@ -331,7 +341,7 @@ const enrollmentController = {
 
         // Previous
         html += pagination.hasPrevPage
-            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage - 1}, '${status}'); return false;">Previous</a></li>`
+            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage - 1}, '${status}', '${gradeLevel}'); return false;">Previous</a></li>`
             : `<li class="page-item disabled"><span class="page-link">Previous</span></li>`;
 
         // Page numbers
@@ -341,12 +351,12 @@ const enrollmentController = {
         for (let i = start; i <= end; i++) {
             html += i === pagination.currentPage
                 ? `<li class="page-item active"><span class="page-link">${i}</span></li>`
-                : `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${i}, '${status}'); return false;">${i}</a></li>`;
+                : `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${i}, '${status}', '${gradeLevel}'); return false;">${i}</a></li>`;
         }
 
         // Next
         html += pagination.hasNextPage
-            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage + 1}, '${status}'); return false;">Next</a></li>`
+            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage + 1}, '${status}', '${gradeLevel}'); return false;">Next</a></li>`
             : `<li class="page-item disabled"><span class="page-link">Next</span></li>`;
 
         paginationEl.innerHTML = html;
@@ -653,7 +663,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (keyword === '') {
             // Restore PHP-rendered table by reloading page
-            window.location.href = '?status=' + encodeURIComponent(enrollmentController.getCurrentStatusFilter()) + '&page=1';
+            window.location.href = '?status=' + encodeURIComponent(enrollmentController.getCurrentStatusFilter()) + '&grade_level=' + encodeURIComponent(enrollmentController.getCurrentGradeFilter()) + '&page=1';
             return;
         }
 

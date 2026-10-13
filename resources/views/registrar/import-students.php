@@ -135,7 +135,7 @@ unset($_SESSION['import_results']);
                 <div class="alert alert-info">
                     Students imported to the masters list. Enrollment and graduation history were recorded automatically
                     wherever the file provided that data (see the table below) &mdash; use the
-                    <a href="<?= BASE_URL ?>/resources/views/registrar/enrollment.php">Enrollment page</a> for any students
+                    <a href="<?= BASE_URL ?>/resources/views/registrar/enrollment.php">Enrollees page</a> for any students
                     not covered by the import.
                 </div>
             <?php endif; ?>

@@ -21,14 +21,23 @@ try {
         $statusFilter = 'Enrolled';
     }
 
+    // Get current grade level filter from query parameter
+    $gradeLevelFilter = $_GET['grade_level'] ?? '';
+    if (!in_array($gradeLevelFilter, $gradeLevels, true)) {
+        $gradeLevelFilter = '';
+    }
+
     // Get enrolled students with pagination
-    $paginatedData = $controller->getEnrolledStudentsWithPagination($currentPage, 10, $statusFilter);
+    $paginatedData = $controller->getEnrolledStudentsWithPagination($currentPage, 10, $statusFilter, $gradeLevelFilter);
     $enrollments = $paginatedData['enrollments'];
     $pagination = $paginatedData['pagination'];
 } catch (Exception $e) {
     error_log($e->getMessage());
     $enrollments = [];
     $statusFilter = $statusFilter ?? 'Enrolled';
+    $gradeLevelFilter = $gradeLevelFilter ?? '';
+    $gradeLevels = $gradeLevels ?? [];
+    $schoolYears = $schoolYears ?? [];
     $pagination = [
         'currentPage' => 1,
         'itemsPerPage' => 10,
@@ -52,7 +61,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Enrollment | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?></title>
+    <title>Enrollees | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?></title>
     <meta name="csrf-token" content="<?php echo htmlspecialchars(Csrf::token()); ?>">
     <link rel="icon" type="image/x-icon" href="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -78,11 +87,11 @@ try {
 
     <!-- Main content -->
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Enrollment /</span> Student Enrollment</h4>
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Enrollees /</span> Enrollees</h4>
         <div class="row mb-3 align-items-center">
             <div class="col-md-6">
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search Students..." id="searchInput" data-status-filter="<?= htmlspecialchars($statusFilter) ?>">
+                    <input type="text" class="form-control" placeholder="Search Students..." id="searchInput" data-status-filter="<?= htmlspecialchars($statusFilter) ?>" data-grade-filter="<?= htmlspecialchars($gradeLevelFilter) ?>">
                 </div>
             </div>
             <div class="col-md-6 text-end mt-2 mt-md-0">
@@ -92,24 +101,34 @@ try {
             </div>
         </div>
 
-        <ul class="nav nav-pills mb-3" id="statusFilterTabs">
-            <?php
-                $statusTabs = [
-                    'Enrolled' => 'Enrolled',
-                    'Transferred' => 'Transferred',
-                    'Dropped' => 'Dropped',
-                    'Graduated' => 'Graduated',
-                    'All' => 'All'
-                ];
-            ?>
-            <?php foreach ($statusTabs as $tabStatus => $tabLabel): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?= $statusFilter === $tabStatus ? 'active' : '' ?>" href="?status=<?= urlencode($tabStatus) ?>&page=1">
-                        <?= htmlspecialchars($tabLabel) ?>
-                    </a>
-                </li>
-            <?php endforeach; ?>
-        </ul>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <ul class="nav nav-pills mb-0" id="statusFilterTabs">
+                <?php
+                    $statusTabs = [
+                        'Enrolled' => 'Enrolled',
+                        'Transferred' => 'Transferred',
+                        'Dropped' => 'Dropped',
+                        'Graduated' => 'Graduated',
+                        'All' => 'All'
+                    ];
+                ?>
+                <?php foreach ($statusTabs as $tabStatus => $tabLabel): ?>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $statusFilter === $tabStatus ? 'active' : '' ?>" href="?status=<?= urlencode($tabStatus) ?>&grade_level=<?= urlencode($gradeLevelFilter) ?>&page=1">
+                            <?= htmlspecialchars($tabLabel) ?>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+
+            <select id="gradeLevelFilter" class="form-select form-select-sm" style="max-width: 200px;"
+                onchange="window.location.href = '?status=<?= urlencode($statusFilter) ?>&grade_level=' + encodeURIComponent(this.value) + '&page=1';">
+                <option value="">All Grade Levels</option>
+                <?php foreach ($gradeLevels as $gl): ?>
+                    <option value="<?= htmlspecialchars($gl) ?>" <?= $gradeLevelFilter === $gl ? 'selected' : '' ?>><?= htmlspecialchars($gl) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
 
         <div class="card">
             <h5 class="card-header">

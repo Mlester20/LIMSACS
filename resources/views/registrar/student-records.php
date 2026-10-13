@@ -45,13 +45,37 @@ AuthRole::allowOnly(['registrar']);
     <div class="row mb-3 align-items-center">
       <div class="col-md-6">
         <div class="input-group">
-          <input type="text" class="form-control" placeholder="Search Students (e.g., Juan Dela Cruz)" id="searchInput">
+          <input type="text" class="form-control" placeholder="Search Students (e.g., Juan Dela Cruz)" id="searchInput" data-grade-filter="<?= htmlspecialchars($gradeLevelFilter) ?>" data-section-filter="<?= htmlspecialchars($sectionFilter) ?>">
         </div>
       </div>
-      
+
       <div class="col-md-6 text-end mt-2 mt-md-0">
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#enrollStudentModal">Add Student Information</button>
       </div>
+    </div>
+
+    <div class="row mb-3 align-items-center">
+      <div class="col-md-3">
+        <select class="form-select" id="gradeLevelFilter" onchange="window.location.href = '?grade_level=' + encodeURIComponent(this.value) + '&section_id=<?= urlencode($sectionFilter) ?>&page=1';">
+          <option value="">All Grade Levels</option>
+          <?php foreach ($filterOptions['grade_levels'] as $gl): ?>
+            <option value="<?= htmlspecialchars($gl) ?>" <?= $gradeLevelFilter === $gl ? 'selected' : '' ?>><?= htmlspecialchars($gl) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" id="sectionFilter" onchange="window.location.href = '?grade_level=<?= urlencode($gradeLevelFilter) ?>&section_id=' + encodeURIComponent(this.value) + '&page=1';">
+          <option value="">All Sections</option>
+          <?php foreach ($filterOptions['sections'] as $sec): ?>
+            <option value="<?= htmlspecialchars($sec['id']) ?>" <?= (string)$sectionFilter === (string)$sec['id'] ? 'selected' : '' ?>><?= htmlspecialchars($sec['section_name'] . ' (' . $sec['grade_level'] . ')') ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <?php if ($gradeLevelFilter !== '' || $sectionFilter !== ''): ?>
+        <div class="col-md-3">
+          <a href="student-records.php" class="btn btn-outline-secondary">Clear Filter</a>
+        </div>
+      <?php endif; ?>
     </div>
 
     <div class="modal fade" id="enrollStudentModal" tabindex="-1" aria-labelledby="enrollStudentModalLabel" aria-hidden="true">
@@ -173,15 +197,17 @@ AuthRole::allowOnly(['registrar']);
                         <th>Full Name</th>
                         <th>Gender</th>
                         <th>Age</th>
+                        <th>Grade Level</th>
+                        <th>Section</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if(!empty($students)): ?>
                         <?php foreach($students as $index => $student): ?>
-                            <tr 
-                                style="cursor: pointer;" 
-                                data-bs-toggle="modal" 
+                            <tr
+                                style="cursor: pointer;"
+                                data-bs-toggle="modal"
                                 data-bs-target="#studentDetailsModal"
                                 onclick="populateStudentModal(<?php echo htmlspecialchars(json_encode($student)); ?>)"
                             >
@@ -190,6 +216,8 @@ AuthRole::allowOnly(['registrar']);
                                 <td><?php echo htmlspecialchars($student['full_name'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($student['gender'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($student['age'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($student['current_grade_level'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars($student['current_section_name'] ?? 'N/A'); ?></td>
                                 <td>
 
                                     <button
@@ -221,7 +249,7 @@ AuthRole::allowOnly(['registrar']);
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6" class="text-center">No students found</td>
+                            <td colspan="8" class="text-center">No students found</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -374,7 +402,7 @@ AuthRole::allowOnly(['registrar']);
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label form-label-sm mb-1">Age</label>
-                                <input type="number" class="form-control form-control-sm" id="editAge" name="age" min="1" max="30">
+                                <input type="number" class="form-control form-control-sm" id="editAge" name="age" min="1" max="30" readonly>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label form-label-sm mb-1">Place of Birth</label>

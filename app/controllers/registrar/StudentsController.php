@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../models/registrar/StudentsModel.php';
 require_once __DIR__ . '/../../models/registrar/AcademicHistoryModel.php';
+require_once __DIR__ . '/../../models/registrar/SectionsModel.php';
 require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
 require_once __DIR__ . '/../../models/registrar/StudentsDocumentModel.php';
 require_once __DIR__ . '/../../models/registrar/DocumentTypesModel.php';
@@ -21,6 +22,7 @@ require_once __DIR__ . '/../../helpers/csrf.php';
         protected $studentsDocuments;
         protected $documentTypes;
         protected $auditLogs;
+        protected $sections;
 
         public function __construct($con){
             parent::__construct(
@@ -31,14 +33,17 @@ require_once __DIR__ . '/../../helpers/csrf.php';
             $this->studentsDocuments = new StudentsDocumentModel($con);
             $this->documentTypes = new DocumentTypesModel($con);
             $this->auditLogs = new AuditLogs($con);
+            $this->sections = new SectionsModel($con);
         }
 
         /**
          * Get paginated students with pagination metadata
          * @param int $page Current page number
+         * @param string $gradeLevel Filter by grade level, or '' for all
+         * @param string|int $sectionId Filter by section, or '' for all
          * @return array Pagination data with students
          */
-        public function index($page = 1){
+        public function index($page = 1, $gradeLevel = '', $sectionId = ''){
             // Ensure page is at least 1
             $page = max(1, intval($page));
 
@@ -46,13 +51,13 @@ require_once __DIR__ . '/../../helpers/csrf.php';
             $offset = ($page - 1) * $this->itemsPerPage;
 
             // Get paginated students
-            $students = $this->model->getPaginated($this->itemsPerPage, $offset);
+            $students = $this->model->getPaginated($this->itemsPerPage, $offset, $gradeLevel, $sectionId);
 
             // Add full names
             $studentsWithFullNames = StudentsService::addFullNames($students);
 
             // Get total count
-            $totalCount = $this->model->getTotalCount();
+            $totalCount = $this->model->getTotalCount($gradeLevel, $sectionId);
             $totalPages = ceil($totalCount / $this->itemsPerPage);
 
             return [
@@ -67,6 +72,17 @@ require_once __DIR__ . '/../../helpers/csrf.php';
         }
 
         /**
+         * Filter dropdown options for the Student Data listing.
+         * @return array{grade_levels: array, sections: array}
+         */
+        public function getFilterOptions(){
+            return [
+                'grade_levels' => $this->sections->getDistinctGradeLevels(),
+                'sections' => $this->sections->index(),
+            ];
+        }
+
+        /**
          * Get lrnExists
          * @param string $lrn
          */
@@ -77,6 +93,12 @@ require_once __DIR__ . '/../../helpers/csrf.php';
 
         public function create($data){
             try{
+                if((int)($data['age'] ?? 0) < 1){
+                    FlashMessage::setFlash("error", "Invalid age. The student's age cannot be 0.");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php");
+                    exit();
+                }
+
                 // Check if LRN exists
                 if($this->lrnExists($data['lrn'])){
                     FlashMessage::setFlash("error", "LRN already exists. Please use a unique LRN.");
@@ -110,6 +132,12 @@ require_once __DIR__ . '/../../helpers/csrf.php';
 
         public function update($id, $data, $page = 1){
             try{
+                if((int)($data['age'] ?? 0) < 1){
+                    FlashMessage::setFlash("error", "Invalid age. The student's age cannot be 0.");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php?page=" . intval($page));
+                    exit();
+                }
+
                 if($this->model->update($id, $data)){
                     $this->auditLogs->log(
                         $_SESSION['id'] ?? null,
@@ -210,7 +238,10 @@ require_once __DIR__ . '/../../helpers/csrf.php';
     try{
         $controller = new StudentsController($con);
         $currentPage = isset($_GET['page']) ? $_GET['page'] : 1;
-        $paginationData = $controller->index($currentPage);
+        $gradeLevelFilter = $_GET['grade_level'] ?? '';
+        $sectionFilter = $_GET['section_id'] ?? '';
+        $filterOptions = $controller->getFilterOptions();
+        $paginationData = $controller->index($currentPage, $gradeLevelFilter, $sectionFilter);
         $students = $paginationData['students'];
         $pagination = [
             'currentPage' => $paginationData['currentPage'],

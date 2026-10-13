@@ -373,14 +373,14 @@ document.querySelectorAll('.table tbody tr').forEach(row => {
     });
 });
 
-//auto calculated age
-document.getElementById('enrollBirthDate').addEventListener('change', function () {
-    const birthDate = new Date(this.value);
+// Shared age-from-birth-date calculation, used by both the Add and Edit forms
+// so neither one can drift out of sync with the other.
+function computeAgeFromBirthDate(birthDateValue) {
+    const birthDate = new Date(birthDateValue);
     const today = new Date();
 
-    if (!this.value || birthDate > today) {
-        document.getElementById('ageInput').value = '';
-        return;
+    if (!birthDateValue || birthDate > today) {
+        return '';
     }
 
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -391,7 +391,33 @@ document.getElementById('enrollBirthDate').addEventListener('change', function (
         age--;
     }
 
-    document.getElementById('ageInput').value = age;
+    return age;
+}
+
+document.getElementById('enrollBirthDate').addEventListener('change', function () {
+    document.getElementById('ageInput').value = computeAgeFromBirthDate(this.value);
+});
+
+document.getElementById('editBirthDate').addEventListener('change', function () {
+    document.getElementById('editAge').value = computeAgeFromBirthDate(this.value);
+});
+
+// Block submission when the computed/entered age is 0 (or blank) — a newborn
+// birth date shouldn't be allowed to create a student record.
+document.getElementById('enrollStudentForm').addEventListener('submit', function (e) {
+    const age = parseInt(document.getElementById('ageInput').value, 10);
+    if (!age || age < 1) {
+        e.preventDefault();
+        alert('Please select a valid birth date. The student\'s age cannot be 0.');
+    }
+});
+
+document.getElementById('editStudentForm').addEventListener('submit', function (e) {
+    const age = parseInt(document.getElementById('editAge').value, 10);
+    if (!age || age < 1) {
+        e.preventDefault();
+        alert('Age cannot be 0. Please enter a valid age or birth date.');
+    }
 });
 
 function deleteStudent(id) {
@@ -459,11 +485,15 @@ async function searchStudents(keyword){
 
         //show loading state
         if(tableBody){
-            tableBody.innerHTML = '<tr><td colspan="6" class="text-center"><span class="spinner-border spinner-border-sm me-2"></span>Searching...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="8" class="text-center"><span class="spinner-border spinner-border-sm me-2"></span>Searching...</td></tr>';
         }
 
-        //build  api url with absolute path
-        const apiUrl = getAppBaseUrl() + '/app/api/registrar/search-students.php?q=' + encodeURIComponent(keyword.trim());
+        //build  api url with absolute path, preserving the active Grade Level/Section filter
+        const searchInputEl = document.getElementById('searchInput');
+        const gradeFilter = (searchInputEl && searchInputEl.dataset.gradeFilter) || '';
+        const sectionFilter = (searchInputEl && searchInputEl.dataset.sectionFilter) || '';
+        const apiUrl = getAppBaseUrl() + '/app/api/registrar/search-students.php?q=' + encodeURIComponent(keyword.trim())
+            + '&grade_level=' + encodeURIComponent(gradeFilter) + '&section_id=' + encodeURIComponent(sectionFilter);
 
         const response = await fetch(apiUrl, {
             method: 'GET', 
@@ -490,7 +520,7 @@ async function searchStudents(keyword){
        console.error('Search error:', error);
        //show error message
        if(tableBody){
-          tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error searching students. Please try again.</td></tr>';
+          tableBody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Error searching students. Please try again.</td></tr>';
        } 
     }
 }
@@ -509,7 +539,7 @@ function renderSearchResults(results){
     tableBody.innerHTML = '';
 
     if(results.length === 0){
-        tableBody.innerHTML = '<tr><td colspan="6" class="text-center">No students found matching your search.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="8" class="text-center">No students found matching your search.</td></tr>';
         if(paginationContainer){
             paginationContainer.style.display = 'none';
         }
@@ -521,12 +551,13 @@ function renderSearchResults(results){
         const studentName = `${student.first_name || ''} ${student.middle_name || ''} ${student.last_name || ''}`.trim();
         const gender = student.gender
         const age = student.age
-        // const enrollmentStatus = student.enrollment_status || 'N/A';
+        const gradeLevel = student.current_grade_level || 'N/A';
+        const section = student.current_section_name || 'N/A';
 
         return `
-            <tr 
-                style="cursor: pointer;" 
-                data-bs-toggle="modal" 
+            <tr
+                style="cursor: pointer;"
+                data-bs-toggle="modal"
                 data-bs-target="#studentDetailsModal"
                 onclick='populateStudentModal(${JSON.stringify(student)})'
             >
@@ -535,6 +566,8 @@ function renderSearchResults(results){
                 <td>${escapeHtml(studentName)}</td>
                 <td>${escapeHtml(gender)}</td>
                 <td>${escapeHtml(age)}</td>
+                <td>${escapeHtml(gradeLevel)}</td>
+                <td>${escapeHtml(section)}</td>
                 <td>
                     <button
                         class="btn btn-sm btn-primary me-1"

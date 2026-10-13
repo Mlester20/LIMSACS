@@ -51,10 +51,10 @@ require_once __DIR__ . '/database/config/config.php';
           <div class="auth-hero-content">
             <div class="auth-hero-heading">
               <span class="auth-hero-kicker">Student Information Management System</span>
-              <h2 class="auth-hero-title">Limsacs</h2>
+              <h2 class="auth-hero-title">LIMSACS</h2>
             </div>
             <p class="auth-hero-tagline">
-              One record for every learner &mdash; from enrollment to graduation, kept accurate and secure.
+              Learner's Information Management System At Aurora Central School
             </p>
             <ul class="auth-hero-points">
               <li><i class='bx bx-shield-quarter'></i> Role-based, permissioned access</li>
@@ -62,7 +62,7 @@ require_once __DIR__ . '/database/config/config.php';
               <li><i class='bx bxs-graduation'></i> Enrollment through graduation history</li>
             </ul>
           </div>
-          <p class="auth-hero-footer">Aurora Central School &middot; Aurora, Isabela</p>
+          <p class="auth-hero-footer"><?= date('Y'); ?> Aurora Central School &middot; Aurora, Isabela</p>
         </aside>
 
         <!-- Form panel -->

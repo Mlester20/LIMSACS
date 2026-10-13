@@ -86,6 +86,13 @@ $totalDocuments = count($documents);
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
     <script src="<?= BASE_URL ?>/public/assets/vendor/js/helpers.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/js/config.js"></script>
+    <style>
+        @media print {
+            #layout-menu, #layout-navbar, .no-print, footer { display: none !important; }
+            #documentsCard { border: none !important; box-shadow: none !important; }
+            .table-responsive { overflow: visible !important; }
+        }
+    </style>
 </head>
 <body>
 
@@ -95,7 +102,7 @@ $totalDocuments = count($documents);
     <?php require_once __DIR__ . '/partials/topbar.php'; ?>
 
     <!-- ── Page header ───────────────────────────────────────────────────── -->
-    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2 no-print">
         <div>
             <h4 class="fw-bold mb-0">Student Documents</h4>
             <small class="text-muted">Track and manage submitted, verified, and pending student requirements</small>
@@ -107,10 +114,10 @@ $totalDocuments = count($documents);
         </div>
     </div>
 
-    <!-- ── Summary cards ─────────────────────────────────────────────────── -->
-    <div class="row g-4 mb-4">
+    <!-- ── Summary cards (click to filter the table by status, Total clears the filter) ── -->
+    <div class="row g-4 mb-4 no-print" id="statusFilterCards">
         <div class="col-6 col-md-4 col-xl">
-            <div class="card h-100 border-0 shadow-sm">
+            <div class="card h-100 border-0 shadow-sm status-filter-card" id="statusCard-" role="button" onclick="filterByStatus('')" style="cursor: pointer;">
                 <div class="card-body d-flex align-items-center gap-3">
                     <div class="avatar avatar-lg flex-shrink-0">
                         <span class="avatar-initial rounded bg-label-primary">
@@ -125,7 +132,7 @@ $totalDocuments = count($documents);
             </div>
         </div>
         <div class="col-6 col-md-4 col-xl">
-            <div class="card h-100 border-0 shadow-sm">
+            <div class="card h-100 border-0 shadow-sm status-filter-card" id="statusCard-Verified" role="button" onclick="filterByStatus('Verified')" style="cursor: pointer;">
                 <div class="card-body d-flex align-items-center gap-3">
                     <div class="avatar avatar-lg flex-shrink-0">
                         <span class="avatar-initial rounded bg-label-success">
@@ -140,7 +147,7 @@ $totalDocuments = count($documents);
             </div>
         </div>
         <div class="col-6 col-md-4 col-xl">
-            <div class="card h-100 border-0 shadow-sm">
+            <div class="card h-100 border-0 shadow-sm status-filter-card" id="statusCard-Submitted" role="button" onclick="filterByStatus('Submitted')" style="cursor: pointer;">
                 <div class="card-body d-flex align-items-center gap-3">
                     <div class="avatar avatar-lg flex-shrink-0">
                         <span class="avatar-initial rounded bg-label-info">
@@ -155,7 +162,7 @@ $totalDocuments = count($documents);
             </div>
         </div>
         <div class="col-6 col-md-4 col-xl">
-            <div class="card h-100 border-0 shadow-sm">
+            <div class="card h-100 border-0 shadow-sm status-filter-card" id="statusCard-Pending" role="button" onclick="filterByStatus('Pending')" style="cursor: pointer;">
                 <div class="card-body d-flex align-items-center gap-3">
                     <div class="avatar avatar-lg flex-shrink-0">
                         <span class="avatar-initial rounded bg-label-warning">
@@ -170,7 +177,7 @@ $totalDocuments = count($documents);
             </div>
         </div>
         <div class="col-6 col-md-4 col-xl">
-            <div class="card h-100 border-0 shadow-sm">
+            <div class="card h-100 border-0 shadow-sm status-filter-card" id="statusCard-Rejected" role="button" onclick="filterByStatus('Rejected')" style="cursor: pointer;">
                 <div class="card-body d-flex align-items-center gap-3">
                     <div class="avatar avatar-lg flex-shrink-0">
                         <span class="avatar-initial rounded bg-label-danger">
@@ -187,7 +194,7 @@ $totalDocuments = count($documents);
     </div>
 
     <!-- ── Search toolbar ────────────────────────────────────────────────── -->
-    <div class="row mb-3 align-items-center">
+    <div class="row mb-3 align-items-center no-print">
         <div class="col-md-6">
             <div class="input-group">
                 <span class="input-group-text bg-label-secondary border-end-0"><i class="bx bx-search"></i></span>
@@ -195,15 +202,19 @@ $totalDocuments = count($documents);
             </div>
         </div>
         <div class="col-md-6 text-end mt-2 mt-md-0">
-            <span class="text-muted small">
+            <span class="text-muted small me-2" id="activeStatusFilterLabel"></span>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="printDocumentsBtn" onclick="printFilteredDocuments()">
+                <i class="bx bx-printer me-1"></i>Print
+            </button>
+            <span class="text-muted small ms-2">
                 <i class="bx bx-folder me-1"></i>
                 <?php echo number_format($totalDocuments); ?> document record<?php echo $totalDocuments === 1 ? '' : 's'; ?> total
             </span>
         </div>
     </div>
 
-    <div class="card">
-        <h5 class="card-header">Student Documents</h5>
+    <div class="card" id="documentsCard">
+        <h5 class="card-header" id="documentsCardHeader">Student Documents</h5>
         <div class="table-responsive nowrap">
             <table class="table">
                 <thead>
@@ -214,47 +225,34 @@ $totalDocuments = count($documents);
                         <th><i class="bx bx-flag me-1"></i>Status</th>
                         <th><i class="bx bx-user-circle me-1"></i>Uploaded By</th>
                         <th><i class="bx bx-calendar me-1"></i>Uploaded At</th>
-                        <th>Actions</th>
+                        <th class="no-print">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="documentsTableBody">
                     <?php if(!empty($documents)): ?>
-                        <?php
-                            // Count how many document rows belong to each student so we
-                            // know the rowspan to use on that student's name cell.
-                            $studentRowspans = [];
-                            foreach($documents as $document){
-                                $studentRowspans[$document['student_id']] = ($studentRowspans[$document['student_id']] ?? 0) + 1;
-                            }
-                            $lastStudentId = null;
-                        ?>
                         <?php foreach($documents as $index => $document): ?>
                             <?php
-                                $isNewStudentGroup = $document['student_id'] !== $lastStudentId;
-                                $lastStudentId = $document['student_id'];
                                 $studentFullName = $document['student_first_name'] . ' ' . $document['student_last_name'];
                                 [$statusBadgeClass, $statusIcon] = $statusMeta($document['status']);
                             ?>
                             <tr
                                 class="document-row"
-                                <?php if($isNewStudentGroup && $index > 0): ?>style="border-top: 2px solid #e9ecef;"<?php endif; ?>
                                 data-student-id="<?php echo htmlspecialchars($document['student_id']); ?>"
                                 data-student-name="<?php echo htmlspecialchars(strtolower($studentFullName)); ?>"
                                 data-document-type="<?php echo htmlspecialchars(strtolower($document['document_type_name'])); ?>"
+                                data-status="<?php echo htmlspecialchars($document['status']); ?>"
                             >
                                 <td><?php echo $index + 1; ?></td>
-                                <?php if($isNewStudentGroup): ?>
-                                    <td rowspan="<?php echo $studentRowspans[$document['student_id']]; ?>" class="align-middle">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <div class="avatar avatar-sm flex-shrink-0">
-                                                <span class="avatar-initial rounded-circle bg-label-primary">
-                                                    <?php echo htmlspecialchars(strtoupper(substr($studentFullName, 0, 1))); ?>
-                                                </span>
-                                            </div>
-                                            <span class="fw-medium"><?php echo htmlspecialchars($studentFullName); ?></span>
+                                <td class="align-middle">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar avatar-sm flex-shrink-0">
+                                            <span class="avatar-initial rounded-circle bg-label-primary">
+                                                <?php echo htmlspecialchars(strtoupper(substr($studentFullName, 0, 1))); ?>
+                                            </span>
                                         </div>
-                                    </td>
-                                <?php endif; ?>
+                                        <span class="fw-medium"><?php echo htmlspecialchars($studentFullName); ?></span>
+                                    </div>
+                                </td>
                                 <td>
                                     <i class="bx <?php echo $fileIcon($document['file_path']); ?> me-1"></i>
                                     <?php echo htmlspecialchars($document['document_type_name']); ?>
@@ -266,7 +264,7 @@ $totalDocuments = count($documents);
                                 </td>
                                 <td><?php echo htmlspecialchars($document['uploaded_by_name'] ?? '—'); ?></td>
                                 <td><?php echo date('M d, Y', strtotime($document['uploaded_at'])); ?></td>
-                                <td class="text-nowrap">
+                                <td class="text-nowrap no-print">
                                     <a
                                         href="<?php echo htmlspecialchars(BASE_URL . $fileUrl($document['file_path'])); ?>"
                                         target="_blank"
@@ -298,7 +296,7 @@ $totalDocuments = count($documents);
         </div>
 
         <!-- Pagination Controls -->
-        <div class="card-footer py-3" id="paginationContainer">
+        <div class="card-footer py-3 no-print" id="paginationContainer">
             <div class="row align-items-center">
                 <div class="col-md-6">
                     <div class="d-flex align-items-center gap-2">
@@ -391,7 +389,7 @@ $totalDocuments = count($documents);
 
                         <!-- Remarks -->
                         <div class="mb-3">
-                            <label class="form-label small mb-1 fw-bold">Remarks:</label>
+                            <label class="form-label small mb-1 fw-bold">Remarks: <span class="text-muted fw-normal">(required if Rejected)</span></label>
                             <textarea class="form-control form-control-sm" name="remarks" rows="3" placeholder="Add any remarks..."></textarea>
                         </div>
                     </div>
@@ -477,7 +475,7 @@ $totalDocuments = count($documents);
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label small mb-1 fw-bold">Remarks:</label>
+                        <label class="form-label small mb-1 fw-bold">Remarks: <span class="text-muted fw-normal">(required if Rejected)</span></label>
                         <textarea class="form-control form-control-sm" name="remarks" id="edit_remarks" rows="3" placeholder="Add any remarks..."></textarea>
                     </div>
                 </div>

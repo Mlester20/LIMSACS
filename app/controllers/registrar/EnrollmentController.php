@@ -252,8 +252,8 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
          * @param string $status - Enrollment status to filter by, or 'All' for every status
          * @return array - Array with 'enrollments' and 'pagination' keys
          */
-        public function getEnrolledStudentsWithPagination($page = 1, $itemsPerPage = 10, $status = 'Enrolled') {
-            return $this->enrollmentService->getEnrolledStudentsWithPagination($page, $itemsPerPage, $status);
+        public function getEnrolledStudentsWithPagination($page = 1, $itemsPerPage = 10, $status = 'Enrolled', $gradeLevel = '') {
+            return $this->enrollmentService->getEnrolledStudentsWithPagination($page, $itemsPerPage, $status, $gradeLevel);
         }
 
         /**
@@ -262,10 +262,11 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
          * @param int $page
          * @param int $itemsPerPage
          * @param string $status Enrollment status to filter by, or 'All' for every status
+         * @param string $gradeLevel Grade level to filter by, or '' for every grade level
          * @return array ['enrollments' => array, 'pagination' => array]
          */
-        public function searchEnrolledStudents($keyword, $page = 1, $itemsPerPage = 10, $status = 'Enrolled') {
-            return $this->enrollmentService->searchEnrolledStudents($keyword, $page, $itemsPerPage, $status);
+        public function searchEnrolledStudents($keyword, $page = 1, $itemsPerPage = 10, $status = 'Enrolled', $gradeLevel = '') {
+            return $this->enrollmentService->searchEnrolledStudents($keyword, $page, $itemsPerPage, $status, $gradeLevel);
         }
 
         /**
@@ -366,13 +367,14 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
                 $page         = $_POST['page'] ?? 1;
                 $itemsPerPage = $_POST['items_per_page'] ?? 10;
                 $status       = $_POST['status'] ?? 'Enrolled';
+                $gradeLevel   = $_POST['grade_level'] ?? '';
 
                 $allowedStatusFilters = ['Enrolled', 'Transferred', 'Dropped', 'Graduated', 'All'];
                 if (!in_array($status, $allowedStatusFilters, true)) {
                     $status = 'Enrolled';
                 }
 
-                $result = $controller->searchEnrolledStudents($keyword, $page, $itemsPerPage, $status);
+                $result = $controller->searchEnrolledStudents($keyword, $page, $itemsPerPage, $status, $gradeLevel);
                 header('Content-Type: application/json');
                 echo json_encode($result);
                 exit();
