@@ -375,11 +375,14 @@ require_once __DIR__ . '/../Model.php';
         }
 
         public function getGradeLevelOptions(): array{
+            // Sourced from `sections`, same as getSectionOptions() — available as soon as
+            // sections exist, not dependent on there already being a Graduated/Transferred/
+            // Dropped record (academic_history can be empty for a brand-new school year).
             $result = $this->con->query("
-                SELECT DISTINCT ah.grade_level
-                FROM {$this->academic_history} ah
-                WHERE ah.enrollment_status IN ('Graduated', 'Transferred', 'Dropped')
-                ORDER BY ah.grade_level ASC
+                SELECT DISTINCT grade_level
+                FROM {$this->sections}
+                WHERE grade_level IS NOT NULL AND grade_level <> ''
+                ORDER BY grade_level ASC
             ");
             return $result ? array_column($result->fetch_all(MYSQLI_ASSOC), 'grade_level') : [];
         }

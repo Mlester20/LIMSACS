@@ -52,7 +52,55 @@ AuthRole::allowOnly(['registrar']);
         </div>
       </div>
       <div class="col-md-6 text-end mt-2 mt-md-0">
+        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addTeacherModal">Add Teacher</button>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSectionModal">Add Section</button>
+      </div>
+    </div>
+
+    <!-- add teacher modal -->
+    <div class="modal fade" id="addTeacherModal" tabindex="-1" aria-labelledby="addTeacherModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form action="<?= BASE_URL ?>/app/controllers/registrar/TeachersController.php" method="post">
+            <?php echo Csrf::field(); ?>
+            <div class="modal-header">
+              <h5 class="modal-title" id="addTeacherModalLabel">Add Teacher</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p class="text-muted small">
+                Adds a teacher so they can be selected as a section adviser. This does
+                <strong>not</strong> create a login account — teachers don't sign in to the system.
+              </p>
+              <div class="mb-3">
+                <label for="teacher_full_name" class="form-label">Full Name</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="teacher_full_name"
+                  name="full_name"
+                  placeholder="e.g., Juan Dela Cruz"
+                  required
+                >
+              </div>
+              <div class="mb-3">
+                <label for="teacher_email" class="form-label">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="teacher_email"
+                  name="email"
+                  placeholder="e.g., juan.delacruz@school.edu.ph"
+                  required
+                >
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary" name="create_teacher">Add Teacher</button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
 
@@ -393,6 +441,22 @@ AuthRole::allowOnly(['registrar']);
     <script src="<?= BASE_URL ?>/public/assets/vendor/js/menu.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/js/main.js"></script>
     <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <script>
+        // teacher_id -> { sectionId, sectionName } for every teacher currently advising
+        // a section. Used by editFunction() in sections.js to stop a registrar from
+        // assigning the same adviser to more than one section at once — a teacher stays
+        // selectable only for the section they already advise, or for sections with no
+        // adviser taken yet.
+        const sectionAdviserMap = <?php
+            $adviserMap = [];
+            foreach($sections as $sec){
+                if(!empty($sec['adviser_id'])){
+                    $adviserMap[$sec['adviser_id']] = ['sectionId' => (int)$sec['id'], 'sectionName' => $sec['section_name']];
+                }
+            }
+            echo json_encode($adviserMap);
+        ?>;
+    </script>
     <script src="<?= BASE_URL ?>/public/js/registrar/sections.js"></script>
 </body>
 </html>

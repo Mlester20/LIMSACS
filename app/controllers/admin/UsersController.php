@@ -10,7 +10,7 @@ require_once __DIR__ . '/../Controller.php';
 require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../models/admin/UsersModel.php';
 
-const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
+const VALID_USER_ROLES = ['admin', 'registrar', 'teacher'];
 
 
     class UsersController extends Controller{
@@ -68,15 +68,23 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
 
         public function create($data){
             try{
-                $errors = $this->validate($data, true);
+                // Teacher records are adviser-only data now — they're never used to log in,
+                // so no password is collected or required for them.
+                $isTeacher = ($data['role'] ?? '') === 'teacher';
+
+                $errors = $this->validate($data, !$isTeacher);
                 if(!empty($errors)){
                     FlashMessage::setFlash('error', implode(' ', $errors));
                     header('Location: ' . BASE_URL . '/resources/views/admin/users.php');
                     exit();
                 }
 
-                // Hash the password
-                $data['password'] = hashPassword($data['password']);
+                // For teachers: a random, never-disclosed hash satisfies the NOT NULL column
+                // but can never be guessed/used to actually log in. Everyone else gets their
+                // chosen password, hashed as usual.
+                $data['password'] = $isTeacher
+                    ? hashPassword(bin2hex(random_bytes(32)))
+                    : hashPassword($data['password']);
 
                 if($this->model->create($data)){
                     $this->auditLogs->log(
@@ -211,7 +219,7 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher', 'staff'];
                     [
                         'full_name' => $_POST['full_name'],
                         'email' => $_POST['email'],
-                        'password' => $_POST['password'],
+                        'password' => $_POST['password'] ?? '', // omitted when role=teacher (field disabled client-side)
                         'role' => $_POST['role'],
                         'profile_picture' => $_POST['profile_picture'] ?? ''
                     ]

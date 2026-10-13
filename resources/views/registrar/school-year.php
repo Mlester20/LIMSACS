@@ -68,12 +68,20 @@ AuthRole::allowOnly(['registrar']);
             <?php endif; ?>
         </form>
 
-        <button
-            class="btn btn-primary"
-            data-bs-toggle="modal"
-            data-bs-target="#addSchoolYearModal">
-            Add School Year
-        </button>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" href="<?= BASE_URL ?>/resources/views/registrar/import-school-years.php" title="Import School Years">
+                <i class="bx bx-import me-1"></i>Import
+            </a>
+            <a class="btn btn-outline-secondary" href="<?= BASE_URL ?>/app/controllers/registrar/SchoolYearImportController.php?export=excel" title="Export School Years">
+                <i class="bx bx-export me-1"></i>Export
+            </a>
+            <button
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#addSchoolYearModal">
+                Add School Year
+            </button>
+        </div>
     </div>
 
     <!-- Add School Year Modal -->

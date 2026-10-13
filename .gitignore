@@ -2,3 +2,4 @@ docs/
 vendor/
 storage/imports
 database/config/config.local.php
+/manuals/

@@ -51,6 +51,36 @@ require_once __DIR__ . '/../Model.php';
             }
         }
 
+        /**
+         * One teacher advises at most one section at a time. Checks whether $adviser_id
+         * is already assigned to some OTHER section.
+         * @param int $adviser_id
+         * @param int|null $excludeSectionId pass the section's own id when editing it, so it doesn't flag itself
+         * @return bool
+         */
+        public function isTeacherAlreadyAdviser($adviser_id, $excludeSectionId = null){
+            try{
+                $query = "SELECT id FROM {$this->sections} WHERE adviser_id = ?";
+                if($excludeSectionId){
+                    $query .= " AND id != ?";
+                }
+                $query .= " LIMIT 1";
+
+                $stmt = $this->con->prepare($query);
+                if($excludeSectionId){
+                    $stmt->bind_param('ii', $adviser_id, $excludeSectionId);
+                }else{
+                    $stmt->bind_param('i', $adviser_id);
+                }
+                $stmt->execute();
+                $result = $stmt->get_result();
+                return $result->num_rows > 0;
+            }catch(Exception $e){
+                error_log('Check adviser conflict error: ' . $e->getMessage());
+                return false;
+            }
+        }
+
         public function create($data){
             try {
                 $query = "INSERT INTO {$this->sections} (section_name, grade_level, adviser_id, school_year_id, max_students) VALUES (?, ?, ?, ?, ?)";

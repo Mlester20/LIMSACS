@@ -60,13 +60,20 @@ require_once __DIR__ . '/../helpers/auditLogs.php';
         }
 
         private function redirectByRole(string $role): void{
+            // 'teacher' accounts still exist (as adviser records selectable in Sections),
+            // but no longer have their own dashboard — only admin/registrar log in to the system.
             $routes = [
                 "admin" => BASE_URL . "/resources/views/admin/dashboard.php",
                 "registrar" => BASE_URL . "/resources/views/registrar/home.php",
-                "teacher" => BASE_URL . "/resources/views/teachers/home.php",
-                //if role is not found, redirect to index to avoid unauthorized access
+                //if role is not found (or has no dashboard, e.g. teacher), redirect to index
                 "default" => BASE_URL . "/index.php"
             ];
+
+            if(!isset($routes[$role])){
+                // Log them back out — they authenticated, but this role has no dashboard to send them to.
+                unset($_SESSION['id'], $_SESSION['full_name'], $_SESSION['email'], $_SESSION['role'], $_SESSION['profile_picture']);
+                FlashMessage::setFlash('error', 'This account does not have access to the system. Please contact the registrar.');
+            }
 
             $location = $routes[$role] ?? $routes["default"];
 

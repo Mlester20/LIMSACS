@@ -31,6 +31,12 @@ require_once __DIR__ . '/../../../database/config/config.php';
 
         public function create($data){
             try{
+                if(!empty($data['adviser_id']) && $this->model->isTeacherAlreadyAdviser($data['adviser_id'])){
+                    FlashMessage::setFlash('error', 'That teacher is already the adviser of another section. One teacher can only advise one section at a time.');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/sections.php');
+                    exit();
+                }
+
                 if($this->model->create($data)){
                     $this->auditLogs->log(
                         $_SESSION['id'] ?? null,
@@ -83,6 +89,12 @@ require_once __DIR__ . '/../../../database/config/config.php';
 
         public function update($id, $data){
             try{
+                if(!empty($data['adviser_id']) && $this->model->isTeacherAlreadyAdviser($data['adviser_id'], $id)){
+                    FlashMessage::setFlash('error', 'That teacher is already the adviser of another section. One teacher can only advise one section at a time.');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/sections.php');
+                    exit();
+                }
+
                 if($this->model->update($id, $data)){
                     $this->auditLogs->log(
                         $_SESSION['id'] ?? null,

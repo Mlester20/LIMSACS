@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../../../app/controllers/admin/UsersController.php';
 require_once __DIR__ . '/../../../app/helpers/flashMessage.php';
 require_once __DIR__ . '/../../../app/middleware/Auth.php';
-AuthRole::allowOnly(['admin']); 
+AuthRole::allowOnly(['admin']);
 ?>
 
 <!DOCTYPE html>
@@ -53,7 +53,7 @@ AuthRole::allowOnly(['admin']);
 
             <select name="role" class="form-select" style="max-width: 160px;">
                 <option value="">All Roles</option>
-                <?php foreach (['admin', 'registrar', 'teacher', 'staff'] as $roleOption): ?>
+                <?php foreach (['admin', 'registrar', 'teacher'] as $roleOption): ?>
                     <option value="<?php echo $roleOption; ?>" <?php echo $role_filter === $roleOption ? 'selected' : ''; ?>>
                         <?php echo ucfirst($roleOption); ?>
                     </option>
@@ -141,7 +141,7 @@ AuthRole::allowOnly(['admin']);
                             </div>
 
                             <!-- Password -->
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6 mb-3" id="passwordFieldGroup">
                                 <label for="password" class="form-label">
                                     Password
                                 </label>
@@ -163,6 +163,9 @@ AuthRole::allowOnly(['admin']);
                                         <i class="bx bx-hide"></i>
                                     </button>
                                 </div>
+                                <small class="text-muted d-none" id="passwordNotNeededNote">
+                                    Not needed — teacher accounts are only used as section advisers and don't log in.
+                                </small>
                             </div>
 
                             <!-- Role -->
@@ -191,10 +194,6 @@ AuthRole::allowOnly(['admin']);
 
                                     <option value="teacher">
                                         Teacher
-                                    </option>
-
-                                    <option value="staff">
-                                        Staff
                                     </option>
 
                                 </select>
@@ -372,10 +371,6 @@ AuthRole::allowOnly(['admin']);
 
                                     <option value="teacher">
                                         Teacher
-                                    </option>
-
-                                    <option value="staff">
-                                        Staff
                                     </option>
 
                                 </select>

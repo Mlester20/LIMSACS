@@ -87,6 +87,7 @@ $exportQs = function ($type) use ($filters) {
             Graduates &mdash; Master List
             <?php if (!$print_mode): ?>
             <div class="d-flex gap-2 flex-wrap no-print">
+                <button type="submit" form="graduatesFilterForm" class="btn btn-sm btn-outline-secondary"><i class="bx bx-filter-alt me-1"></i>Filter</button>
                 <a href="<?= $e($exportQs('excel')) ?>" class="btn btn-sm btn-outline-success"><i class="bx bx-spreadsheet me-1"></i>Export Excel</a>
                 <a href="<?= $e($exportQs('pdf')) ?>" class="btn btn-sm btn-outline-danger"><i class="bx bx-file-pdf me-1"></i>Export PDF</a>
                 <a href="<?= $e($qs($current_page) . '&print=1') ?>" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bx bx-printer me-1"></i>Print</a>
@@ -96,12 +97,12 @@ $exportQs = function ($type) use ($filters) {
 
         <?php if (!$print_mode): ?>
         <div class="card-body border-bottom no-print">
-            <form method="GET" class="row g-2 align-items-end">
-                <div class="col-md-2">
+            <form method="GET" id="graduatesFilterForm" class="row g-2 align-items-end">
+                <div class="col-md-4">
                     <label class="form-label small">Search</label>
                     <input type="text" name="search" class="form-control" placeholder="LRN or student name" value="<?= $e($search_term) ?>">
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-4">
                     <label class="form-label small">School Year</label>
                     <select name="school_year_id" class="form-select">
                         <option value="">All</option>
@@ -110,7 +111,7 @@ $exportQs = function ($type) use ($filters) {
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-4">
                     <label class="form-label small">Grade Level</label>
                     <select name="grade_level" class="form-select">
                         <option value="">All</option>
@@ -119,7 +120,7 @@ $exportQs = function ($type) use ($filters) {
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-4">
                     <label class="form-label small">Section</label>
                     <select name="section_id" class="form-select">
                         <option value="">All</option>
@@ -128,7 +129,7 @@ $exportQs = function ($type) use ($filters) {
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="col-md-1">
+                <div class="col-md-4">
                     <label class="form-label small">Gender</label>
                     <select name="gender" class="form-select">
                         <option value="">All</option>
@@ -136,7 +137,7 @@ $exportQs = function ($type) use ($filters) {
                         <option value="Female" <?= $gender_filter === 'Female' ? 'selected' : '' ?>>Female</option>
                     </select>
                 </div>
-                <div class="col-md-1">
+                <div class="col-md-4">
                     <label class="form-label small">Status</label>
                     <select name="status" class="form-select">
                         <option value="">All</option>
@@ -144,9 +145,6 @@ $exportQs = function ($type) use ($filters) {
                         <option value="Transferred" <?= $status_filter === 'Transferred' ? 'selected' : '' ?>>Transferred</option>
                         <option value="Dropped" <?= $status_filter === 'Dropped' ? 'selected' : '' ?>>Dropped</option>
                     </select>
-                </div>
-                <div class="col-md-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-outline-secondary w-100">Filter</button>
                 </div>
             </form>
             <?php if ($search_term !== '' || $school_year_filter !== '' || $grade_level_filter !== '' || $section_filter !== '' || $gender_filter !== '' || $status_filter !== ''): ?>

@@ -11,7 +11,29 @@ function resetPasswordModal(id, full_name){
     document.getElementById('reset_user_name').textContent = full_name;
 }
 
+/**
+ * Teacher accounts are adviser-only data now (no login), so the password field
+ * isn't needed when "Teacher" is picked on the Create User form.
+ */
+function togglePasswordRequirement(){
+    const role = document.getElementById('role');
+    const passwordInput = document.getElementById('password');
+    const passwordGroup = document.getElementById('passwordFieldGroup');
+    const note = document.getElementById('passwordNotNeededNote');
+    if(!role || !passwordInput) return;
+
+    const isTeacher = role.value === 'teacher';
+    passwordInput.required = !isTeacher;
+    passwordInput.disabled = isTeacher;
+    passwordInput.value = '';
+    passwordGroup?.querySelector('.input-group')?.classList.toggle('d-none', isTeacher);
+    note?.classList.toggle('d-none', !isTeacher);
+}
+
 document.addEventListener('DOMContentLoaded', function(){
+    document.getElementById('role')?.addEventListener('change', togglePasswordRequirement);
+    document.getElementById('addUserModal')?.addEventListener('shown.bs.modal', togglePasswordRequirement);
+
     const resetForm = document.getElementById('resetPasswordForm');
     const confirmInput = document.getElementById('confirm_password');
 

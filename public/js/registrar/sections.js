@@ -10,9 +10,44 @@ function getCsrfToken() {
 function editFunction(id, section_name, grade_level, adviser_id, school_year_id) {
     document.getElementById('edit_section_id').value = id;
     document.getElementById('edit_section_name').value = section_name;
-    document.getElementById('edit_section_grade_level').value = grade_level; 
+    document.getElementById('edit_section_grade_level').value = grade_level;
+    document.getElementById('edit_school_year_id').value = school_year_id;
+
+    applyAdviserAvailability(id, adviser_id);
     document.getElementById('edit_adviser_id').value = adviser_id;
-    document.getElementById('edit_school_year_id').value = school_year_id; 
+}
+
+/**
+ * Disables adviser options already taken by a DIFFERENT section, so one teacher can't
+ * end up assigned as adviser to more than one section at a time. The section currently
+ * being edited keeps its own existing adviser selectable (and any unassigned teacher
+ * stays selectable too). Relies on `sectionAdviserMap` (teacher_id -> {sectionId,
+ * sectionName}), rendered inline by resources/views/registrar/sections.php.
+ * @param {number} currentSectionId
+ * @param {number|string} currentAdviserId the section's own adviser, always kept selectable
+ */
+function applyAdviserAvailability(currentSectionId, currentAdviserId) {
+    const select = document.getElementById('edit_adviser_id');
+    if (!select || typeof sectionAdviserMap === 'undefined') return;
+
+    Array.from(select.options).forEach(option => {
+        if (!option.value) return; // the blank "Select Adviser" placeholder
+
+        if (option.dataset.originalText === undefined) {
+            option.dataset.originalText = option.textContent;
+        }
+
+        const taken = sectionAdviserMap[option.value];
+        const isOwnAdviser = String(option.value) === String(currentAdviserId);
+
+        if (taken && taken.sectionId !== currentSectionId && !isOwnAdviser) {
+            option.disabled = true;
+            option.textContent = `${option.dataset.originalText} (already advising ${taken.sectionName})`;
+        } else {
+            option.disabled = false;
+            option.textContent = option.dataset.originalText;
+        }
+    });
 }
 
 function viewSection(id, section_name, grade_level, adviser_name, school_year, total_students, max_capacity) {
