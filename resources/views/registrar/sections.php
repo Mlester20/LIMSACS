@@ -3,6 +3,8 @@ require_once __DIR__ . '/../../../app/controllers/registrar/SectionsController.p
 require_once __DIR__ . '/../../../app/helpers/flashMessage.php';
 require_once __DIR__ . '/../../../app/middleware/Auth.php';
 AuthRole::allowOnly(['registrar']);
+
+$gradeLevels = SectionsController::GRADE_LEVELS;
 ?>
 
 <!DOCTYPE html>
@@ -128,14 +130,12 @@ AuthRole::allowOnly(['registrar']);
               </div>
               <div class="mb-3">
                 <label for="section_grade_level" class="form-label">Grade Level</label>
-                <input 
-                  type="text" 
-                  class="form-control" 
-                  id="section_grade_level" 
-                  name="grade_level" 
-                  placeholder="e.g., Grade 5" 
-                  required
-                >
+                <select class="form-select" id="section_grade_level" name="grade_level" required>
+                  <option value="" selected disabled>Select Grade Level</option>
+                  <?php foreach($gradeLevels as $gl): ?>
+                    <option value="<?php echo htmlspecialchars($gl); ?>"><?php echo htmlspecialchars($gl); ?></option>
+                  <?php endforeach; ?>
+                </select>
               </div>
               <!-- dropdown for teacher assignment -->
               <div class="mb-3">
@@ -200,14 +200,12 @@ AuthRole::allowOnly(['registrar']);
               </div>
               <div class="mb-3">
                 <label for="edit_section_grade_level" class="form-label">Grade Level</label>
-                <input 
-                  type="text" 
-                  class="form-control" 
-                  id="edit_section_grade_level" 
-                  name="grade_level" 
-                  placeholder="e.g., Grade 5" 
-                  required
-                >
+                <select class="form-select" id="edit_section_grade_level" name="grade_level" required>
+                  <option value="" selected disabled>Select Grade Level</option>
+                  <?php foreach($gradeLevels as $gl): ?>
+                    <option value="<?php echo htmlspecialchars($gl); ?>"><?php echo htmlspecialchars($gl); ?></option>
+                  <?php endforeach; ?>
+                </select>
               </div>
               <!-- dropdown for teacher assignment -->
               <div class="mb-3">

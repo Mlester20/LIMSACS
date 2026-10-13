@@ -12,6 +12,8 @@ require_once __DIR__ . '/../../services/SectionService.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 
     class SectionsController extends Controller{
+        const GRADE_LEVELS = ['Kindergarten', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
+
         protected $auditLogs;
         protected $academicHistory;
         protected $sectionService;
@@ -31,6 +33,12 @@ require_once __DIR__ . '/../../../database/config/config.php';
 
         public function create($data){
             try{
+                if(!in_array($data['grade_level'] ?? '', self::GRADE_LEVELS, true)){
+                    FlashMessage::setFlash('error', 'Please select a valid grade level.');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/sections.php');
+                    exit();
+                }
+
                 if(!empty($data['adviser_id']) && $this->model->isTeacherAlreadyAdviser($data['adviser_id'])){
                     FlashMessage::setFlash('error', 'That teacher is already the adviser of another section. One teacher can only advise one section at a time.');
                     header('Location: ' . BASE_URL . '/resources/views/registrar/sections.php');
@@ -89,6 +97,12 @@ require_once __DIR__ . '/../../../database/config/config.php';
 
         public function update($id, $data){
             try{
+                if(!in_array($data['grade_level'] ?? '', self::GRADE_LEVELS, true)){
+                    FlashMessage::setFlash('error', 'Please select a valid grade level.');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/sections.php');
+                    exit();
+                }
+
                 if(!empty($data['adviser_id']) && $this->model->isTeacherAlreadyAdviser($data['adviser_id'], $id)){
                     FlashMessage::setFlash('error', 'That teacher is already the adviser of another section. One teacher can only advise one section at a time.');
                     header('Location: ' . BASE_URL . '/resources/views/registrar/sections.php');
