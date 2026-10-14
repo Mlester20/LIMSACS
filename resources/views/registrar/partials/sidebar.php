@@ -11,7 +11,7 @@
       <div class="app-brand demo">
         <a href="<?= BASE_URL ?>/resources/views/registrar/home.php" class="app-brand-link">
           <span class="app-brand-logo demo">
-            <img src="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" alt="Logo" style="width: 50x; height: 50px;">
+            <img src="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" alt="Logo" style="width: 60px; height: 60px;">
           </span>
           <span class="app-brand-text demo menu-text fw-bolder ms-2">LIMSACS</span>
         </a>
@@ -83,14 +83,10 @@
           <span class="menu-header-text">Graduate Data</span>
         </li>
         <li class="menu-item <?php echo (in_array($currentPage, ['graduates.php', 'graduates-master-list.php', 'graduate-view.php'])) ? 'active' : ''; ?>">
-          <a href="javascript:void(0);" class="menu-link menu-toggle">
+          <a href="<?= BASE_URL ?>/resources/views/registrar/graduates.php" class="menu-link">
             <i class="menu-icon tf-icons bx bx-medal"></i>
             <div data-i18n="Graduates">Graduate Data</div>
           </a>
-          <ul class="menu-sub">
-            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/graduates.php" class="menu-link"><div data-i18n="Dashboard">Dashboard</div></a></li>
-            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/graduates-master-list.php" class="menu-link"><div data-i18n="Master List">Master List</div></a></li>
-          </ul>
         </li>
 
         <!-- Audits -->

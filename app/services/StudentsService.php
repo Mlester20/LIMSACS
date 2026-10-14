@@ -69,8 +69,9 @@ require_once __DIR__ . '/../models/Model.php';
          * @param string $keyword
          * @param string $gradeLevel Optional exact grade_level filter, '' for all
          * @param string|int $sectionId Optional exact section_id filter, '' for all
+         * @param string $archivedFilter '0' = active only (default), '1' = archived only, 'all' = both
         */
-        public function searchStudents($keyword, $gradeLevel = '', $sectionId = ''){
+        public function searchStudents($keyword, $gradeLevel = '', $sectionId = '', $archivedFilter = '0'){
             $keyword = trim($keyword);
 
             if(empty($keyword) || strlen($keyword) < 2){
@@ -93,6 +94,11 @@ require_once __DIR__ . '/../models/Model.php';
                 $extraParams[] = $sectionId;
                 $extraTypes .= 'i';
             }
+            if($archivedFilter === '0' || $archivedFilter === '1'){
+                $extraConditions .= " AND s.archived = ?";
+                $extraParams[] = (int)$archivedFilter;
+                $extraTypes .= 'i';
+            }
 
             $query = "SELECT
                 s.id,
@@ -109,8 +115,10 @@ require_once __DIR__ . '/../models/Model.php';
                 s.religion,
                 s.address,
                 s.contact_number,
+                s.archived,
                 ah.grade_level AS current_grade_level,
-                sec.section_name AS current_section_name
+                sec.section_name AS current_section_name,
+                ah.enrollment_status AS current_enrollment_status
                 FROM {$this->students} s
                 LEFT JOIN academic_history ah ON ah.id = (
                     SELECT ah2.id FROM academic_history ah2 WHERE ah2.student_id = s.id ORDER BY ah2.id DESC LIMIT 1

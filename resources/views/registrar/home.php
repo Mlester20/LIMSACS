@@ -91,6 +91,10 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
     <script src="<?= BASE_URL ?>/public/assets/vendor/js/helpers.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/js/config.js"></script>
+    <style>
+        .dashboard-stat-card { cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+        .dashboard-stat-card:hover { transform: translateY(-3px); box-shadow: 0 0.5rem 1rem rgba(0,0,0,.1) !important; }
+    </style>
 </head>
 <body>
 
@@ -132,98 +136,106 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
         <div class="row g-4 mb-4">
     
           <div class="col-sm-6 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm">
-              <div class="card-body d-flex align-items-center gap-3">
-                <div class="avatar avatar-lg flex-shrink-0">
-                  <span class="avatar-initial rounded bg-label-primary">
-                    <i class="bx bx-group bx-sm"></i>
-                  </span>
-                </div>
-                <div>
-                  <p class="text-muted small mb-0">Total Students</p>
-                  <h3 class="mb-0 fw-bold"><?= $int($data['total_students'] ?? 0) ?></h3>
-                </div>
-              </div>
-              <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
-                <small class="text-success">
-                  <i class="bx bx-user-check"></i>
-                  <?= $int($data['enrolled_students'] ?? 0) ?> currently enrolled
-                </small>
-              </div>
-            </div>
-          </div>
-    
-          <div class="col-sm-6 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm">
-              <div class="card-body d-flex align-items-center gap-3">
-                <div class="avatar avatar-lg flex-shrink-0">
-                  <span class="avatar-initial rounded bg-label-success">
-                    <i class="bx bx-user-check bx-sm"></i>
-                  </span>
-                </div>
-                <div>
-                  <p class="text-muted small mb-0">Enrolled (Active Year)</p>
-                  <h3 class="mb-0 fw-bold"><?= $int($data['enrolled_students'] ?? 0) ?></h3>
-                </div>
-              </div>
-              <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
-                <?php
-                  $total    = (int)($data['total_students'] ?? 0);
-                  $enrolled = (int)($data['enrolled_students'] ?? 0);
-                  $pct      = $total > 0 ? round($enrolled / $total * 100) : 0;
-                ?>
-                <div class="d-flex align-items-center gap-2">
-                  <div class="progress flex-grow-1" style="height:5px;">
-                    <div class="progress-bar bg-success" style="width:<?= $pct ?>%"></div>
+            <a href="student-records.php" class="text-decoration-none text-reset">
+              <div class="card h-100 border-0 shadow-sm dashboard-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                  <div class="avatar avatar-lg flex-shrink-0">
+                    <span class="avatar-initial rounded bg-label-primary">
+                      <i class="bx bx-group bx-sm"></i>
+                    </span>
                   </div>
-                  <small class="text-muted"><?= $pct ?>%</small>
+                  <div>
+                    <p class="text-muted small mb-0">Total Students</p>
+                    <h3 class="mb-0 fw-bold"><?= $int($data['total_students'] ?? 0) ?></h3>
+                  </div>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
+                  <small class="text-success">
+                    <i class="bx bx-user-check"></i>
+                    <?= $int($data['enrolled_students'] ?? 0) ?> currently enrolled
+                  </small>
                 </div>
               </div>
-            </div>
+            </a>
           </div>
-    
+
           <div class="col-sm-6 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm">
-              <div class="card-body d-flex align-items-center gap-3">
-                <div class="avatar avatar-lg flex-shrink-0">
-                  <span class="avatar-initial rounded bg-label-warning">
-                    <i class="bx bx-grid-alt bx-sm"></i>
-                  </span>
+            <a href="enrollment.php?status=Enrolled&page=1" class="text-decoration-none text-reset">
+              <div class="card h-100 border-0 shadow-sm dashboard-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                  <div class="avatar avatar-lg flex-shrink-0">
+                    <span class="avatar-initial rounded bg-label-success">
+                      <i class="bx bx-user-check bx-sm"></i>
+                    </span>
+                  </div>
+                  <div>
+                    <p class="text-muted small mb-0">Enrolled (Active Year)</p>
+                    <h3 class="mb-0 fw-bold"><?= $int($data['enrolled_students'] ?? 0) ?></h3>
+                  </div>
                 </div>
-                <div>
-                  <p class="text-muted small mb-0">Total Sections</p>
-                  <h3 class="mb-0 fw-bold"><?= $int($data['total_sections'] ?? 0) ?></h3>
+                <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
+                  <?php
+                    $total    = (int)($data['total_students'] ?? 0);
+                    $enrolled = (int)($data['enrolled_students'] ?? 0);
+                    $pct      = $total > 0 ? round($enrolled / $total * 100) : 0;
+                  ?>
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="progress flex-grow-1" style="height:5px;">
+                      <div class="progress-bar bg-success" style="width:<?= $pct ?>%"></div>
+                    </div>
+                    <small class="text-muted"><?= $pct ?>%</small>
+                  </div>
                 </div>
               </div>
-              <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
-                <small class="text-muted">
-                  <i class="bx bx-buildings"></i> Across all grade levels
-                </small>
-              </div>
-            </div>
+            </a>
           </div>
-    
+
           <div class="col-sm-6 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm">
-              <div class="card-body d-flex align-items-center gap-3">
-                <div class="avatar avatar-lg flex-shrink-0">
-                  <span class="avatar-initial rounded bg-label-info">
-                    <i class="bx bx-file bx-sm"></i>
-                  </span>
+            <a href="sections.php" class="text-decoration-none text-reset">
+              <div class="card h-100 border-0 shadow-sm dashboard-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                  <div class="avatar avatar-lg flex-shrink-0">
+                    <span class="avatar-initial rounded bg-label-warning">
+                      <i class="bx bx-grid-alt bx-sm"></i>
+                    </span>
+                  </div>
+                  <div>
+                    <p class="text-muted small mb-0">Total Sections</p>
+                    <h3 class="mb-0 fw-bold"><?= $int($data['total_sections'] ?? 0) ?></h3>
+                  </div>
                 </div>
-                <div>
-                  <p class="text-muted small mb-0">Required Document Types</p>
-                  <h3 class="mb-0 fw-bold"><?= $int($data['required_documents'] ?? 0) ?></h3>
+                <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
+                  <small class="text-muted">
+                    <i class="bx bx-buildings"></i> Across all grade levels
+                  </small>
                 </div>
               </div>
-              <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
-                <small class="text-muted">
-                  <i class="bx bx-check-double"></i> Active &amp; required only
-                </small>
-              </div>
-            </div>
+            </a>
           </div>
-    
+
+          <div class="col-sm-6 col-xl-3">
+            <a href="document-types.php" class="text-decoration-none text-reset">
+              <div class="card h-100 border-0 shadow-sm dashboard-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                  <div class="avatar avatar-lg flex-shrink-0">
+                    <span class="avatar-initial rounded bg-label-info">
+                      <i class="bx bx-file bx-sm"></i>
+                    </span>
+                  </div>
+                  <div>
+                    <p class="text-muted small mb-0">Required Document Types</p>
+                    <h3 class="mb-0 fw-bold"><?= $int($data['required_documents'] ?? 0) ?></h3>
+                  </div>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
+                  <small class="text-muted">
+                    <i class="bx bx-check-double"></i> Active &amp; required only
+                  </small>
+                </div>
+              </div>
+            </a>
+          </div>
+
         </div><!-- /Row 1 -->
 
         <!-- ── Row 1.5: Academic outcomes (enrollment status) ──────────────────── -->
@@ -237,27 +249,29 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
           <?php foreach ($statusOrder as $status): ?>
             <?php $count = (int) ($statusCounts[$status] ?? 0); ?>
             <div class="col-sm-6 col-xl-3">
-              <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center gap-3">
-                  <div class="avatar avatar-lg flex-shrink-0">
-                    <span class="avatar-initial rounded <?= $enrollBadge($status) ?>">
-                      <i class="bx <?= $enrollIcon($status) ?> bx-sm"></i>
-                    </span>
+              <a href="enrollment.php?status=<?= urlencode($status) ?>&page=1" class="text-decoration-none text-reset">
+                <div class="card h-100 border-0 shadow-sm dashboard-stat-card">
+                  <div class="card-body d-flex align-items-center gap-3">
+                    <div class="avatar avatar-lg flex-shrink-0">
+                      <span class="avatar-initial rounded <?= $enrollBadge($status) ?>">
+                        <i class="bx <?= $enrollIcon($status) ?> bx-sm"></i>
+                      </span>
+                    </div>
+                    <div>
+                      <p class="text-muted small mb-0"><?= $e($status) ?></p>
+                      <h3 class="mb-0 fw-bold"><?= $int($count) ?></h3>
+                    </div>
                   </div>
-                  <div>
-                    <p class="text-muted small mb-0"><?= $e($status) ?></p>
-                    <h3 class="mb-0 fw-bold"><?= $int($count) ?></h3>
-                  </div>
+                  <?php if ($status === 'Graduated'): ?>
+                    <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
+                      <small class="text-muted">
+                        <i class="bx bx-medal"></i>
+                        <?= $int($data['graduates_active_year'] ?? 0) ?> graduated this school year
+                      </small>
+                    </div>
+                  <?php endif; ?>
                 </div>
-                <?php if ($status === 'Graduated'): ?>
-                  <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
-                    <small class="text-muted">
-                      <i class="bx bx-medal"></i>
-                      <?= $int($data['graduates_active_year'] ?? 0) ?> graduated this school year
-                    </small>
-                  </div>
-                <?php endif; ?>
-              </div>
+              </a>
             </div>
           <?php endforeach; ?>
 
@@ -302,22 +316,24 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
               $share = $totalDocs > 0 ? round($count / $totalDocs * 100) : 0;
             ?>
             <div class="col-sm-6 col-xl-4">
-              <div class="card border-0 shadow-sm h-100">
-                <div class="card-body">
-                  <div class="d-flex align-items-center justify-content-between mb-3">
-                    <span class="badge bg-label-<?= $m['color'] ?> p-2 rounded fs-6">
-                      <i class="bx <?= $m['icon'] ?>"></i>
-                    </span>
-                    <span class="text-muted small"><?= $share ?>% of submissions</span>
-                  </div>
-                  <h3 class="mb-1 fw-bold"><?= $int($count) ?></h3>
-                  <p class="mb-0 fw-semibold"><?= $m['label'] ?> Documents</p>
-                  <small class="text-muted"><?= $m['desc'] ?></small>
-                  <div class="progress mt-3" style="height:4px;">
-                    <div class="progress-bar bg-<?= $m['color'] ?>" style="width:<?= $share ?>%"></div>
+              <a href="student-documents.php?status=<?= urlencode($m['label']) ?>" class="text-decoration-none text-reset">
+                <div class="card border-0 shadow-sm h-100 dashboard-stat-card">
+                  <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                      <span class="badge bg-label-<?= $m['color'] ?> p-2 rounded fs-6">
+                        <i class="bx <?= $m['icon'] ?>"></i>
+                      </span>
+                      <span class="text-muted small"><?= $share ?>% of submissions</span>
+                    </div>
+                    <h3 class="mb-1 fw-bold"><?= $int($count) ?></h3>
+                    <p class="mb-0 fw-semibold"><?= $m['label'] ?> Documents</p>
+                    <small class="text-muted"><?= $m['desc'] ?></small>
+                    <div class="progress mt-3" style="height:4px;">
+                      <div class="progress-bar bg-<?= $m['color'] ?>" style="width:<?= $share ?>%"></div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </a>
             </div>
           <?php endforeach; ?>
     

@@ -45,7 +45,7 @@ AuthRole::allowOnly(['registrar']);
     <div class="row mb-3 align-items-center">
       <div class="col-md-6">
         <div class="input-group">
-          <input type="text" class="form-control" placeholder="Search Students (e.g., Juan Dela Cruz)" id="searchInput" data-grade-filter="<?= htmlspecialchars($gradeLevelFilter) ?>" data-section-filter="<?= htmlspecialchars($sectionFilter) ?>">
+          <input type="text" class="form-control" placeholder="Search Students (e.g., Juan Dela Cruz)" id="searchInput" data-grade-filter="<?= htmlspecialchars($gradeLevelFilter) ?>" data-section-filter="<?= htmlspecialchars($sectionFilter) ?>" data-archived-filter="<?= htmlspecialchars($archivedFilter) ?>">
         </div>
       </div>
 
@@ -56,7 +56,7 @@ AuthRole::allowOnly(['registrar']);
 
     <div class="row mb-3 align-items-center">
       <div class="col-md-3">
-        <select class="form-select" id="gradeLevelFilter" onchange="window.location.href = '?grade_level=' + encodeURIComponent(this.value) + '&section_id=<?= urlencode($sectionFilter) ?>&page=1';">
+        <select class="form-select" id="gradeLevelFilter" onchange="applyStudentFilters()">
           <option value="">All Grade Levels</option>
           <?php foreach ($filterOptions['grade_levels'] as $gl): ?>
             <option value="<?= htmlspecialchars($gl) ?>" <?= $gradeLevelFilter === $gl ? 'selected' : '' ?>><?= htmlspecialchars($gl) ?></option>
@@ -64,11 +64,18 @@ AuthRole::allowOnly(['registrar']);
         </select>
       </div>
       <div class="col-md-3">
-        <select class="form-select" id="sectionFilter" onchange="window.location.href = '?grade_level=<?= urlencode($gradeLevelFilter) ?>&section_id=' + encodeURIComponent(this.value) + '&page=1';">
+        <select class="form-select" id="sectionFilter" onchange="applyStudentFilters()">
           <option value="">All Sections</option>
           <?php foreach ($filterOptions['sections'] as $sec): ?>
             <option value="<?= htmlspecialchars($sec['id']) ?>" <?= (string)$sectionFilter === (string)$sec['id'] ? 'selected' : '' ?>><?= htmlspecialchars($sec['section_name'] . ' (' . $sec['grade_level'] . ')') ?></option>
           <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" id="archivedFilter" onchange="applyStudentFilters()">
+          <option value="0" <?= $archivedFilter === '0' ? 'selected' : '' ?>>Active Students</option>
+          <option value="1" <?= $archivedFilter === '1' ? 'selected' : '' ?>>Archived Students</option>
+          <option value="all" <?= $archivedFilter === 'all' ? 'selected' : '' ?>>All Students</option>
         </select>
       </div>
       <?php if ($gradeLevelFilter !== '' || $sectionFilter !== ''): ?>
@@ -77,6 +84,18 @@ AuthRole::allowOnly(['registrar']);
         </div>
       <?php endif; ?>
     </div>
+
+    <script>
+      function applyStudentFilters() {
+        const gradeLevel = document.getElementById('gradeLevelFilter').value;
+        const sectionId = document.getElementById('sectionFilter').value;
+        const archived = document.getElementById('archivedFilter').value;
+        window.location.href = '?grade_level=' + encodeURIComponent(gradeLevel)
+          + '&section_id=' + encodeURIComponent(sectionId)
+          + '&archived=' + encodeURIComponent(archived)
+          + '&page=1';
+      }
+    </script>
 
     <div class="modal fade" id="enrollStudentModal" tabindex="-1" aria-labelledby="enrollStudentModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -186,12 +205,40 @@ AuthRole::allowOnly(['registrar']);
         </div>
     </div>
 
+    <?php
+        $enrollStatusBadge = function($status){
+            return match ($status) {
+                'Enrolled'    => 'bg-label-success',
+                'Transferred' => 'bg-label-info',
+                'Graduated'   => 'bg-label-primary',
+                'Dropped'     => 'bg-label-danger',
+                default       => 'bg-label-secondary',
+            };
+        };
+    ?>
+
     <div class="card">
-        <h5 class="card-header">Student Information</h5>
+        <h5 class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span>Student Information</span>
+            <?php if ($archivedFilter !== '1'): ?>
+                <button type="submit" form="bulkArchiveForm" name="archive_students" class="btn btn-sm btn-outline-warning" id="archiveSelectedBtn" disabled>
+                    <i class="bx bx-archive-in me-1"></i>Archive Selected
+                </button>
+            <?php endif; ?>
+            <?php if ($archivedFilter !== '0'): ?>
+                <button type="submit" form="bulkArchiveForm" name="unarchive_students" class="btn btn-sm btn-outline-success" id="unarchiveSelectedBtn" disabled>
+                    <i class="bx bx-archive-out me-1"></i>Unarchive Selected
+                </button>
+            <?php endif; ?>
+        </h5>
+        <form id="bulkArchiveForm" method="POST" action="<?= BASE_URL ?>/app/controllers/registrar/StudentsController.php" onsubmit="return confirmBulkArchive(event)">
+            <?php echo Csrf::field(); ?>
+            <input type="hidden" name="page" value="<?= (int) $pagination['currentPage'] ?>">
         <div class="table-responsive nowrap">
             <table class="table">
                 <thead>
                     <tr>
+                        <th><input type="checkbox" class="form-check-input" id="selectAllStudents"></th>
                         <th>#</th>
                         <th>LRN</th>
                         <th>Full Name</th>
@@ -199,18 +246,15 @@ AuthRole::allowOnly(['registrar']);
                         <th>Age</th>
                         <th>Grade Level</th>
                         <th>Section</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if(!empty($students)): ?>
                         <?php foreach($students as $index => $student): ?>
-                            <tr
-                                style="cursor: pointer;"
-                                data-bs-toggle="modal"
-                                data-bs-target="#studentDetailsModal"
-                                onclick="populateStudentModal(<?php echo htmlspecialchars(json_encode($student)); ?>)"
-                            >
+                            <tr>
+                                <td><input type="checkbox" class="form-check-input student-row-checkbox" name="student_ids[]" value="<?php echo (int) $student['id']; ?>"></td>
                                 <td><?php echo $pagination['itemsPerPage'] * ($pagination['currentPage'] - 1) + ($index + 1); ?></td>
                                 <td><?php echo htmlspecialchars($student['lrn'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($student['full_name'] ?? 'N/A'); ?></td>
@@ -219,43 +263,55 @@ AuthRole::allowOnly(['registrar']);
                                 <td><?php echo htmlspecialchars($student['current_grade_level'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($student['current_section_name'] ?? 'N/A'); ?></td>
                                 <td>
-
-                                    <button
-                                        class="btn btn-sm btn-primary"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editStudentModal"
-                                        onclick="editStudent(<?php echo htmlspecialchars(json_encode($student)); ?>)"
-                                        title="Edit"
-                                        aria-label="Edit">
-                                        <i class="bx bx-edit"></i>
-                                    </button>
-                                    <!-- delete action -->
-                                    <form method="POST" action="<?= BASE_URL ?>/app/controllers/registrar/StudentsController.php" style="display: inline;">
-                                        <?php echo Csrf::field(); ?>
-                                        <input type="hidden" name="student_id" value="<?php echo $student['id']; ?>">
-                                        <?php $deleteConfirmName = addslashes(htmlspecialchars($student['full_name'] ?? 'this student', ENT_QUOTES)); ?>
-                                        <button
-                                            type="submit"
-                                            class="btn btn-sm btn-danger"
-                                            onclick="return confirm('Are you sure you want to delete <?php echo $deleteConfirmName; ?> (LRN: <?php echo addslashes(htmlspecialchars($student['lrn'] ?? 'N/A', ENT_QUOTES)); ?>)? This action cannot be undone.');"
-                                            name="delete_student"
-                                            title="Delete"
-                                            aria-label="Delete"
-                                            >
-                                            <i class="bx bx-trash"></i>
+                                    <?php if (!empty($student['current_enrollment_status'])): ?>
+                                        <span class="badge <?= $enrollStatusBadge($student['current_enrollment_status']) ?>"><?php echo htmlspecialchars($student['current_enrollment_status']); ?></span>
+                                    <?php else: ?>
+                                        <span class="badge bg-label-secondary">N/A</span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($student['archived'])): ?>
+                                        <span class="badge bg-label-dark">Archived</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php
+                                        $deleteConfirmName = addslashes(htmlspecialchars($student['full_name'] ?? 'this student', ENT_QUOTES));
+                                        $deleteConfirmLrn  = addslashes(htmlspecialchars($student['lrn'] ?? 'N/A', ENT_QUOTES));
+                                    ?>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-icon btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions" aria-label="Actions">
+                                            <i class="bx bx-dots-vertical-rounded"></i>
                                         </button>
-                                    </form>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#studentDetailsModal" onclick="populateStudentModal(<?php echo htmlspecialchars(json_encode($student)); ?>)">
+                                                    <i class="bx bx-show me-2"></i>View
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editStudentModal" onclick="editStudent(<?php echo htmlspecialchars(json_encode($student)); ?>)">
+                                                    <i class="bx bx-edit me-2"></i>Edit
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a class="dropdown-item text-danger" href="#" onclick="deleteStudentRow(<?php echo (int) $student['id']; ?>, '<?php echo $deleteConfirmName; ?>', '<?php echo $deleteConfirmLrn; ?>')">
+                                                    <i class="bx bx-trash me-2"></i>Delete
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="8" class="text-center">No students found</td>
+                            <td colspan="10" class="text-center">No students found</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
+        </form>
 
         <!-- Pagination -->
         <div class="card-footer">
@@ -694,8 +750,16 @@ AuthRole::allowOnly(['registrar']);
         </div>
     </div>
 
+    <!-- Delete Student Form (hidden, avoids nesting a <form> inside bulkArchiveForm) -->
+    <form action="<?= BASE_URL ?>/app/controllers/registrar/StudentsController.php" method="POST" id="deleteStudentForm" style="display: none;">
+        <?php echo Csrf::field(); ?>
+        <input type="hidden" name="page" value="<?= (int) $pagination['currentPage'] ?>">
+        <input type="hidden" name="student_id" id="delete_student_id">
+        <input type="hidden" name="delete_student" value="1">
+    </form>
+
     <?php require_once __DIR__ . '/partials/footer.php'; ?>
-    
+
     <!-- ── Vendor scripts ── -->
     <script src="<?= BASE_URL ?>/public/assets/vendor/libs/jquery/jquery.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/vendor/libs/popper/popper.js"></script>

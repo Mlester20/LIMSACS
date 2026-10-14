@@ -13,8 +13,8 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
 $syLabels = array_column($data['per_school_year'] ?? [], 'school_year');
 $syData   = array_map('intval', array_column($data['per_school_year'] ?? [], 'total'));
 
-$glLabels = array_column($data['per_grade_level'] ?? [], 'grade_level');
-$glData   = array_map('intval', array_column($data['per_grade_level'] ?? [], 'total'));
+$genderLabels = ['Male', 'Female'];
+$genderData   = [(int) ($data['male_graduates'] ?? 0), (int) ($data['female_graduates'] ?? 0)];
 
 $perSection  = $data['per_section'] ?? [];
 $maxSection  = $perSection ? max(array_column($perSection, 'total')) : 0;
@@ -48,6 +48,10 @@ $maxSection  = $perSection ? max(array_column($perSection, 'total')) : 0;
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/vendor/libs/apex-charts/apex-charts.css" />
     <script src="<?= BASE_URL ?>/public/assets/vendor/js/helpers.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/js/config.js"></script>
+    <style>
+        .dashboard-stat-card { cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+        .dashboard-stat-card:hover { transform: translateY(-3px); box-shadow: 0 0.5rem 1rem rgba(0,0,0,.1) !important; }
+    </style>
 </head>
 <body>
     <?php require_once __DIR__ . '/../../../app/helpers/flashMessage.php'; FlashMessage::showFlash(); ?>
@@ -76,19 +80,21 @@ $maxSection  = $perSection ? max(array_column($perSection, 'total')) : 0;
     <div class="row g-4 mb-4">
 
       <div class="col-sm-6 col-xl-3">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-body d-flex align-items-center gap-3">
-            <div class="avatar avatar-lg flex-shrink-0">
-              <span class="avatar-initial rounded bg-label-primary">
-                <i class="bx bx-medal bx-sm"></i>
-              </span>
-            </div>
-            <div>
-              <p class="text-muted small mb-0">Total Graduates</p>
-              <h3 class="mb-0 fw-bold"><?= $int($data['total_graduates'] ?? 0) ?></h3>
+        <a href="graduates-master-list.php" class="text-decoration-none text-reset">
+          <div class="card h-100 border-0 shadow-sm dashboard-stat-card">
+            <div class="card-body d-flex align-items-center gap-3">
+              <div class="avatar avatar-lg flex-shrink-0">
+                <span class="avatar-initial rounded bg-label-primary">
+                  <i class="bx bx-medal bx-sm"></i>
+                </span>
+              </div>
+              <div>
+                <p class="text-muted small mb-0">Total Graduates</p>
+                <h3 class="mb-0 fw-bold"><?= $int($data['total_graduates'] ?? 0) ?></h3>
+              </div>
             </div>
           </div>
-        </div>
+        </a>
       </div>
 
       <div class="col-sm-6 col-xl-3">
@@ -124,19 +130,37 @@ $maxSection  = $perSection ? max(array_column($perSection, 'total')) : 0;
       </div>
 
       <div class="col-sm-6 col-xl-3">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-body d-flex align-items-center gap-3">
-            <div class="avatar avatar-lg flex-shrink-0">
-              <span class="avatar-initial rounded bg-label-success">
-                <i class="bx bx-calendar-check bx-sm"></i>
-              </span>
+        <?php if (!empty($data['current_sy_id'])): ?>
+          <a href="graduates-master-list.php?school_year_id=<?= $e($data['current_sy_id']) ?>" class="text-decoration-none text-reset">
+            <div class="card h-100 border-0 shadow-sm dashboard-stat-card">
+              <div class="card-body d-flex align-items-center gap-3">
+                <div class="avatar avatar-lg flex-shrink-0">
+                  <span class="avatar-initial rounded bg-label-success">
+                    <i class="bx bx-calendar-check bx-sm"></i>
+                  </span>
+                </div>
+                <div>
+                  <p class="text-muted small mb-0">Current School Year Graduates</p>
+                  <h3 class="mb-0 fw-bold"><?= $int($data['current_sy_graduates'] ?? 0) ?></h3>
+                </div>
+              </div>
             </div>
-            <div>
-              <p class="text-muted small mb-0">Current School Year Graduates</p>
-              <h3 class="mb-0 fw-bold"><?= $int($data['current_sy_graduates'] ?? 0) ?></h3>
+          </a>
+        <?php else: ?>
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body d-flex align-items-center gap-3">
+              <div class="avatar avatar-lg flex-shrink-0">
+                <span class="avatar-initial rounded bg-label-success">
+                  <i class="bx bx-calendar-check bx-sm"></i>
+                </span>
+              </div>
+              <div>
+                <p class="text-muted small mb-0">Current School Year Graduates</p>
+                <h3 class="mb-0 fw-bold"><?= $int($data['current_sy_graduates'] ?? 0) ?></h3>
+              </div>
             </div>
           </div>
-        </div>
+        <?php endif; ?>
       </div>
 
     </div><!-- /Row 1 -->
@@ -167,12 +191,12 @@ $maxSection  = $perSection ? max(array_column($perSection, 'total')) : 0;
       <div class="col-12 col-xl-6">
         <div class="card border-0 shadow-sm h-100">
           <div class="card-header py-3">
-            <h6 class="mb-0 fw-bold">Graduates Per Grade Level</h6>
+            <h6 class="mb-0 fw-bold">Male and Female</h6>
           </div>
           <div class="card-body">
-            <?php if (!empty($glLabels)): ?>
+            <?php if (array_sum($genderData) > 0): ?>
               <div style="height: 280px;">
-                <canvas id="perGradeLevelChart"></canvas>
+                <canvas id="genderChart"></canvas>
               </div>
             <?php else: ?>
               <div class="text-center text-muted py-5">
@@ -240,8 +264,8 @@ $maxSection  = $perSection ? max(array_column($perSection, 'total')) : 0;
     <script>
       const syLabels = <?= json_encode($syLabels, $jsonOpts) ?>;
       const syData   = <?= json_encode($syData, $jsonOpts) ?>;
-      const glLabels = <?= json_encode($glLabels, $jsonOpts) ?>;
-      const glData   = <?= json_encode($glData, $jsonOpts) ?>;
+      const genderLabels = <?= json_encode($genderLabels, $jsonOpts) ?>;
+      const genderData   = <?= json_encode($genderData, $jsonOpts) ?>;
 
       document.addEventListener('DOMContentLoaded', function () {
         const syCtx = document.getElementById('perSchoolYearChart');
@@ -267,25 +291,22 @@ $maxSection  = $perSection ? max(array_column($perSection, 'total')) : 0;
           });
         }
 
-        const glCtx = document.getElementById('perGradeLevelChart');
-        if (glCtx && glLabels.length) {
-          new Chart(glCtx, {
-            type: 'bar',
+        const genderCtx = document.getElementById('genderChart');
+        if (genderCtx && genderData.reduce((a, b) => a + b, 0) > 0) {
+          new Chart(genderCtx, {
+            type: 'doughnut',
             data: {
-              labels: glLabels,
+              labels: genderLabels,
               datasets: [{
-                label: 'Graduates',
-                data: glData,
-                backgroundColor: '#71dd37',
-                borderRadius: 6,
-                maxBarThickness: 40,
+                data: genderData,
+                backgroundColor: ['#03c3ec', '#ff3e84'],
+                borderWidth: 0,
               }],
             },
             options: {
               responsive: true,
               maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+              plugins: { legend: { position: 'bottom' } },
             },
           });
         }

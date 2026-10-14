@@ -45,14 +45,10 @@ $currentPage = basename($_SERVER['PHP_SELF']);
           </a>
         </li>
         <li class="menu-item <?php echo (in_array($currentPage, ['graduates.php', 'graduates-master-list.php', 'graduate-view.php'])) ? 'active' : ''; ?>">
-          <a href="javascript:void(0);" class="menu-link menu-toggle">
+          <a href="<?= BASE_URL ?>/resources/views/admin/graduates.php" class="menu-link">
             <i class="menu-icon tf-icons bx bx-medal"></i>
             <div data-i18n="Graduates">Graduates</div>
           </a>
-          <ul class="menu-sub">
-            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/admin/graduates.php" class="menu-link"><div data-i18n="Dashboard">Dashboard</div></a></li>
-            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/admin/graduates-master-list.php" class="menu-link"><div data-i18n="Master List">Master List</div></a></li>
-          </ul>
         </li>
         <li class="menu-item <?php echo ($currentPage === 'school-year.php') ? 'active' : ''; ?>">
           <a href="<?= BASE_URL ?>/resources/views/admin/school-year.php" class="menu-link">

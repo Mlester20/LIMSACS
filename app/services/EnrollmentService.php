@@ -170,6 +170,52 @@ class EnrollmentService extends Model {
     }
 
     /**
+     * Correct a wrongly-made enrollment's school year/grade level/section in
+     * place, instead of deleting it and re-enrolling the student from scratch.
+     * Only allowed while the enrollment is still 'Enrolled', same scope as
+     * revertEnrollment() above.
+     * @param int $enrollment_id academic_history.id of the enrollment record
+     * @param int $school_year_id
+     * @param string $grade_level
+     * @param int $section_id
+     * @return array ['success' => bool, 'message' => string, 'studentName' => string|null]
+     */
+    public function editEnrollment($enrollment_id, $school_year_id, $grade_level, $section_id) {
+        try {
+            $enrollment = $this->academicHistoryModel->getById($enrollment_id);
+            if (!$enrollment) {
+                return ['success' => false, 'message' => 'Enrollment record not found.'];
+            }
+
+            $studentName = trim($enrollment['first_name'] . ' ' . $enrollment['last_name']);
+
+            if ($enrollment['enrollment_status'] !== 'Enrolled') {
+                return ['success' => false, 'message' => 'Only an enrollment that is still Enrolled can be edited.'];
+            }
+
+            // Only check for a duplicate enrollment if the school year is actually
+            // changing — the current row IS the one on record for its own year.
+            if ((int) $school_year_id !== (int) $enrollment['school_year_id']
+                && $this->academicHistoryModel->isAlreadyEnrolled($enrollment['student_id'], $school_year_id)) {
+                return ['success' => false, 'message' => "{$studentName} already has an enrollment record for that school year."];
+            }
+
+            if (!$this->academicHistoryModel->updateEnrollmentDetails($enrollment_id, $school_year_id, $grade_level, $section_id)) {
+                return ['success' => false, 'message' => 'Failed to update enrollment.'];
+            }
+
+            return [
+                'success' => true,
+                'message' => "Enrollment updated for {$studentName}.",
+                'studentName' => $studentName
+            ];
+        } catch (Exception $e) {
+            error_log("Edit enrollment error: " . $e->getMessage());
+            return ['success' => false, 'message' => 'An error occurred while updating the enrollment.'];
+        }
+    }
+
+    /**
      * Get enrolled students with pagination
      * @param int $page Current page number (default: 1)
      * @param int $itemsPerPage Items per page (default: 10)
@@ -217,8 +263,10 @@ class EnrollmentService extends Model {
                     s.first_name,
                     s.last_name,
                     s.lrn,
+                    ah.school_year_id,
                     sy.school_year,
                     ah.grade_level,
+                    ah.section_id,
                     sec.section_name,
                     ah.enrollment_status
                 FROM {$this->academicHistory} ah
@@ -317,8 +365,10 @@ class EnrollmentService extends Model {
                     s.first_name,
                     s.last_name,
                     s.lrn,
+                    ah.school_year_id,
                     sy.school_year,
                     ah.grade_level,
+                    ah.section_id,
                     sec.section_name,
                     ah.enrollment_status
                 FROM {$this->academicHistory} ah

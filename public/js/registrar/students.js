@@ -534,15 +534,17 @@ async function searchStudents(keyword){
 
         //show loading state
         if(tableBody){
-            tableBody.innerHTML = '<tr><td colspan="8" class="text-center"><span class="spinner-border spinner-border-sm me-2"></span>Searching...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="10" class="text-center"><span class="spinner-border spinner-border-sm me-2"></span>Searching...</td></tr>';
         }
 
-        //build  api url with absolute path, preserving the active Grade Level/Section filter
+        //build  api url with absolute path, preserving the active Grade Level/Section/Archived filter
         const searchInputEl = document.getElementById('searchInput');
         const gradeFilter = (searchInputEl && searchInputEl.dataset.gradeFilter) || '';
         const sectionFilter = (searchInputEl && searchInputEl.dataset.sectionFilter) || '';
+        const archivedFilter = (searchInputEl && searchInputEl.dataset.archivedFilter) || '0';
         const apiUrl = getAppBaseUrl() + '/app/api/registrar/search-students.php?q=' + encodeURIComponent(keyword.trim())
-            + '&grade_level=' + encodeURIComponent(gradeFilter) + '&section_id=' + encodeURIComponent(sectionFilter);
+            + '&grade_level=' + encodeURIComponent(gradeFilter) + '&section_id=' + encodeURIComponent(sectionFilter)
+            + '&archived=' + encodeURIComponent(archivedFilter);
 
         const response = await fetch(apiUrl, {
             method: 'GET', 
@@ -569,7 +571,7 @@ async function searchStudents(keyword){
        console.error('Search error:', error);
        //show error message
        if(tableBody){
-          tableBody.innerHTML = '<tr><td colspan="8" class="text-center text-danger">Error searching students. Please try again.</td></tr>';
+          tableBody.innerHTML = '<tr><td colspan="10" class="text-center text-danger">Error searching students. Please try again.</td></tr>';
        } 
     }
 }
@@ -588,12 +590,22 @@ function renderSearchResults(results){
     tableBody.innerHTML = '';
 
     if(results.length === 0){
-        tableBody.innerHTML = '<tr><td colspan="8" class="text-center">No students found matching your search.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="10" class="text-center">No students found matching your search.</td></tr>';
         if(paginationContainer){
             paginationContainer.style.display = 'none';
         }
         return;
     }
+
+    const statusBadgeClass = function (status) {
+        switch (status) {
+            case 'Enrolled': return 'bg-label-success';
+            case 'Transferred': return 'bg-label-info';
+            case 'Graduated': return 'bg-label-primary';
+            case 'Dropped': return 'bg-label-danger';
+            default: return 'bg-label-secondary';
+        }
+    };
 
     const rows = results.map((student, index) => {
         const lrn = student.lrn || 'N/A';
@@ -602,14 +614,11 @@ function renderSearchResults(results){
         const age = student.age
         const gradeLevel = student.current_grade_level || 'N/A';
         const section = student.current_section_name || 'N/A';
+        const status = student.current_enrollment_status || '';
 
         return `
-            <tr
-                style="cursor: pointer;"
-                data-bs-toggle="modal"
-                data-bs-target="#studentDetailsModal"
-                onclick='populateStudentModal(${JSON.stringify(student)})'
-            >
+            <tr>
+                <td><input type="checkbox" class="form-check-input student-row-checkbox" name="student_ids[]" value="${student.id}"></td>
                 <td>${escapeHtml(index + 1)}</td>
                 <td>${escapeHtml(lrn)}</td>
                 <td>${escapeHtml(studentName)}</td>
@@ -618,36 +627,45 @@ function renderSearchResults(results){
                 <td>${escapeHtml(gradeLevel)}</td>
                 <td>${escapeHtml(section)}</td>
                 <td>
-                    <button
-                        class="btn btn-sm btn-primary me-1"
-                        title="Edit Student"
-                        aria-label="Edit"
-                        data-bs-toggle="modal"
-                        data-bs-target="#editStudentModal"
-                        onclick='event.stopPropagation(); editStudent(${JSON.stringify(student)})'
-                    >
-                        <i class="bx bx-edit"></i>
-                    </button>
-                    <form method="POST" action="../../../app/controllers/registrar/StudentsController.php" style="display: inline;">
-                        <input type="hidden" name="csrf_token" value="${getCsrfToken()}">
-                        <input type="hidden" name="student_id" value="${student.id}">
-                        <button
-                            type="submit"
-                            class="btn btn-sm btn-danger"
-                            onclick="return confirm('Are you sure you want to delete ${escapeForConfirm(studentName || 'this student')} (LRN: ${escapeForConfirm(lrn)})? This action cannot be undone.');"
-                            name="delete_student"
-                            title="Delete"
-                            aria-label="Delete"
-                        >
-                            <i class="bx bx-trash"></i>
+                    <span class="badge ${statusBadgeClass(status)}">${escapeHtml(status || 'N/A')}</span>
+                    ${student.archived ? '<span class="badge bg-label-dark">Archived</span>' : ''}
+                </td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-icon btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions" aria-label="Actions">
+                            <i class="bx bx-dots-vertical-rounded"></i>
                         </button>
-                    </form>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#studentDetailsModal" onclick='populateStudentModal(${JSON.stringify(student)})'>
+                                    <i class="bx bx-show me-2"></i>View
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editStudentModal" onclick='editStudent(${JSON.stringify(student)})'>
+                                    <i class="bx bx-edit me-2"></i>Edit
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="#" onclick="deleteStudentRow(${student.id}, '${escapeForConfirm(studentName || 'this student')}', '${escapeForConfirm(lrn)}')">
+                                    <i class="bx bx-trash me-2"></i>Delete
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </td>
             </tr>`;
     }).join('');
 
     //insert rows into table
     tableBody.innerHTML = rows;
+
+    // New rows mean a fresh, all-unchecked set — reset the select-all checkbox
+    // and disable the bulk archive/unarchive buttons until something is checked.
+    const selectAll = document.getElementById('selectAllStudents');
+    if (selectAll) selectAll.checked = false;
+    if (typeof updateBulkArchiveButtons === 'function') updateBulkArchiveButtons();
 
     //hide pagination during search
     if(paginationContainer){
@@ -698,3 +716,57 @@ function initializeSearch(){
 }
 
 document.addEventListener('DOMContentLoaded', initializeSearch);
+
+// ============== DELETE STUDENT (hidden form, avoids nesting inside bulkArchiveForm) ==============
+
+function deleteStudentRow(id, fullName, lrn) {
+    if (!confirm(`Are you sure you want to delete ${fullName} (LRN: ${lrn})? This action cannot be undone.`)) {
+        return;
+    }
+    document.getElementById('delete_student_id').value = id;
+    document.getElementById('deleteStudentForm').submit();
+}
+
+// ============== BULK ARCHIVE / UNARCHIVE ==============
+
+function updateBulkArchiveButtons() {
+    const checkedCount = document.querySelectorAll('.student-row-checkbox:checked').length;
+    const archiveBtn = document.getElementById('archiveSelectedBtn');
+    const unarchiveBtn = document.getElementById('unarchiveSelectedBtn');
+    if (archiveBtn) archiveBtn.disabled = checkedCount === 0;
+    if (unarchiveBtn) unarchiveBtn.disabled = checkedCount === 0;
+}
+
+function confirmBulkArchive(event) {
+    const checkedCount = document.querySelectorAll('.student-row-checkbox:checked').length;
+    if (checkedCount === 0) {
+        event.preventDefault();
+        return false;
+    }
+    const action = event.submitter && event.submitter.name === 'unarchive_students' ? 'unarchive' : 'archive';
+    const confirmed = confirm(`Are you sure you want to ${action} ${checkedCount} selected student(s)?`);
+    if (!confirmed) {
+        event.preventDefault();
+    }
+    return confirmed;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const selectAll = document.getElementById('selectAllStudents');
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.student-row-checkbox').forEach(cb => {
+                cb.checked = selectAll.checked;
+            });
+            updateBulkArchiveButtons();
+        });
+    }
+
+    // Event delegation: live search replaces the <tbody> content with new
+    // checkboxes, so a per-element listener wouldn't survive that re-render.
+    document.addEventListener('change', function (e) {
+        if (e.target.classList && e.target.classList.contains('student-row-checkbox')) {
+            updateBulkArchiveButtons();
+        }
+    });
+});

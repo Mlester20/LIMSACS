@@ -183,7 +183,11 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
                                     ];
                                     if($this->graduates->create($graduateData)){
                                         $results['graduates_added']++;
-                                        $verdict['graduate'] = ['status' => 'added', 'reason' => null];
+                                        // Keep the Student Data list decluttered the same way a manual
+                                        // bulk-archive would, instead of leaving graduates mixed in with
+                                        // active students right after a bulk import.
+                                        $this->model->bulkSetArchived([$studentId], true);
+                                        $verdict['graduate'] = ['status' => 'added', 'reason' => 'student auto-archived'];
                                     }else{
                                         $results['graduates_skipped']++;
                                         $verdict['graduate'] = ['status' => 'failed', 'reason' => 'database error'];

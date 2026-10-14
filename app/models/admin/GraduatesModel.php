@@ -212,6 +212,16 @@ require_once __DIR__ . '/../Model.php';
             return (int)($row['total'] ?? 0);
         }
 
+        /**
+         * Id of the currently active school year, or null if none is active.
+         * Used to let the "Current School Year Graduates" dashboard card link
+         * straight to the Master List pre-filtered to that school year.
+         */
+        public function getActiveSchoolYearId(): ?int{
+            $row = $this->con->query("SELECT id FROM {$this->school_year} WHERE status = 'active' LIMIT 1")->fetch_assoc();
+            return $row ? (int)$row['id'] : null;
+        }
+
         public function getPreviousSchoolYearGraduates(): int{
             try{
                 $activeRow = $this->con->query("

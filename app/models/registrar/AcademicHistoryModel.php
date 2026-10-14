@@ -198,6 +198,32 @@ require_once __DIR__ . '/../Model.php';
         }
 
         /**
+         * Correct a mistakenly-entered enrollment's school year/grade level/section,
+         * in place, instead of deleting and re-enrolling from scratch.
+         * @param int $id Enrollment record ID
+         * @param int $school_year_id
+         * @param string $grade_level
+         * @param int $section_id
+         * @return bool
+         */
+        public function updateEnrollmentDetails($id, $school_year_id, $grade_level, $section_id) {
+            try {
+                $query = "UPDATE {$this->academic_history}
+                        SET school_year_id = ?, grade_level = ?, section_id = ?
+                        WHERE id = ?";
+
+                $stmt = $this->con->prepare($query);
+                $stmt->bind_param('isii', $school_year_id, $grade_level, $section_id, $id);
+
+                $stmt->execute();
+                return true;
+            } catch (Exception $e) {
+                error_log("Update enrollment details error: " . $e->getMessage());
+                return false;
+            }
+        }
+
+        /**
          * Delete enrollment record
          * @param int $id
          * @return bool

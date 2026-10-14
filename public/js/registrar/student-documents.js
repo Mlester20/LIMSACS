@@ -1,3 +1,16 @@
+/**
+ * Resolve the app's base URL (project root), regardless of how deep the
+ * current page is nested under /resources/views/...
+ * e.g. '/LIMSACS/resources/views/registrar/x.php' -> '/LIMSACS'
+ * Needed because static file links (storage/...) built in JS have no access
+ * to the PHP BASE_URL constant otherwise.
+ */
+function getAppBaseUrl() {
+    const path = window.location.pathname;
+    const idx = path.lastIndexOf('/resources');
+    return idx !== -1 ? path.substring(0, idx) : '';
+}
+
 function debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -400,13 +413,11 @@ function editDocument(documentData) {
     const currentFilePreview = document.getElementById('currentFilePreview');
 
     if (documentData.file_path) {
-        // Normalize file path to use /storage/student_documents/ absolute path
-        let normalizedPath = documentData.file_path;
-        if (normalizedPath.includes('storage/student_documents/')) {
-            const fileName = normalizedPath.split('/').pop();
-            normalizedPath = '/storage/student_documents/' + fileName;
-        }
-        
+        // Normalize file path to an absolute /<app base>/storage/student_documents/... URL,
+        // since this file lives under the app's subfolder (e.g. /LIMSACS), not domain root.
+        const rawFileName = documentData.file_path.split('/').pop();
+        let normalizedPath = getAppBaseUrl() + '/storage/student_documents/' + rawFileName;
+
         const fileName = normalizedPath.split('/').pop();
         const ext = fileName.split('.').pop().toLowerCase();
         currentFileName.textContent = fileName;
@@ -514,6 +525,14 @@ document.addEventListener('DOMContentLoaded', function () {
     
     // Initialize pagination
     initializePagination();
+
+    // Pre-apply a status filter when arriving via a link like
+    // student-documents.php?status=Pending (e.g. from the dashboard's
+    // document status cards), same statuses the summary cards use.
+    const urlStatus = new URLSearchParams(window.location.search).get('status');
+    if (urlStatus && ['Submitted', 'Verified', 'Pending', 'Rejected'].includes(urlStatus)) {
+        filterByStatus(urlStatus);
+    }
 });
 
 // Clear edit modal when it's hidden
