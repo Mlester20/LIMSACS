@@ -170,29 +170,88 @@ class EnrollmentService extends Model {
     }
 
     /**
+     * Correct a wrongly-made enrollment's school year/grade level/section in
+     * place, instead of deleting it and re-enrolling the student from scratch.
+     * Only allowed while the enrollment is still 'Enrolled', same scope as
+     * revertEnrollment() above.
+     * @param int $enrollment_id academic_history.id of the enrollment record
+     * @param int $school_year_id
+     * @param string $grade_level
+     * @param int $section_id
+     * @return array ['success' => bool, 'message' => string, 'studentName' => string|null]
+     */
+    public function editEnrollment($enrollment_id, $school_year_id, $grade_level, $section_id) {
+        try {
+            $enrollment = $this->academicHistoryModel->getById($enrollment_id);
+            if (!$enrollment) {
+                return ['success' => false, 'message' => 'Enrollment record not found.'];
+            }
+
+            $studentName = trim($enrollment['first_name'] . ' ' . $enrollment['last_name']);
+
+            if ($enrollment['enrollment_status'] !== 'Enrolled') {
+                return ['success' => false, 'message' => 'Only an enrollment that is still Enrolled can be edited.'];
+            }
+
+            // Only check for a duplicate enrollment if the school year is actually
+            // changing — the current row IS the one on record for its own year.
+            if ((int) $school_year_id !== (int) $enrollment['school_year_id']
+                && $this->academicHistoryModel->isAlreadyEnrolled($enrollment['student_id'], $school_year_id)) {
+                return ['success' => false, 'message' => "{$studentName} already has an enrollment record for that school year."];
+            }
+
+            if (!$this->academicHistoryModel->updateEnrollmentDetails($enrollment_id, $school_year_id, $grade_level, $section_id)) {
+                return ['success' => false, 'message' => 'Failed to update enrollment.'];
+            }
+
+            return [
+                'success' => true,
+                'message' => "Enrollment updated for {$studentName}.",
+                'studentName' => $studentName
+            ];
+        } catch (Exception $e) {
+            error_log("Edit enrollment error: " . $e->getMessage());
+            return ['success' => false, 'message' => 'An error occurred while updating the enrollment.'];
+        }
+    }
+
+    /**
      * Get enrolled students with pagination
      * @param int $page Current page number (default: 1)
      * @param int $itemsPerPage Items per page (default: 10)
      * @param string $status Enrollment status to filter by, or 'All' for every status
      * @return array ['enrollments' => array, 'pagination' => array]
      */
-    public function getEnrolledStudentsWithPagination($page = 1, $itemsPerPage = 10, $status = 'Enrolled') {
+    public function getEnrolledStudentsWithPagination($page = 1, $itemsPerPage = 10, $status = 'Enrolled', $gradeLevel = '') {
         try {
             $page = max(1, (int)$page);
             $itemsPerPage = max(1, (int)$itemsPerPage);
             $offset = ($page - 1) * $itemsPerPage;
 
-            $statusFilter = ($status !== 'All') ? "WHERE ah.enrollment_status = ?" : "";
+            $conditions = [];
+            $params = [];
+            $types = '';
+            if ($status !== 'All') {
+                $conditions[] = "ah.enrollment_status = ?";
+                $params[] = $status;
+                $types .= 's';
+            }
+            if ($gradeLevel !== '') {
+                $conditions[] = "ah.grade_level = ?";
+                $params[] = $gradeLevel;
+                $types .= 's';
+            }
+            $where = $conditions ? "WHERE " . implode(' AND ', $conditions) : "";
 
             $query_count = "
                 SELECT COUNT(*) as total
                 FROM {$this->academicHistory} ah
                 JOIN {$this->students} s ON ah.student_id = s.id
-                {$statusFilter}
+                {$where}
             ";
             $stmt = $this->con->prepare($query_count);
-            if ($status !== 'All') {
-                $stmt->bind_param('s', $status);
+            if ($types !== '') {
+                $stmt->bind_param($types, ...$params);
             }
             $stmt->execute();
             $totalRecords = $stmt->get_result()->fetch_assoc()['total'] ?? 0;
@@ -204,24 +263,22 @@ class EnrollmentService extends Model {
                     s.first_name,
                     s.last_name,
                     s.lrn,
+                    ah.school_year_id,
                     sy.school_year,
                     ah.grade_level,
+                    ah.section_id,
                     sec.section_name,
                     ah.enrollment_status
                 FROM {$this->academicHistory} ah
                 JOIN {$this->students} s ON ah.student_id = s.id
                 JOIN {$this->schoolYear} sy ON ah.school_year_id = sy.id
                 JOIN {$this->sections} sec ON ah.section_id = sec.id
-                {$statusFilter}
+                {$where}
                 ORDER BY s.last_name ASC, s.first_name ASC
                 LIMIT ? OFFSET ?
             ";
             $stmt = $this->con->prepare($query);
-            if ($status !== 'All') {
-                $stmt->bind_param('sii', $status, $itemsPerPage, $offset);
-            } else {
-                $stmt->bind_param('ii', $itemsPerPage, $offset);
-            }
+            $stmt->bind_param($types . 'ii', ...array_merge($params, [$itemsPerPage, $offset]));
             $stmt->execute();
             $enrollments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
@@ -262,14 +319,26 @@ class EnrollmentService extends Model {
      * @param string $status Enrollment status to filter by, or 'All' for every status
      * @return array ['enrollments' => array, 'pagination' => array]
      */
-    public function searchEnrolledStudents($keyword, $page = 1, $itemsPerPage = 10, $status = 'Enrolled') {
+    public function searchEnrolledStudents($keyword, $page = 1, $itemsPerPage = 10, $status = 'Enrolled', $gradeLevel = '') {
         try {
             $page = max(1, (int)$page);
             $itemsPerPage = max(1, (int)$itemsPerPage);
             $offset = ($page - 1) * $itemsPerPage;
             $searchKeyword = '%' . trim($keyword) . '%';
 
-            $statusFilter = ($status !== 'All') ? "AND ah.enrollment_status = ?" : "";
+            $extraConditions = '';
+            $extraParams = [];
+            $extraTypes = '';
+            if ($status !== 'All') {
+                $extraConditions .= " AND ah.enrollment_status = ?";
+                $extraParams[] = $status;
+                $extraTypes .= 's';
+            }
+            if ($gradeLevel !== '') {
+                $extraConditions .= " AND ah.grade_level = ?";
+                $extraParams[] = $gradeLevel;
+                $extraTypes .= 's';
+            }
 
             // Total count for pagination
             $countQuery = "
@@ -281,14 +350,10 @@ class EnrollmentService extends Model {
                     s.last_name LIKE ? OR
                     s.lrn LIKE ?
                 )
-                {$statusFilter}
+                {$extraConditions}
             ";
             $stmt = $this->con->prepare($countQuery);
-            if ($status !== 'All') {
-                $stmt->bind_param('ssss', $searchKeyword, $searchKeyword, $searchKeyword, $status);
-            } else {
-                $stmt->bind_param('sss', $searchKeyword, $searchKeyword, $searchKeyword);
-            }
+            $stmt->bind_param('sss' . $extraTypes, $searchKeyword, $searchKeyword, $searchKeyword, ...$extraParams);
             $stmt->execute();
             $totalRecords = $stmt->get_result()->fetch_assoc()['total'] ?? 0;
 
@@ -300,8 +365,10 @@ class EnrollmentService extends Model {
                     s.first_name,
                     s.last_name,
                     s.lrn,
+                    ah.school_year_id,
                     sy.school_year,
                     ah.grade_level,
+                    ah.section_id,
                     sec.section_name,
                     ah.enrollment_status
                 FROM {$this->academicHistory} ah
@@ -313,16 +380,12 @@ class EnrollmentService extends Model {
                     s.last_name LIKE ? OR
                     s.lrn LIKE ?
                 )
-                {$statusFilter}
+                {$extraConditions}
                 ORDER BY s.last_name ASC, s.first_name ASC
                 LIMIT ? OFFSET ?
             ";
             $stmt = $this->con->prepare($query);
-            if ($status !== 'All') {
-                $stmt->bind_param('ssssii', $searchKeyword, $searchKeyword, $searchKeyword, $status, $itemsPerPage, $offset);
-            } else {
-                $stmt->bind_param('sssii', $searchKeyword, $searchKeyword, $searchKeyword, $itemsPerPage, $offset);
-            }
+            $stmt->bind_param('sss' . $extraTypes . 'ii', $searchKeyword, $searchKeyword, $searchKeyword, ...array_merge($extraParams, [$itemsPerPage, $offset]));
             $stmt->execute();
             $enrollments = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 

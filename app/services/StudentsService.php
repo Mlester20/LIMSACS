@@ -66,8 +66,12 @@ require_once __DIR__ . '/../models/Model.php';
         /**
          * Search Specific Students
          * Prepare the Like keyword
+         * @param string $keyword
+         * @param string $gradeLevel Optional exact grade_level filter, '' for all
+         * @param string|int $sectionId Optional exact section_id filter, '' for all
+         * @param string $archivedFilter '0' = active only (default), '1' = archived only, 'all' = both
         */
-        public function searchStudents($keyword){
+        public function searchStudents($keyword, $gradeLevel = '', $sectionId = '', $archivedFilter = '0'){
             $keyword = trim($keyword);
 
             if(empty($keyword) || strlen($keyword) < 2){
@@ -76,6 +80,26 @@ require_once __DIR__ . '/../models/Model.php';
 
             //prepare the keyword for LIKE search
             $searchKeyword = '%' . $keyword . '%';
+
+            $extraConditions = '';
+            $extraParams = [];
+            $extraTypes = '';
+            if($gradeLevel !== ''){
+                $extraConditions .= " AND ah.grade_level = ?";
+                $extraParams[] = $gradeLevel;
+                $extraTypes .= 's';
+            }
+            if($sectionId !== ''){
+                $extraConditions .= " AND ah.section_id = ?";
+                $extraParams[] = $sectionId;
+                $extraTypes .= 'i';
+            }
+            if($archivedFilter === '0' || $archivedFilter === '1'){
+                $extraConditions .= " AND s.archived = ?";
+                $extraParams[] = (int)$archivedFilter;
+                $extraTypes .= 'i';
+            }
+
             $query = "SELECT
                 s.id,
                 s.lrn,
@@ -90,13 +114,22 @@ require_once __DIR__ . '/../models/Model.php';
                 s.nationality,
                 s.religion,
                 s.address,
-                s.contact_number
+                s.contact_number,
+                s.archived,
+                ah.grade_level AS current_grade_level,
+                sec.section_name AS current_section_name,
+                ah.enrollment_status AS current_enrollment_status
                 FROM {$this->students} s
-                WHERE 
-                s.lrn LIKE ? OR
+                LEFT JOIN academic_history ah ON ah.id = (
+                    SELECT ah2.id FROM academic_history ah2 WHERE ah2.student_id = s.id ORDER BY ah2.id DESC LIMIT 1
+                )
+                LEFT JOIN sections sec ON ah.section_id = sec.id
+                WHERE
+                (s.lrn LIKE ? OR
                 s.first_name LIKE ? OR
                 s.middle_name LIKE ? OR
-                s.last_name LIKE ?
+                s.last_name LIKE ?)
+                {$extraConditions}
                 ORDER BY s.first_name ASC, s.last_name ASC
             ";
 
@@ -113,8 +146,8 @@ require_once __DIR__ . '/../models/Model.php';
                 }
 
                 $stmt->bind_param(
-                    "ssss",
-                    $searchKeyword, $searchKeyword, $searchKeyword, $searchKeyword
+                    "ssss" . $extraTypes,
+                    $searchKeyword, $searchKeyword, $searchKeyword, $searchKeyword, ...$extraParams
                 );
                 $stmt->execute();
 

@@ -71,11 +71,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         $_SESSION['full_name'] . ' created a new parent/guardian record for student ID: ' . $data['student_id'],
                     );
                     FlashMessage::setFlash("success", "Parent/Guardian record created successfully.");
-                    header("Location: " . BASE_URL . "/resources/views/registrar/parent-guardians.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php");
                     exit();
                 }else{
                     FlashMessage::setFlash("error", "Error creating Parent/Guardian record.");
-                    header("Location: " . BASE_URL . "/resources/views/registrar/parent-guardians.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php");
                     exit();
                 }
             }catch(Exception $e){
@@ -96,11 +96,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         $_SESSION['full_name'] . ' updated parent/guardian record with ID: ' . $id,
                     );
                     FlashMessage::setFlash("success", "Parent/Guardian record updated successfully.");
-                    header("Location: " . BASE_URL . "/resources/views/registrar/parent-guardians.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php");
                     exit();
                 }else{
                     FlashMessage::setFlash("error", "Error updating Parent/Guardian record.");
-                    header("Location: " . BASE_URL . "/resources/views/registrar/parent-guardians.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php");
                     exit();
                 }
             }catch(Exception $e){
@@ -121,11 +121,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         $_SESSION['full_name'] . ' deleted parent/guardian record with ID: ' . $id,
                     );
                     FlashMessage::setFlash("success", "Parent/Guardian record deleted successfully.");
-                    header("Location: " . BASE_URL . "/resources/views/registrar/parent-guardians.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php");
                     exit();
                 }else{
                     FlashMessage::setFlash("error", "Error deleting Parent/Guardian record.");
-                    header("Location: " . BASE_URL . "/resources/views/registrar/parent-guardians.php");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php");
                     exit();
                 }
             }catch(Exception $e){
@@ -176,7 +176,7 @@ require_once __DIR__ . '/../../../database/config/config.php';
             }
 
             if(isset($_POST['save_guardian']) || isset($_POST['update_guardian']) || isset($_POST['delete_guardian'])){
-                Csrf::requireValidOnPost(BASE_URL . '/resources/views/registrar/parent-guardians.php');
+                Csrf::requireValidOnPost(BASE_URL . '/resources/views/registrar/student-records.php');
             }
 
             if(isset($_POST['save_guardian'])){

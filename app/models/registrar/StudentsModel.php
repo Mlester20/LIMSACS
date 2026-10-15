@@ -18,16 +18,33 @@ require_once __DIR__ . '/../Model.php';
         }
 
         /**
-         * Get paginated students
+         * Get paginated students, with each student's most recent grade
+         * level/section/enrollment status (from academic_history) attached
+         * for display, and optional filtering by grade level/section/archived.
          * @param int $limit Records per page
          * @param int $offset Starting position
+         * @param string $gradeLevel Exact grade_level match, or '' for all
+         * @param string|int $sectionId Exact section_id match, or '' for all
+         * @param string $archivedFilter '0' = active only (default), '1' = archived only, 'all' = both
          * @return array Paginated student records
          */
-        public function getPaginated($limit = 10, $offset = 0){
+        public function getPaginated($limit = 10, $offset = 0, $gradeLevel = '', $sectionId = '', $archivedFilter = '0'){
             try{
-                $query = "SELECT * FROM {$this->students} ORDER BY last_name ASC LIMIT ? OFFSET ?";
+                [$where, $params, $types] = $this->buildStudentFilter($gradeLevel, $sectionId, $archivedFilter);
+
+                $query = "
+                    SELECT s.*, ah.grade_level AS current_grade_level, sec.section_name AS current_section_name, ah.enrollment_status AS current_enrollment_status
+                    FROM {$this->students} s
+                    LEFT JOIN academic_history ah ON ah.id = (
+                        SELECT ah2.id FROM academic_history ah2 WHERE ah2.student_id = s.id ORDER BY ah2.id DESC LIMIT 1
+                    )
+                    LEFT JOIN sections sec ON ah.section_id = sec.id
+                    {$where}
+                    ORDER BY s.last_name ASC
+                    LIMIT ? OFFSET ?
+                ";
                 $stmt = $this->con->prepare($query);
-                $stmt->bind_param('ii', $limit, $offset);
+                $stmt->bind_param($types . 'ii', ...array_merge($params, [$limit, $offset]));
                 $stmt->execute();
                 $result = $stmt->get_result();
 
@@ -38,13 +55,25 @@ require_once __DIR__ . '/../Model.php';
         }
 
         /**
-         * Get total count of students
+         * Get total count of students, honoring the same filters as getPaginated().
          * @return int Total number of students
          */
-        public function getTotalCount(){
+        public function getTotalCount($gradeLevel = '', $sectionId = '', $archivedFilter = '0'){
             try{
-                $query = "SELECT COUNT(*) as total FROM {$this->students} ORDER by last_name ASC";
+                [$where, $params, $types] = $this->buildStudentFilter($gradeLevel, $sectionId, $archivedFilter);
+
+                $query = "
+                    SELECT COUNT(*) as total
+                    FROM {$this->students} s
+                    LEFT JOIN academic_history ah ON ah.id = (
+                        SELECT ah2.id FROM academic_history ah2 WHERE ah2.student_id = s.id ORDER BY ah2.id DESC LIMIT 1
+                    )
+                    {$where}
+                ";
                 $stmt = $this->con->prepare($query);
+                if($types !== ''){
+                    $stmt->bind_param($types, ...$params);
+                }
                 $stmt->execute();
                 $result = $stmt->get_result();
                 $row = $result->fetch_assoc();
@@ -53,6 +82,55 @@ require_once __DIR__ . '/../Model.php';
             }catch(Exception $e){
                 error_log($e->getMessage());
                 return 0;
+            }
+        }
+
+        /**
+         * @return array{0:string,1:array,2:string} [WHERE clause, params, bind types]
+         */
+        private function buildStudentFilter($gradeLevel, $sectionId, $archivedFilter = '0'){
+            $conditions = [];
+            $params = [];
+            $types = '';
+            if($gradeLevel !== ''){
+                $conditions[] = "ah.grade_level = ?";
+                $params[] = $gradeLevel;
+                $types .= 's';
+            }
+            if($sectionId !== ''){
+                $conditions[] = "ah.section_id = ?";
+                $params[] = $sectionId;
+                $types .= 'i';
+            }
+            if($archivedFilter === '0' || $archivedFilter === '1'){
+                $conditions[] = "s.archived = ?";
+                $params[] = (int)$archivedFilter;
+                $types .= 'i';
+            }
+            $where = $conditions ? "WHERE " . implode(' AND ', $conditions) : "";
+            return [$where, $params, $types];
+        }
+
+        /**
+         * Bulk set the archived flag for the given student ids.
+         * @param int[] $ids
+         * @param bool $archived
+         * @return bool
+         */
+        public function bulkSetArchived(array $ids, bool $archived){
+            if(empty($ids)) return false;
+            try{
+                $placeholders = implode(',', array_fill(0, count($ids), '?'));
+                $query = "UPDATE {$this->students} SET archived = ? WHERE id IN ({$placeholders})";
+                $stmt = $this->con->prepare($query);
+                $types = 'i' . str_repeat('i', count($ids));
+                $archivedInt = $archived ? 1 : 0;
+                $stmt->bind_param($types, $archivedInt, ...$ids);
+                $stmt->execute();
+                return true;
+            }catch(Exception $e){
+                error_log($e->getMessage());
+                return false;
             }
         }
 

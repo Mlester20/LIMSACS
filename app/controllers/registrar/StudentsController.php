@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../helpers/flashMessage.php';
 require_once __DIR__ . '/../../helpers/auditLogs.php';
 require_once __DIR__ . '/../../models/registrar/StudentsModel.php';
 require_once __DIR__ . '/../../models/registrar/AcademicHistoryModel.php';
+require_once __DIR__ . '/../../models/registrar/SectionsModel.php';
 require_once __DIR__ . '/../../models/registrar/ParentGuardiansModel.php';
 require_once __DIR__ . '/../../models/registrar/StudentsDocumentModel.php';
 require_once __DIR__ . '/../../models/registrar/DocumentTypesModel.php';
@@ -21,6 +22,7 @@ require_once __DIR__ . '/../../helpers/csrf.php';
         protected $studentsDocuments;
         protected $documentTypes;
         protected $auditLogs;
+        protected $sections;
 
         public function __construct($con){
             parent::__construct(
@@ -31,14 +33,18 @@ require_once __DIR__ . '/../../helpers/csrf.php';
             $this->studentsDocuments = new StudentsDocumentModel($con);
             $this->documentTypes = new DocumentTypesModel($con);
             $this->auditLogs = new AuditLogs($con);
+            $this->sections = new SectionsModel($con);
         }
 
         /**
          * Get paginated students with pagination metadata
          * @param int $page Current page number
+         * @param string $gradeLevel Filter by grade level, or '' for all
+         * @param string|int $sectionId Filter by section, or '' for all
+         * @param string $archivedFilter '0' = active only (default), '1' = archived only, 'all' = both
          * @return array Pagination data with students
          */
-        public function index($page = 1){
+        public function index($page = 1, $gradeLevel = '', $sectionId = '', $archivedFilter = '0'){
             // Ensure page is at least 1
             $page = max(1, intval($page));
 
@@ -46,13 +52,13 @@ require_once __DIR__ . '/../../helpers/csrf.php';
             $offset = ($page - 1) * $this->itemsPerPage;
 
             // Get paginated students
-            $students = $this->model->getPaginated($this->itemsPerPage, $offset);
+            $students = $this->model->getPaginated($this->itemsPerPage, $offset, $gradeLevel, $sectionId, $archivedFilter);
 
             // Add full names
             $studentsWithFullNames = StudentsService::addFullNames($students);
 
             // Get total count
-            $totalCount = $this->model->getTotalCount();
+            $totalCount = $this->model->getTotalCount($gradeLevel, $sectionId, $archivedFilter);
             $totalPages = ceil($totalCount / $this->itemsPerPage);
 
             return [
@@ -67,6 +73,55 @@ require_once __DIR__ . '/../../helpers/csrf.php';
         }
 
         /**
+         * Bulk archive/unarchive a set of student ids.
+         * @param array $ids
+         * @param bool $archived
+         * @param int $page
+         */
+        public function archiveStudents($ids, $archived, $page = 1){
+            try{
+                $ids = array_values(array_filter(array_map('intval', (array)$ids)));
+                if(empty($ids)){
+                    FlashMessage::setFlash("error", "Please select at least one student.");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php?page=" . intval($page));
+                    exit();
+                }
+
+                if($this->model->bulkSetArchived($ids, $archived)){
+                    $action = $archived ? 'ARCHIVE STUDENTS' : 'UNARCHIVE STUDENTS';
+                    $this->auditLogs->log(
+                        $_SESSION['id'] ?? null,
+                        $_SESSION['role'] ?? 'unknown',
+                        $action,
+                        'STUDENT',
+                        null,
+                        'students',
+                        $_SESSION['full_name'] . ' ' . ($archived ? 'archived' : 'unarchived') . ' ' . count($ids) . ' student(s): ' . implode(', ', $ids),
+                    );
+                    FlashMessage::setFlash("success", count($ids) . ($archived ? ' student(s) archived.' : ' student(s) unarchived.'));
+                }else{
+                    FlashMessage::setFlash("error", "Failed to update the selected students. Please try again.");
+                }
+                header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php?page=" . intval($page));
+                exit();
+            }catch(Exception $e){
+                ErrorHandler::log($e, 'StudentsController::archiveStudents');
+                exit();
+            }
+        }
+
+        /**
+         * Filter dropdown options for the Student Data listing.
+         * @return array{grade_levels: array, sections: array}
+         */
+        public function getFilterOptions(){
+            return [
+                'grade_levels' => $this->sections->getDistinctGradeLevels(),
+                'sections' => $this->sections->index(),
+            ];
+        }
+
+        /**
          * Get lrnExists
          * @param string $lrn
          */
@@ -77,6 +132,12 @@ require_once __DIR__ . '/../../helpers/csrf.php';
 
         public function create($data){
             try{
+                if((int)($data['age'] ?? 0) < 1){
+                    FlashMessage::setFlash("error", "Invalid age. The student's age cannot be 0.");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php");
+                    exit();
+                }
+
                 // Check if LRN exists
                 if($this->lrnExists($data['lrn'])){
                     FlashMessage::setFlash("error", "LRN already exists. Please use a unique LRN.");
@@ -110,6 +171,12 @@ require_once __DIR__ . '/../../helpers/csrf.php';
 
         public function update($id, $data, $page = 1){
             try{
+                if((int)($data['age'] ?? 0) < 1){
+                    FlashMessage::setFlash("error", "Invalid age. The student's age cannot be 0.");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php?page=" . intval($page));
+                    exit();
+                }
+
                 if($this->model->update($id, $data)){
                     $this->auditLogs->log(
                         $_SESSION['id'] ?? null,
@@ -210,7 +277,14 @@ require_once __DIR__ . '/../../helpers/csrf.php';
     try{
         $controller = new StudentsController($con);
         $currentPage = isset($_GET['page']) ? $_GET['page'] : 1;
-        $paginationData = $controller->index($currentPage);
+        $gradeLevelFilter = $_GET['grade_level'] ?? '';
+        $sectionFilter = $_GET['section_id'] ?? '';
+        $archivedFilter = $_GET['archived'] ?? '0';
+        if(!in_array($archivedFilter, ['0', '1', 'all'], true)){
+            $archivedFilter = '0';
+        }
+        $filterOptions = $controller->getFilterOptions();
+        $paginationData = $controller->index($currentPage, $gradeLevelFilter, $sectionFilter, $archivedFilter);
         $students = $paginationData['students'];
         $pagination = [
             'currentPage' => $paginationData['currentPage'],
@@ -222,7 +296,7 @@ require_once __DIR__ . '/../../helpers/csrf.php';
         ];
 
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
-            if(isset($_POST['enroll_student']) || isset($_POST['edit_student']) || isset($_POST['delete_student'])){
+            if(isset($_POST['enroll_student']) || isset($_POST['edit_student']) || isset($_POST['delete_student']) || isset($_POST['archive_students']) || isset($_POST['unarchive_students'])){
                 Csrf::requireValidOnPost(BASE_URL . '/resources/views/registrar/student-records.php');
             }
 
@@ -273,6 +347,14 @@ require_once __DIR__ . '/../../helpers/csrf.php';
                 $studentId = $_POST['student_id'];
                 $controller->delete($studentId, $currentPage);
 
+            }
+
+            if(isset($_POST['archive_students'])){
+                $controller->archiveStudents($_POST['student_ids'] ?? [], true, $currentPage);
+            }
+
+            if(isset($_POST['unarchive_students'])){
+                $controller->archiveStudents($_POST['student_ids'] ?? [], false, $currentPage);
             }
         }
     }catch(Exception $e){

@@ -161,6 +161,18 @@ $gradeLevels = SectionsController::GRADE_LEVELS;
                   <?php endif; ?>
                 </select>
               </div>
+              <div class="mb-3">
+                <label for="max_students" class="form-label">Max Capacity</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="max_students"
+                  name="max_students"
+                  min="1"
+                  value="35"
+                  required
+                >
+              </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -230,6 +242,17 @@ $gradeLevels = SectionsController::GRADE_LEVELS;
                     </option>
                   <?php endif; ?>
                 </select>
+              </div>
+              <div class="mb-3">
+                <label for="edit_max_students" class="form-label">Max Capacity</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="edit_max_students"
+                  name="max_students"
+                  min="1"
+                  required
+                >
               </div>
             </div>
             <div class="modal-footer">
@@ -395,7 +418,8 @@ $gradeLevels = SectionsController::GRADE_LEVELS;
                         '<?php echo addslashes(htmlspecialchars($section['section_name'])); ?>',
                         '<?php echo addslashes(htmlspecialchars($section['grade_level'])); ?>',
                         <?php echo $section['adviser_id']; ?>,
-                        <?php echo $section['school_year_id']; ?>
+                        <?php echo $section['school_year_id']; ?>,
+                        <?php echo (int) $section['max_capacity']; ?>
                       )"
                       title="Edit"
                       aria-label="Edit"

@@ -39,32 +39,22 @@ $currentPage = basename($_SERVER['PHP_SELF']);
           </a>
         </li>
         <li class="menu-item <?php echo ($currentPage === 'academic-history.php') ? 'active' : ''; ?>">
-          <a href="javascript:void(0);" class="menu-link menu-toggle">
+          <a href="<?= BASE_URL ?>/resources/views/admin/academic-history.php" class="menu-link">
             <i class="menu-icon tf-icons bx bx-user"></i>
-            <div data-i18n="Account Settings">Enrolled Students</div>
+            <div data-i18n="Academic History">Academic History</div>
           </a>
-          <ul class="menu-sub">
-            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/admin/academic-history.php" class="menu-link"><div data-i18n="Account">Academic History</div></a></li>
-          </ul>
         </li>
         <li class="menu-item <?php echo (in_array($currentPage, ['graduates.php', 'graduates-master-list.php', 'graduate-view.php'])) ? 'active' : ''; ?>">
-          <a href="javascript:void(0);" class="menu-link menu-toggle">
+          <a href="<?= BASE_URL ?>/resources/views/admin/graduates.php" class="menu-link">
             <i class="menu-icon tf-icons bx bx-medal"></i>
             <div data-i18n="Graduates">Graduates</div>
           </a>
-          <ul class="menu-sub">
-            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/admin/graduates.php" class="menu-link"><div data-i18n="Dashboard">Dashboard</div></a></li>
-            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/admin/graduates-master-list.php" class="menu-link"><div data-i18n="Master List">Master List</div></a></li>
-          </ul>
         </li>
         <li class="menu-item <?php echo ($currentPage === 'school-year.php') ? 'active' : ''; ?>">
-          <a href="javascript:void(0);" class="menu-link menu-toggle">
+          <a href="<?= BASE_URL ?>/resources/views/admin/school-year.php" class="menu-link">
             <i class="menu-icon tf-icons bx bx-book-open"></i>
             <div data-i18n="School Year">School Year</div>
           </a>
-          <ul class="menu-sub">
-            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/admin/school-year.php" class="menu-link"><div data-i18n="Basic">School Year</div></a></li>
-          </ul>
         </li>
         <li class="menu-item <?php echo ($currentPage === 'student-documents.php') ? 'active' : ''; ?>">
           <a href="<?= BASE_URL ?>/resources/views/admin/student-documents.php" class="menu-link">
@@ -85,25 +75,28 @@ $currentPage = basename($_SERVER['PHP_SELF']);
           </a>
         </li>
         <li class="menu-item <?php echo ($currentPage === 'users.php') ? 'active' : ''; ?>">
-          <a href="javascript:void(0);" class="menu-link menu-toggle">
+          <a href="<?= BASE_URL ?>/resources/views/admin/users.php" class="menu-link">
             <i class="menu-icon tf-icons bx bx-user"></i>
-            <div data-i18n="Misc">Users</div>
+            <div data-i18n="Users">Users</div>
           </a>
-          <ul class="menu-sub">
-            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/admin/users.php" class="menu-link"><div data-i18n="Users">Users</div></a></li>
-          </ul>
         </li>
 
           <!-- Audits -->
           <li class="menu-header small text-uppercase"><span class="menu-header-text">Audits</span></li>
             <li class="menu-item <?php echo ($currentPage === 'audit-logs.php') ? 'active' : '' ?> ">
-              <a href="javascript:void(0);" class="menu-link menu-toggle">
+              <a href="<?= BASE_URL ?>/resources/views/admin/audit-logs.php" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-file"></i>
-                <div data-i18n="Misc">Audit Logs</div>
+                <div data-i18n="Activity Logs">Logs</div>
               </a>
-              <ul class="menu-sub">
-                <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/admin/audit-logs.php" class="menu-link"><div data-i18n="Activity Logs">Activity Logs</div></a></li>
-              </ul>
+          </li>
+
+          <!-- System -->
+          <li class="menu-header small text-uppercase"><span class="menu-header-text">System</span></li>
+            <li class="menu-item <?php echo ($currentPage === 'backup.php') ? 'active' : '' ?> ">
+              <a href="<?= BASE_URL ?>/resources/views/admin/backup.php" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-cloud-download"></i>
+                <div data-i18n="Backup">Backup</div>
+              </a>
           </li>
       </ul>
     </aside>

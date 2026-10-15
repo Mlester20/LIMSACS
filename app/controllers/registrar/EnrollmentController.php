@@ -212,6 +212,33 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
         }
 
         /**
+         * Correct a wrongly-made enrollment's school year/grade level/section
+         * in place. See EnrollmentService::editEnrollment().
+         * @param int $enrollment_id
+         * @param int $school_year_id
+         * @param string $grade_level
+         * @param int $section_id
+         * @return array ['success' => bool, 'message' => string]
+         */
+        public function editEnrollment($enrollment_id, $school_year_id, $grade_level, $section_id) {
+            $result = $this->enrollmentService->editEnrollment($enrollment_id, $school_year_id, $grade_level, $section_id);
+
+            if ($result['success']) {
+                $this->auditLogs->log(
+                    $_SESSION['id'],
+                    $_SESSION['role'],
+                    'EDIT ENROLLMENT',
+                    'ENROLLMENT',
+                    $enrollment_id,
+                    'academic_history',
+                    "Edited enrollment for {$result['studentName']}"
+                );
+            }
+
+            return $result;
+        }
+
+        /**
          * Abstract method implementation - not used in EnrollmentController
          */
         public function index() {
@@ -252,8 +279,8 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
          * @param string $status - Enrollment status to filter by, or 'All' for every status
          * @return array - Array with 'enrollments' and 'pagination' keys
          */
-        public function getEnrolledStudentsWithPagination($page = 1, $itemsPerPage = 10, $status = 'Enrolled') {
-            return $this->enrollmentService->getEnrolledStudentsWithPagination($page, $itemsPerPage, $status);
+        public function getEnrolledStudentsWithPagination($page = 1, $itemsPerPage = 10, $status = 'Enrolled', $gradeLevel = '') {
+            return $this->enrollmentService->getEnrolledStudentsWithPagination($page, $itemsPerPage, $status, $gradeLevel);
         }
 
         /**
@@ -262,10 +289,11 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
          * @param int $page
          * @param int $itemsPerPage
          * @param string $status Enrollment status to filter by, or 'All' for every status
+         * @param string $gradeLevel Grade level to filter by, or '' for every grade level
          * @return array ['enrollments' => array, 'pagination' => array]
          */
-        public function searchEnrolledStudents($keyword, $page = 1, $itemsPerPage = 10, $status = 'Enrolled') {
-            return $this->enrollmentService->searchEnrolledStudents($keyword, $page, $itemsPerPage, $status);
+        public function searchEnrolledStudents($keyword, $page = 1, $itemsPerPage = 10, $status = 'Enrolled', $gradeLevel = '') {
+            return $this->enrollmentService->searchEnrolledStudents($keyword, $page, $itemsPerPage, $status, $gradeLevel);
         }
 
         /**
@@ -366,13 +394,14 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
                 $page         = $_POST['page'] ?? 1;
                 $itemsPerPage = $_POST['items_per_page'] ?? 10;
                 $status       = $_POST['status'] ?? 'Enrolled';
+                $gradeLevel   = $_POST['grade_level'] ?? '';
 
                 $allowedStatusFilters = ['Enrolled', 'Transferred', 'Dropped', 'Graduated', 'All'];
                 if (!in_array($status, $allowedStatusFilters, true)) {
                     $status = 'Enrolled';
                 }
 
-                $result = $controller->searchEnrolledStudents($keyword, $page, $itemsPerPage, $status);
+                $result = $controller->searchEnrolledStudents($keyword, $page, $itemsPerPage, $status, $gradeLevel);
                 header('Content-Type: application/json');
                 echo json_encode($result);
                 exit();
@@ -416,9 +445,12 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
                 exit();
             }
 
-            // Revert (undo) a wrongly-made enrollment — only while still Enrolled
-            if (isset($_POST['revert_enrollment'])) {
+            // Edit (correct) a wrongly-made enrollment — only while still Enrolled
+            if (isset($_POST['edit_enrollment'])) {
                 $enrollment_id = $_POST['enrollment_id'] ?? null;
+                $school_year_id = $_POST['school_year_id'] ?? null;
+                $grade_level = $_POST['grade_level'] ?? null;
+                $section_id = $_POST['section_id'] ?? null;
 
                 header('Content-Type: application/json');
 
@@ -427,12 +459,12 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
                     exit();
                 }
 
-                if (!$enrollment_id) {
-                    echo json_encode(['success' => false, 'message' => 'Missing enrollment id.']);
+                if (!$enrollment_id || !$school_year_id || !$grade_level || !$section_id) {
+                    echo json_encode(['success' => false, 'message' => 'Missing required enrollment data.']);
                     exit();
                 }
 
-                $result = $controller->revertEnrollment($enrollment_id);
+                $result = $controller->editEnrollment($enrollment_id, $school_year_id, $grade_level, $section_id);
                 echo json_encode($result);
                 exit();
             }

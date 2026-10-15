@@ -1,6 +1,12 @@
+// Tracks the student/parent-guardian data currently shown in the Student
+// Profile modal, so the Add/Edit Parent/Guardian button (outside the AJAX
+// callback below) knows which student it's editing for.
+let currentProfileStudentId = null;
+let currentParentGuardianData = null;
+
 function populateStudentModal(student) {
     const studentId = student.id;
-    
+
     $.ajax({
         url: '../../../app/controllers/registrar/StudentsController.php',
         type: 'POST',
@@ -68,6 +74,8 @@ function populateStudentModal(student) {
             renderAcademicHistory(academicHistory);
 
             // Render Parent/Guardians Information
+            currentProfileStudentId = studentData.id || studentId;
+            currentParentGuardianData = parentGuardians;
             renderParentGuardians(parentGuardians);
 
             // Render Documents Checklist
@@ -123,6 +131,11 @@ function renderAcademicHistory(academicHistory) {
 function renderParentGuardians(parentGuardians) {
     const container = document.getElementById('parentGuardiansInfo');
     if (!container) return;
+
+    const btnLabel = document.getElementById('editParentGuardianBtnLabel');
+    if (btnLabel) {
+        btnLabel.textContent = (parentGuardians && parentGuardians.id) ? 'Edit' : 'Add';
+    }
 
     if (!parentGuardians || Object.keys(parentGuardians).length === 0) {
         container.innerHTML = '<p class="text-muted text-center">No parent/guardian information found</p>';
@@ -181,6 +194,42 @@ function renderParentGuardians(parentGuardians) {
 
     html += '</div>';
     container.innerHTML = html;
+}
+
+/**
+ * Open the Add/Edit Parent/Guardian modal for the student currently shown in
+ * the Student Profile modal, pre-filled if a record already exists.
+ */
+function openParentGuardianEditor() {
+    if (!currentProfileStudentId) return;
+
+    const data = currentParentGuardianData || {};
+    const hasExisting = !!data.id;
+
+    document.getElementById('pg_student_id').value = currentProfileStudentId;
+    document.getElementById('pg_id').value = hasExisting ? data.id : '';
+    document.getElementById('pg_father_name').value = data.father_name || '';
+    document.getElementById('pg_father_occupation').value = data.father_occupation || '';
+    document.getElementById('pg_father_contact').value = data.father_contact || '';
+    document.getElementById('pg_mother_name').value = data.mother_name || '';
+    document.getElementById('pg_mother_occupation').value = data.mother_occupation || '';
+    document.getElementById('pg_mother_contact').value = data.mother_contact || '';
+    document.getElementById('pg_guardian_name').value = data.guardian_name || '';
+    document.getElementById('pg_guardian_relationship').value = data.guardian_relationship || '';
+    document.getElementById('pg_guardian_contact').value = data.guardian_contact || '';
+
+    const submitBtn = document.getElementById('pgSubmitBtn');
+    submitBtn.name = hasExisting ? 'update_guardian' : 'save_guardian';
+    submitBtn.textContent = hasExisting ? 'Save Changes' : 'Save';
+
+    // Bootstrap doesn't officially support stacked modals, so close the
+    // Student Profile modal underneath before opening this one.
+    const profileModalEl = document.getElementById('studentDetailsModal');
+    const profileModalInstance = bootstrap.Modal.getInstance(profileModalEl);
+    if (profileModalInstance) profileModalInstance.hide();
+
+    const modalEl = document.getElementById('editParentGuardianModal');
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
 }
 
 /**
@@ -373,14 +422,14 @@ document.querySelectorAll('.table tbody tr').forEach(row => {
     });
 });
 
-//auto calculated age
-document.getElementById('enrollBirthDate').addEventListener('change', function () {
-    const birthDate = new Date(this.value);
+// Shared age-from-birth-date calculation, used by both the Add and Edit forms
+// so neither one can drift out of sync with the other.
+function computeAgeFromBirthDate(birthDateValue) {
+    const birthDate = new Date(birthDateValue);
     const today = new Date();
 
-    if (!this.value || birthDate > today) {
-        document.getElementById('ageInput').value = '';
-        return;
+    if (!birthDateValue || birthDate > today) {
+        return '';
     }
 
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -391,7 +440,33 @@ document.getElementById('enrollBirthDate').addEventListener('change', function (
         age--;
     }
 
-    document.getElementById('ageInput').value = age;
+    return age;
+}
+
+document.getElementById('enrollBirthDate').addEventListener('change', function () {
+    document.getElementById('ageInput').value = computeAgeFromBirthDate(this.value);
+});
+
+document.getElementById('editBirthDate').addEventListener('change', function () {
+    document.getElementById('editAge').value = computeAgeFromBirthDate(this.value);
+});
+
+// Block submission when the computed/entered age is 0 (or blank) — a newborn
+// birth date shouldn't be allowed to create a student record.
+document.getElementById('enrollStudentForm').addEventListener('submit', function (e) {
+    const age = parseInt(document.getElementById('ageInput').value, 10);
+    if (!age || age < 1) {
+        e.preventDefault();
+        alert('Please select a valid birth date. The student\'s age cannot be 0.');
+    }
+});
+
+document.getElementById('editStudentForm').addEventListener('submit', function (e) {
+    const age = parseInt(document.getElementById('editAge').value, 10);
+    if (!age || age < 1) {
+        e.preventDefault();
+        alert('Age cannot be 0. Please enter a valid age or birth date.');
+    }
 });
 
 function deleteStudent(id) {
@@ -459,11 +534,17 @@ async function searchStudents(keyword){
 
         //show loading state
         if(tableBody){
-            tableBody.innerHTML = '<tr><td colspan="6" class="text-center"><span class="spinner-border spinner-border-sm me-2"></span>Searching...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="10" class="text-center"><span class="spinner-border spinner-border-sm me-2"></span>Searching...</td></tr>';
         }
 
-        //build  api url with absolute path
-        const apiUrl = getAppBaseUrl() + '/app/api/registrar/search-students.php?q=' + encodeURIComponent(keyword.trim());
+        //build  api url with absolute path, preserving the active Grade Level/Section/Archived filter
+        const searchInputEl = document.getElementById('searchInput');
+        const gradeFilter = (searchInputEl && searchInputEl.dataset.gradeFilter) || '';
+        const sectionFilter = (searchInputEl && searchInputEl.dataset.sectionFilter) || '';
+        const archivedFilter = (searchInputEl && searchInputEl.dataset.archivedFilter) || '0';
+        const apiUrl = getAppBaseUrl() + '/app/api/registrar/search-students.php?q=' + encodeURIComponent(keyword.trim())
+            + '&grade_level=' + encodeURIComponent(gradeFilter) + '&section_id=' + encodeURIComponent(sectionFilter)
+            + '&archived=' + encodeURIComponent(archivedFilter);
 
         const response = await fetch(apiUrl, {
             method: 'GET', 
@@ -490,7 +571,7 @@ async function searchStudents(keyword){
        console.error('Search error:', error);
        //show error message
        if(tableBody){
-          tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Error searching students. Please try again.</td></tr>';
+          tableBody.innerHTML = '<tr><td colspan="10" class="text-center text-danger">Error searching students. Please try again.</td></tr>';
        } 
     }
 }
@@ -509,63 +590,82 @@ function renderSearchResults(results){
     tableBody.innerHTML = '';
 
     if(results.length === 0){
-        tableBody.innerHTML = '<tr><td colspan="6" class="text-center">No students found matching your search.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="10" class="text-center">No students found matching your search.</td></tr>';
         if(paginationContainer){
             paginationContainer.style.display = 'none';
         }
         return;
     }
 
+    const statusBadgeClass = function (status) {
+        switch (status) {
+            case 'Enrolled': return 'bg-label-success';
+            case 'Transferred': return 'bg-label-info';
+            case 'Graduated': return 'bg-label-primary';
+            case 'Dropped': return 'bg-label-danger';
+            default: return 'bg-label-secondary';
+        }
+    };
+
     const rows = results.map((student, index) => {
         const lrn = student.lrn || 'N/A';
         const studentName = `${student.first_name || ''} ${student.middle_name || ''} ${student.last_name || ''}`.trim();
         const gender = student.gender
         const age = student.age
-        // const enrollmentStatus = student.enrollment_status || 'N/A';
+        const gradeLevel = student.current_grade_level || 'N/A';
+        const section = student.current_section_name || 'N/A';
+        const status = student.current_enrollment_status || '';
 
         return `
-            <tr 
-                style="cursor: pointer;" 
-                data-bs-toggle="modal" 
-                data-bs-target="#studentDetailsModal"
-                onclick='populateStudentModal(${JSON.stringify(student)})'
-            >
+            <tr>
+                <td><input type="checkbox" class="form-check-input student-row-checkbox" name="student_ids[]" value="${student.id}"></td>
                 <td>${escapeHtml(index + 1)}</td>
                 <td>${escapeHtml(lrn)}</td>
                 <td>${escapeHtml(studentName)}</td>
                 <td>${escapeHtml(gender)}</td>
                 <td>${escapeHtml(age)}</td>
+                <td>${escapeHtml(gradeLevel)}</td>
+                <td>${escapeHtml(section)}</td>
                 <td>
-                    <button
-                        class="btn btn-sm btn-primary me-1"
-                        title="Edit Student"
-                        aria-label="Edit"
-                        data-bs-toggle="modal"
-                        data-bs-target="#editStudentModal"
-                        onclick='event.stopPropagation(); editStudent(${JSON.stringify(student)})'
-                    >
-                        <i class="bx bx-edit"></i>
-                    </button>
-                    <form method="POST" action="../../../app/controllers/registrar/StudentsController.php" style="display: inline;">
-                        <input type="hidden" name="csrf_token" value="${getCsrfToken()}">
-                        <input type="hidden" name="student_id" value="${student.id}">
-                        <button
-                            type="submit"
-                            class="btn btn-sm btn-danger"
-                            onclick="return confirm('Are you sure you want to delete this student? This action cannot be undone.');"
-                            name="delete_student"
-                            title="Delete"
-                            aria-label="Delete"
-                        >
-                            <i class="bx bx-trash"></i>
+                    <span class="badge ${statusBadgeClass(status)}">${escapeHtml(status || 'N/A')}</span>
+                    ${student.archived ? '<span class="badge bg-label-dark">Archived</span>' : ''}
+                </td>
+                <td>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-icon btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions" aria-label="Actions">
+                            <i class="bx bx-dots-vertical-rounded"></i>
                         </button>
-                    </form>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#studentDetailsModal" onclick='populateStudentModal(${JSON.stringify(student)})'>
+                                    <i class="bx bx-show me-2"></i>View
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editStudentModal" onclick='editStudent(${JSON.stringify(student)})'>
+                                    <i class="bx bx-edit me-2"></i>Edit
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="#" onclick="deleteStudentRow(${student.id}, '${escapeForConfirm(studentName || 'this student')}', '${escapeForConfirm(lrn)}')">
+                                    <i class="bx bx-trash me-2"></i>Delete
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </td>
             </tr>`;
     }).join('');
 
     //insert rows into table
     tableBody.innerHTML = rows;
+
+    // New rows mean a fresh, all-unchecked set — reset the select-all checkbox
+    // and disable the bulk archive/unarchive buttons until something is checked.
+    const selectAll = document.getElementById('selectAllStudents');
+    if (selectAll) selectAll.checked = false;
+    if (typeof updateBulkArchiveButtons === 'function') updateBulkArchiveButtons();
 
     //hide pagination during search
     if(paginationContainer){
@@ -591,6 +691,14 @@ function escapeHtml(text){
 }
 
 /**
+ * Escape a value for safe interpolation inside a single-quoted confirm()
+ * string that itself sits inside a double-quoted HTML onclick attribute.
+ */
+function escapeForConfirm(text){
+    return String(text ?? '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+/**
  * Initialize search functionality
  */
 function initializeSearch(){
@@ -608,3 +716,57 @@ function initializeSearch(){
 }
 
 document.addEventListener('DOMContentLoaded', initializeSearch);
+
+// ============== DELETE STUDENT (hidden form, avoids nesting inside bulkArchiveForm) ==============
+
+function deleteStudentRow(id, fullName, lrn) {
+    if (!confirm(`Are you sure you want to delete ${fullName} (LRN: ${lrn})? This action cannot be undone.`)) {
+        return;
+    }
+    document.getElementById('delete_student_id').value = id;
+    document.getElementById('deleteStudentForm').submit();
+}
+
+// ============== BULK ARCHIVE / UNARCHIVE ==============
+
+function updateBulkArchiveButtons() {
+    const checkedCount = document.querySelectorAll('.student-row-checkbox:checked').length;
+    const archiveBtn = document.getElementById('archiveSelectedBtn');
+    const unarchiveBtn = document.getElementById('unarchiveSelectedBtn');
+    if (archiveBtn) archiveBtn.disabled = checkedCount === 0;
+    if (unarchiveBtn) unarchiveBtn.disabled = checkedCount === 0;
+}
+
+function confirmBulkArchive(event) {
+    const checkedCount = document.querySelectorAll('.student-row-checkbox:checked').length;
+    if (checkedCount === 0) {
+        event.preventDefault();
+        return false;
+    }
+    const action = event.submitter && event.submitter.name === 'unarchive_students' ? 'unarchive' : 'archive';
+    const confirmed = confirm(`Are you sure you want to ${action} ${checkedCount} selected student(s)?`);
+    if (!confirmed) {
+        event.preventDefault();
+    }
+    return confirmed;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const selectAll = document.getElementById('selectAllStudents');
+    if (selectAll) {
+        selectAll.addEventListener('change', function () {
+            document.querySelectorAll('.student-row-checkbox').forEach(cb => {
+                cb.checked = selectAll.checked;
+            });
+            updateBulkArchiveButtons();
+        });
+    }
+
+    // Event delegation: live search replaces the <tbody> content with new
+    // checkboxes, so a per-element listener wouldn't survive that re-render.
+    document.addEventListener('change', function (e) {
+        if (e.target.classList && e.target.classList.contains('student-row-checkbox')) {
+            updateBulkArchiveButtons();
+        }
+    });
+});

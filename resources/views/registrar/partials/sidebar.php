@@ -11,7 +11,7 @@
       <div class="app-brand demo">
         <a href="<?= BASE_URL ?>/resources/views/registrar/home.php" class="app-brand-link">
           <span class="app-brand-logo demo">
-            <img src="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" alt="Logo" style="width: 50x; height: 50px;">
+            <img src="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" alt="Logo" style="width: 60px; height: 60px;">
           </span>
           <span class="app-brand-text demo menu-text fw-bolder ms-2">LIMSACS</span>
         </a>
@@ -39,18 +39,9 @@
             <div data-i18n="Account Settings">Enroll Students</div>
           </a>
           <ul class="menu-sub">
-            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/enrollment.php" class="menu-link"><div data-i18n="Account">Enrollment</div></a></li>
-            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/student-records.php" class="menu-link"><div data-i18n="Account">Student Information</div></a></li>
+            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/enrollment.php" class="menu-link"><div data-i18n="Account">Enrollees</div></a></li>
+            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/student-records.php" class="menu-link"><div data-i18n="Account">Student Data</div></a></li>
             <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/import-students.php" class="menu-link"><div data-i18n="Import Students">Import Students</div></a></li>
-          </ul>
-        </li>
-        <li class="menu-item <?php echo ($currentPage == 'parent-guardians.php') ? 'active' : ''; ?>">
-          <a href="javascript:void(0);" class="menu-link menu-toggle">
-            <i class="menu-icon tf-icons bx bx-user"></i>
-            <div data-i18n="Parents & Guardians">Parents</div>
-          </a>
-          <ul class="menu-sub">
-            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/parent-guardians.php" class="menu-link"><div data-i18n="Parents & Guardians">Parents & Guardians</div></a></li>
           </ul>
         </li>
 
@@ -59,22 +50,16 @@
           <span class="menu-header-text">Academics</span>
         </li>
         <li class="menu-item <?php echo ($currentPage == 'sections.php') ? 'active' : ''; ?>">
-          <a href="javascript:void(0);" class="menu-link menu-toggle">
+          <a href="<?= BASE_URL ?>/resources/views/registrar/sections.php" class="menu-link">
             <i class="menu-icon tf-icons bx bx-book"></i>
             <div data-i18n="Sections">Sections</div>
           </a>
-          <ul class="menu-sub">
-            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/sections.php" class="menu-link"><div data-i18n="Basic">Sections</div></a></li>
-          </ul>
         </li>
         <li class="menu-item <?php echo ($currentPage == 'school-year.php') ? 'active' : ''; ?>">
-          <a href="javascript:void(0);" class="menu-link menu-toggle">
+          <a href="<?= BASE_URL ?>/resources/views/registrar/school-year.php" class="menu-link">
             <i class="menu-icon tf-icons bx bx-calendar"></i>
             <div data-i18n="School Year">School Year</div>
           </a>
-          <ul class="menu-sub">
-            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/school-year.php" class="menu-link"><div data-i18n="School Year">School Year</div></a></li>
-          </ul>
         </li>
 
         <!-- Documents -->
@@ -95,29 +80,31 @@
 
         <!-- Graduates -->
         <li class="menu-header small text-uppercase">
-          <span class="menu-header-text">Graduates</span>
+          <span class="menu-header-text">Graduate Data</span>
         </li>
         <li class="menu-item <?php echo (in_array($currentPage, ['graduates.php', 'graduates-master-list.php', 'graduate-view.php'])) ? 'active' : ''; ?>">
-          <a href="javascript:void(0);" class="menu-link menu-toggle">
+          <a href="<?= BASE_URL ?>/resources/views/registrar/graduates.php" class="menu-link">
             <i class="menu-icon tf-icons bx bx-medal"></i>
-            <div data-i18n="Graduates">Graduates</div>
+            <div data-i18n="Graduates">Graduate Data</div>
           </a>
-          <ul class="menu-sub">
-            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/graduates.php" class="menu-link"><div data-i18n="Dashboard">Dashboard</div></a></li>
-            <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/graduates-master-list.php" class="menu-link"><div data-i18n="Master List">Master List</div></a></li>
-          </ul>
         </li>
 
         <!-- Audits -->
         <li class="menu-header small text-uppercase"><span class="menu-header-text">Audits</span></li>
           <li class="menu-item <?php echo ($currentPage === 'logs.php') ? 'active' : '' ?> ">
-            <a href="javascript:void(0);" class="menu-link menu-toggle">
+            <a href="<?= BASE_URL ?>/resources/views/registrar/logs.php" class="menu-link">
               <i class="menu-icon tf-icons bx bx-file"></i>
-              <div data-i18n="Logs">Logs</div>
+              <div data-i18n="Activity Logs">Logs</div>
             </a>
-            <ul class="menu-sub">
-              <li class="menu-item"><a href="<?= BASE_URL ?>/resources/views/registrar/logs.php" class="menu-link"><div data-i18n="Activity Logs">Activity Logs</div></a></li>
-            </ul>
+        </li>
+
+        <!-- System -->
+        <li class="menu-header small text-uppercase"><span class="menu-header-text">System</span></li>
+          <li class="menu-item <?php echo ($currentPage === 'backup.php') ? 'active' : '' ?> ">
+            <a href="<?= BASE_URL ?>/resources/views/registrar/backup.php" class="menu-link">
+              <i class="menu-icon tf-icons bx bx-cloud-download"></i>
+              <div data-i18n="Backup">Backup</div>
+            </a>
         </li>
       </ul>
     </aside>

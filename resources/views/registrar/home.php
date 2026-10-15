@@ -91,6 +91,17 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
     <script src="<?= BASE_URL ?>/public/assets/vendor/js/helpers.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/js/config.js"></script>
+    <style>
+        .dashboard-stat-card { cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+        .dashboard-stat-card:hover { transform: translateY(-3px); box-shadow: 0 0.5rem 1rem rgba(0,0,0,.1) !important; }
+        @media print {
+            body > *:not(.modal) { display: none !important; }
+            .modal:not(.show) { display: none !important; }
+            .modal-backdrop { display: none !important; }
+            .modal, .modal-dialog, .modal-content { position: static !important; display: block !important; max-width: 100% !important; margin: 0 !important; }
+            #docStatusModal .btn-close, #docStatusModal .modal-footer { display: none !important; }
+        }
+    </style>
 </head>
 <body>
 
@@ -127,145 +138,10 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
             </span>
           </div>
         </div>
-    
-        <!-- ── Row 1: Student / Section / Year KPIs ──────────────────────────── -->
-        <div class="row g-4 mb-4">
-    
-          <div class="col-sm-6 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm">
-              <div class="card-body d-flex align-items-center gap-3">
-                <div class="avatar avatar-lg flex-shrink-0">
-                  <span class="avatar-initial rounded bg-label-primary">
-                    <i class="bx bx-group bx-sm"></i>
-                  </span>
-                </div>
-                <div>
-                  <p class="text-muted small mb-0">Total Students</p>
-                  <h3 class="mb-0 fw-bold"><?= $int($data['total_students'] ?? 0) ?></h3>
-                </div>
-              </div>
-              <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
-                <small class="text-success">
-                  <i class="bx bx-user-check"></i>
-                  <?= $int($data['enrolled_students'] ?? 0) ?> currently enrolled
-                </small>
-              </div>
-            </div>
-          </div>
-    
-          <div class="col-sm-6 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm">
-              <div class="card-body d-flex align-items-center gap-3">
-                <div class="avatar avatar-lg flex-shrink-0">
-                  <span class="avatar-initial rounded bg-label-success">
-                    <i class="bx bx-user-check bx-sm"></i>
-                  </span>
-                </div>
-                <div>
-                  <p class="text-muted small mb-0">Enrolled (Active Year)</p>
-                  <h3 class="mb-0 fw-bold"><?= $int($data['enrolled_students'] ?? 0) ?></h3>
-                </div>
-              </div>
-              <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
-                <?php
-                  $total    = (int)($data['total_students'] ?? 0);
-                  $enrolled = (int)($data['enrolled_students'] ?? 0);
-                  $pct      = $total > 0 ? round($enrolled / $total * 100) : 0;
-                ?>
-                <div class="d-flex align-items-center gap-2">
-                  <div class="progress flex-grow-1" style="height:5px;">
-                    <div class="progress-bar bg-success" style="width:<?= $pct ?>%"></div>
-                  </div>
-                  <small class="text-muted"><?= $pct ?>%</small>
-                </div>
-              </div>
-            </div>
-          </div>
-    
-          <div class="col-sm-6 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm">
-              <div class="card-body d-flex align-items-center gap-3">
-                <div class="avatar avatar-lg flex-shrink-0">
-                  <span class="avatar-initial rounded bg-label-warning">
-                    <i class="bx bx-grid-alt bx-sm"></i>
-                  </span>
-                </div>
-                <div>
-                  <p class="text-muted small mb-0">Total Sections</p>
-                  <h3 class="mb-0 fw-bold"><?= $int($data['total_sections'] ?? 0) ?></h3>
-                </div>
-              </div>
-              <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
-                <small class="text-muted">
-                  <i class="bx bx-buildings"></i> Across all grade levels
-                </small>
-              </div>
-            </div>
-          </div>
-    
-          <div class="col-sm-6 col-xl-3">
-            <div class="card h-100 border-0 shadow-sm">
-              <div class="card-body d-flex align-items-center gap-3">
-                <div class="avatar avatar-lg flex-shrink-0">
-                  <span class="avatar-initial rounded bg-label-info">
-                    <i class="bx bx-file bx-sm"></i>
-                  </span>
-                </div>
-                <div>
-                  <p class="text-muted small mb-0">Required Document Types</p>
-                  <h3 class="mb-0 fw-bold"><?= $int($data['required_documents'] ?? 0) ?></h3>
-                </div>
-              </div>
-              <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
-                <small class="text-muted">
-                  <i class="bx bx-check-double"></i> Active &amp; required only
-                </small>
-              </div>
-            </div>
-          </div>
-    
-        </div><!-- /Row 1 -->
 
-        <!-- ── Row 1.5: Academic outcomes (enrollment status) ──────────────────── -->
+        <!-- ── Row 0: Document status pills (moved to the top) ─────────────────── -->
         <div class="row g-4 mb-4">
 
-          <?php
-            $statusOrder  = ['Enrolled', 'Transferred', 'Graduated', 'Dropped'];
-            $statusCounts = array_column($data['enrollment_status_summary'] ?? [], 'total', 'status');
-          ?>
-
-          <?php foreach ($statusOrder as $status): ?>
-            <?php $count = (int) ($statusCounts[$status] ?? 0); ?>
-            <div class="col-sm-6 col-xl-3">
-              <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body d-flex align-items-center gap-3">
-                  <div class="avatar avatar-lg flex-shrink-0">
-                    <span class="avatar-initial rounded <?= $enrollBadge($status) ?>">
-                      <i class="bx <?= $enrollIcon($status) ?> bx-sm"></i>
-                    </span>
-                  </div>
-                  <div>
-                    <p class="text-muted small mb-0"><?= $e($status) ?></p>
-                    <h3 class="mb-0 fw-bold"><?= $int($count) ?></h3>
-                  </div>
-                </div>
-                <?php if ($status === 'Graduated'): ?>
-                  <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
-                    <small class="text-muted">
-                      <i class="bx bx-medal"></i>
-                      <?= $int($data['graduates_active_year'] ?? 0) ?> graduated this school year
-                    </small>
-                  </div>
-                <?php endif; ?>
-              </div>
-            </div>
-          <?php endforeach; ?>
-
-        </div><!-- /Row 1.5 -->
-
-        <!-- ── Row 2: Document status pills ──────────────────────────────────── -->
-        <div class="row g-4 mb-4">
-    
           <?php
             $docMetrics = [
               [
@@ -290,19 +166,19 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
                 'desc'  => 'Requires resubmission',
               ],
             ];
-    
+
             $totalDocs = (int)($data['pending_documents'] ?? 0)
                       + (int)($data['verified_documents'] ?? 0)
                       + (int)($data['rejected_documents'] ?? 0);
           ?>
-    
+
           <?php foreach ($docMetrics as $m): ?>
             <?php
               $count = (int)($data[$m['key']] ?? 0);
               $share = $totalDocs > 0 ? round($count / $totalDocs * 100) : 0;
             ?>
             <div class="col-sm-6 col-xl-4">
-              <div class="card border-0 shadow-sm h-100">
+              <div class="card border-0 shadow-sm h-100 dashboard-stat-card" role="button" onclick="openDocStatusModal('<?= $e($m['label']) ?>')">
                 <div class="card-body">
                   <div class="d-flex align-items-center justify-content-between mb-3">
                     <span class="badge bg-label-<?= $m['color'] ?> p-2 rounded fs-6">
@@ -320,9 +196,118 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
               </div>
             </div>
           <?php endforeach; ?>
-    
-        </div><!-- /Row 2 -->
-    
+
+        </div><!-- /Row 0 -->
+
+        <!-- ── Row 1: Student / Section / Year KPIs ──────────────────────────── -->
+        <div class="row g-4 mb-4">
+
+          <div class="col-sm-6 col-xl-4">
+            <a href="student-records.php" class="text-decoration-none text-reset">
+              <div class="card h-100 border-0 shadow-sm dashboard-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                  <div class="avatar avatar-lg flex-shrink-0">
+                    <span class="avatar-initial rounded bg-label-primary">
+                      <i class="bx bx-group bx-sm"></i>
+                    </span>
+                  </div>
+                  <div>
+                    <p class="text-muted small mb-0">Total Students</p>
+                    <h3 class="mb-0 fw-bold"><?= $int($data['total_students'] ?? 0) ?></h3>
+                  </div>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
+                  <small class="text-success">
+                    <i class="bx bx-user-check"></i>
+                    <?= $int($data['enrolled_students'] ?? 0) ?> currently enrolled
+                  </small>
+                </div>
+              </div>
+            </a>
+          </div>
+
+          <div class="col-sm-6 col-xl-4">
+            <a href="sections.php" class="text-decoration-none text-reset">
+              <div class="card h-100 border-0 shadow-sm dashboard-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                  <div class="avatar avatar-lg flex-shrink-0">
+                    <span class="avatar-initial rounded bg-label-warning">
+                      <i class="bx bx-grid-alt bx-sm"></i>
+                    </span>
+                  </div>
+                  <div>
+                    <p class="text-muted small mb-0">Total Sections</p>
+                    <h3 class="mb-0 fw-bold"><?= $int($data['total_sections'] ?? 0) ?></h3>
+                  </div>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
+                  <small class="text-muted">
+                    <i class="bx bx-buildings"></i> Across all grade levels
+                  </small>
+                </div>
+              </div>
+            </a>
+          </div>
+
+          <?php $graduatedCount = (int) (array_column($data['enrollment_status_summary'] ?? [], 'total', 'status')['Graduated'] ?? 0); ?>
+          <div class="col-sm-6 col-xl-4">
+            <a href="enrollment.php?status=Graduated&page=1" class="text-decoration-none text-reset">
+              <div class="card h-100 border-0 shadow-sm dashboard-stat-card">
+                <div class="card-body d-flex align-items-center gap-3">
+                  <div class="avatar avatar-lg flex-shrink-0">
+                    <span class="avatar-initial rounded bg-label-primary">
+                      <i class="bx bx-medal bx-sm"></i>
+                    </span>
+                  </div>
+                  <div>
+                    <p class="text-muted small mb-0">Graduated</p>
+                    <h3 class="mb-0 fw-bold"><?= $int($graduatedCount) ?></h3>
+                  </div>
+                </div>
+                <div class="card-footer bg-transparent border-top-0 pt-0 pb-3 px-3">
+                  <small class="text-muted">
+                    <i class="bx bx-medal"></i>
+                    <?= $int($data['graduates_active_year'] ?? 0) ?> graduated this school year
+                  </small>
+                </div>
+              </div>
+            </a>
+          </div>
+
+        </div><!-- /Row 1 -->
+
+        <!-- ── Row 1.5: Academic outcomes (enrollment status) ──────────────────── -->
+        <div class="row g-4 mb-4">
+
+          <?php
+            $statusOrder  = ['Enrolled', 'Transferred', 'Dropped'];
+            $statusLabels = ['Enrolled' => 'Enrolled Students', 'Transferred' => 'Transferred', 'Dropped' => 'Dropped'];
+            $statusCounts = array_column($data['enrollment_status_summary'] ?? [], 'total', 'status');
+          ?>
+
+          <?php foreach ($statusOrder as $status): ?>
+            <?php $count = (int) ($statusCounts[$status] ?? 0); ?>
+            <div class="col-sm-6 col-xl-4">
+              <a href="enrollment.php?status=<?= urlencode($status) ?>&page=1" class="text-decoration-none text-reset">
+                <div class="card h-100 border-0 shadow-sm dashboard-stat-card">
+                  <div class="card-body d-flex align-items-center gap-3">
+                    <div class="avatar avatar-lg flex-shrink-0">
+                      <span class="avatar-initial rounded <?= $enrollBadge($status) ?>">
+                        <i class="bx <?= $enrollIcon($status) ?> bx-sm"></i>
+                      </span>
+                    </div>
+                    <div>
+                      <p class="text-muted small mb-0"><?= $e($statusLabels[$status] ?? $status) ?></p>
+                      <h3 class="mb-0 fw-bold"><?= $int($count) ?></h3>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            </div>
+          <?php endforeach; ?>
+
+        </div><!-- /Row 1.5 -->
+
         <!-- ── Row 3: Recent tables ───────────────────────────────────────────── -->
         <div class="row g-4 mb-4">
     
@@ -403,47 +388,6 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
 
         </div><!-- /Row 3 -->
 
-        <!-- ── Row 3.5: Section capacity ───────────────────────────────────────── -->
-        <div class="row g-4 mb-4">
-          <div class="col-12">
-            <div class="card border-0 shadow-sm">
-              <div class="card-header py-3">
-                <h6 class="mb-0 fw-bold">Section Capacity (Active School Year)</h6>
-                <small class="text-muted">Enrolled students vs. maximum capacity per section</small>
-              </div>
-              <div class="card-body">
-                <?php if (!empty($data['section_capacity'])): ?>
-                  <?php foreach ($data['section_capacity'] as $sec): ?>
-                    <?php
-                      $max      = (int) $sec['max_students'];
-                      $enrolled = (int) $sec['enrolled_count'];
-                      $pct      = $max > 0 ? round($enrolled / $max * 100) : 0;
-                      $barColor = $pct >= 100 ? 'danger' : ($pct >= 75 ? 'warning' : 'success');
-                    ?>
-                    <div class="mb-3">
-                      <div class="d-flex justify-content-between align-items-center mb-1">
-                        <span class="fw-semibold">
-                          <?= $e($sec['section_name']) ?>
-                          <span class="text-muted fw-normal">&mdash; <?= $e($sec['grade_level']) ?></span>
-                        </span>
-                        <span class="text-muted small"><?= $int($enrolled) ?> / <?= $int($max) ?> (<?= $pct ?>%)</span>
-                      </div>
-                      <div class="progress" style="height:6px;">
-                        <div class="progress-bar bg-<?= $barColor ?>" style="width:<?= min($pct, 100) ?>%"></div>
-                      </div>
-                    </div>
-                  <?php endforeach; ?>
-                <?php else: ?>
-                  <div class="text-center text-muted py-4">
-                    <i class="bx bx-buildings fs-3 d-block mb-1"></i>
-                    No active sections found
-                  </div>
-                <?php endif; ?>
-              </div>
-            </div>
-          </div>
-        </div><!-- /Row 3.5 -->
-    
         <!-- ── Row 4: Document uploads + status summary ───────────────────────── -->
         <div class="row g-4">
     
@@ -554,6 +498,27 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
       </div><!-- /container-xxl -->
     </div><!-- /content-wrapper -->
 
+    <!-- Modal: Documents by status (Pending/Verified/Rejected card click from above) -->
+    <div class="modal fade" id="docStatusModal" tabindex="-1" aria-labelledby="docStatusModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <h6 class="modal-title fw-bold mb-0" id="docStatusModalLabel">Documents</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-2" id="docStatusModalBody">
+                    <p class="text-center text-muted py-4">Loading...</p>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="printDocStatusModal()">
+                        <i class="bx bx-printer me-1"></i>Print
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <?php require_once __DIR__ . '/partials/footer.php'; ?>
 
 
@@ -648,6 +613,61 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
           });
         }
       });
+
+      // ── Documents-by-status modal (Pending/Verified/Rejected cards) ──────────
+      let currentDocStatus = '';
+
+      function openDocStatusModal(status) {
+        currentDocStatus = status;
+        document.getElementById('docStatusModalLabel').textContent = status + ' Documents';
+        const body = document.getElementById('docStatusModalBody');
+        body.innerHTML = '<p class="text-center text-muted py-4"><span class="spinner-border spinner-border-sm me-2"></span>Loading...</p>';
+
+        bootstrap.Modal.getOrCreateInstance(document.getElementById('docStatusModal')).show();
+
+        fetch('<?= BASE_URL ?>/resources/views/registrar/student-documents.php?action=get_by_status&status=' + encodeURIComponent(status))
+          .then(res => res.json())
+          .then(response => {
+            if (!response.success || !response.data || response.data.length === 0) {
+              body.innerHTML = '<p class="text-center text-muted py-4">No ' + status.toLowerCase() + ' documents found.</p>';
+              return;
+            }
+
+            let rows = '';
+            response.data.forEach((doc, i) => {
+              const studentName = `${doc.student_first_name || ''} ${doc.student_last_name || ''}`.trim();
+              const uploadedAt = doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—';
+              rows += `
+                <tr>
+                  <td>${i + 1}</td>
+                  <td>${doc.lrn || 'N/A'}</td>
+                  <td>${studentName || 'N/A'}</td>
+                  <td>${doc.current_grade_level || 'N/A'}</td>
+                  <td>${doc.current_section_name || 'N/A'}</td>
+                  <td>${doc.adviser_name || 'N/A'}</td>
+                  <td>${doc.document_type_name || 'N/A'}</td>
+                  <td>${uploadedAt}</td>
+                </tr>
+              `;
+            });
+
+            body.innerHTML = `
+              <table class="table table-sm">
+                <thead>
+                  <tr><th>#</th><th>LRN</th><th>Student Name</th><th>Grade</th><th>Section</th><th>Adviser</th><th>Document Type</th><th>Uploaded At</th></tr>
+                </thead>
+                <tbody>${rows}</tbody>
+              </table>
+            `;
+          })
+          .catch(() => {
+            body.innerHTML = '<p class="text-center text-danger py-4">Failed to load documents. Please try again.</p>';
+          });
+      }
+
+      function printDocStatusModal() {
+        window.print();
+      }
     </script>
 </body>
 </html>

@@ -7,11 +7,12 @@ function getCsrfToken() {
     return meta ? meta.content : '';
 }
 
-function editFunction(id, section_name, grade_level, adviser_id, school_year_id) {
+function editFunction(id, section_name, grade_level, adviser_id, school_year_id, max_students) {
     document.getElementById('edit_section_id').value = id;
     document.getElementById('edit_section_name').value = section_name;
     document.getElementById('edit_section_grade_level').value = grade_level;
     document.getElementById('edit_school_year_id').value = school_year_id;
+    document.getElementById('edit_max_students').value = max_students || 35;
 
     applyAdviserAvailability(id, adviser_id);
     document.getElementById('edit_adviser_id').value = adviser_id;
@@ -269,7 +270,8 @@ function renderSearchResults(results) {
                             '${sectionName.replace(/'/g, "\\'").replace(/"/g, '\\"')}',
                             '${gradeLevel.replace(/'/g, "\\'").replace(/"/g, '\\"')}',
                             ${section.adviser_id},
-                            ${section.school_year_id}
+                            ${section.school_year_id},
+                            ${section.max_capacity || 35}
                         )"
                         aria-label="Edit Section"
                     >

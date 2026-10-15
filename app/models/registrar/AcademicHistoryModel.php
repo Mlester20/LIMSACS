@@ -198,6 +198,32 @@ require_once __DIR__ . '/../Model.php';
         }
 
         /**
+         * Correct a mistakenly-entered enrollment's school year/grade level/section,
+         * in place, instead of deleting and re-enrolling from scratch.
+         * @param int $id Enrollment record ID
+         * @param int $school_year_id
+         * @param string $grade_level
+         * @param int $section_id
+         * @return bool
+         */
+        public function updateEnrollmentDetails($id, $school_year_id, $grade_level, $section_id) {
+            try {
+                $query = "UPDATE {$this->academic_history}
+                        SET school_year_id = ?, grade_level = ?, section_id = ?
+                        WHERE id = ?";
+
+                $stmt = $this->con->prepare($query);
+                $stmt->bind_param('isii', $school_year_id, $grade_level, $section_id, $id);
+
+                $stmt->execute();
+                return true;
+            } catch (Exception $e) {
+                error_log("Update enrollment details error: " . $e->getMessage());
+                return false;
+            }
+        }
+
+        /**
          * Delete enrollment record
          * @param int $id
          * @return bool
@@ -283,6 +309,40 @@ require_once __DIR__ . '/../Model.php';
                 return $result->fetch_all(MYSQLI_ASSOC) ?? [];
             }catch(Exception $e){
                 error_log("Error getting total count: " . $e->getMessage());
+                return [];
+            }
+        }
+
+        /**
+         * Every academic_history record, joined with readable student/section/
+         * school year fields, regardless of enrollment_status. Used for the
+         * Excel backup export (not paginated/filtered).
+         * @return array
+         */
+        public function getAllForExport(){
+            try{
+                $query = "
+                    SELECT
+                        ah.id,
+                        s.lrn,
+                        CONCAT(s.first_name, ' ', s.last_name) AS student_full_name,
+                        sy.school_year,
+                        ah.grade_level,
+                        sec.section_name,
+                        ah.enrollment_status,
+                        ah.created_at
+                    FROM {$this->academic_history} ah
+                    JOIN {$this->students} s ON ah.student_id = s.id
+                    LEFT JOIN {$this->sections} sec ON ah.section_id = sec.id
+                    LEFT JOIN {$this->school_year} sy ON ah.school_year_id = sy.id
+                    ORDER BY ah.id DESC
+                ";
+                $stmt = $this->con->prepare($query);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                return $result->fetch_all(MYSQLI_ASSOC) ?? [];
+            }catch(Exception $e){
+                error_log("Get all academic history for export error: " . $e->getMessage());
                 return [];
             }
         }

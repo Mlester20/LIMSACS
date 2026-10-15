@@ -22,6 +22,7 @@ require_once __DIR__ . '/../../helpers/graduatesPdfTemplate.php';
                 'male_graduates'        => $this->model->getGenderCount('Male'),
                 'female_graduates'      => $this->model->getGenderCount('Female'),
                 'current_sy_graduates'  => $this->model->getCurrentSchoolYearGraduates(),
+                'current_sy_id'         => $this->model->getActiveSchoolYearId(),
                 'previous_sy_graduates' => $this->model->getPreviousSchoolYearGraduates(),
                 'per_school_year'       => $this->model->getGraduatesPerSchoolYear(),
                 'per_grade_level'       => $this->model->getGraduatesPerGradeLevel(),

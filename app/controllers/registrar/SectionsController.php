@@ -179,12 +179,12 @@ require_once __DIR__ . '/../../../database/config/config.php';
                         'grade_level' => $_POST['grade_level'],
                         'adviser_id' => $_POST['adviser_id'],
                         'school_year_id' => $_POST['school_year_id'],
-                        'max_students' => $_POST['max_students'] ?? 35
+                        'max_students' => filter_var($_POST['max_students'] ?? 35, FILTER_VALIDATE_INT, ['options' => ['default' => 35, 'min_range' => 1]])
                     ]
                 );
                 exit();
             }
-            
+
             if(isset($_POST['update_section'])){
                 $update_id = $_POST['id'];
                 $controller->update($update_id, [
@@ -192,7 +192,7 @@ require_once __DIR__ . '/../../../database/config/config.php';
                     'grade_level' => $_POST['grade_level'],
                     'adviser_id' => $_POST['adviser_id'],
                     'school_year_id' => $_POST['school_year_id'],
-                    'max_students' => $_POST['max_students'] ?? 35
+                    'max_students' => filter_var($_POST['max_students'] ?? 35, FILTER_VALIDATE_INT, ['options' => ['default' => 35, 'min_range' => 1]])
                 ]);
                 exit();
             }

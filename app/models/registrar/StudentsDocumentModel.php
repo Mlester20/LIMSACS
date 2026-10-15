@@ -39,13 +39,22 @@ require_once __DIR__ . '/../Model.php';
                     sd.*,
                     s.first_name as student_first_name,
                     s.last_name as student_last_name,
+                    s.lrn,
                     dt.document_name as document_type_name,
                     u.full_name as uploaded_by_name,
-                    sd.uploaded_at
+                    sd.uploaded_at,
+                    ah.grade_level AS current_grade_level,
+                    sec.section_name AS current_section_name,
+                    adv.full_name AS adviser_name
                     FROM {$this->student_documents} sd
                     LEFT JOIN {$this->students} s ON sd.student_id = s.id
                     LEFT JOIN {$this->document_types} dt ON sd.document_type_id = dt.id
                     LEFT JOIN {$this->user} u ON sd.uploaded_by = u.id
+                    LEFT JOIN academic_history ah ON ah.id = (
+                        SELECT ah2.id FROM academic_history ah2 WHERE ah2.student_id = s.id ORDER BY ah2.id DESC LIMIT 1
+                    )
+                    LEFT JOIN sections sec ON ah.section_id = sec.id
+                    LEFT JOIN {$this->user} adv ON sec.adviser_id = adv.id
                     {$where}
                     ORDER BY s.last_name, s.first_name, sd.uploaded_at DESC
                     LIMIT ? OFFSET ?

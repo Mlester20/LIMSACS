@@ -256,12 +256,20 @@ const enrollmentController = {
         return (input && input.dataset.statusFilter) || 'Enrolled';
     },
 
-    searchEnrolled: function (keyword, page = 1, status = null) {
+    getCurrentGradeFilter: function () {
+        const input = document.getElementById('searchInput');
+        return (input && input.dataset.gradeFilter) || '';
+    },
+
+    searchEnrolled: function (keyword, page = 1, status = null, gradeLevel = null) {
         const tbody = document.querySelector('.table tbody');
         if (!tbody) return;
 
         if (status === null) {
             status = enrollmentController.getCurrentStatusFilter();
+        }
+        if (gradeLevel === null) {
+            gradeLevel = enrollmentController.getCurrentGradeFilter();
         }
 
         // Show loading state
@@ -275,7 +283,8 @@ const enrollmentController = {
                 keyword: keyword,
                 page: page,
                 items_per_page: 10,
-                status: status
+                status: status,
+                grade_level: gradeLevel
             },
             dataType: 'json',
             success: function (data) {
@@ -307,7 +316,7 @@ const enrollmentController = {
                 tbody.innerHTML = html;
 
                 // Update pagination UI
-                enrollmentController.updateSearchPagination(keyword, pagination, status);
+                enrollmentController.updateSearchPagination(keyword, pagination, status, gradeLevel);
             },
             error: function () {
                 tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger py-3">Search error. Please try again.</td></tr>';
@@ -315,15 +324,16 @@ const enrollmentController = {
         });
     },
 
-    updateSearchPagination: function (keyword, pagination, status) {
+    updateSearchPagination: function (keyword, pagination, status, gradeLevel) {
         const paginationEl = document.querySelector('.pagination');
         if (!paginationEl) return;
 
         status = status || enrollmentController.getCurrentStatusFilter();
+        gradeLevel = gradeLevel === undefined ? enrollmentController.getCurrentGradeFilter() : gradeLevel;
 
         if (!keyword || keyword.trim() === '') {
             // Reload the page to restore PHP pagination when search is cleared
-            window.location.href = '?status=' + encodeURIComponent(status) + '&page=1';
+            window.location.href = '?status=' + encodeURIComponent(status) + '&grade_level=' + encodeURIComponent(gradeLevel) + '&page=1';
             return;
         }
 
@@ -331,7 +341,7 @@ const enrollmentController = {
 
         // Previous
         html += pagination.hasPrevPage
-            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage - 1}, '${status}'); return false;">Previous</a></li>`
+            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage - 1}, '${status}', '${gradeLevel}'); return false;">Previous</a></li>`
             : `<li class="page-item disabled"><span class="page-link">Previous</span></li>`;
 
         // Page numbers
@@ -341,12 +351,12 @@ const enrollmentController = {
         for (let i = start; i <= end; i++) {
             html += i === pagination.currentPage
                 ? `<li class="page-item active"><span class="page-link">${i}</span></li>`
-                : `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${i}, '${status}'); return false;">${i}</a></li>`;
+                : `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${i}, '${status}', '${gradeLevel}'); return false;">${i}</a></li>`;
         }
 
         // Next
         html += pagination.hasNextPage
-            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage + 1}, '${status}'); return false;">Next</a></li>`
+            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage + 1}, '${status}', '${gradeLevel}'); return false;">Next</a></li>`
             : `<li class="page-item disabled"><span class="page-link">Next</span></li>`;
 
         paginationEl.innerHTML = html;
@@ -371,54 +381,101 @@ const enrollmentController = {
     renderActionsCell: function(enrollment) {
         const fullName = `${enrollment.first_name} ${enrollment.last_name}`;
 
-        const historyBtn = `
-            <button class="btn btn-sm btn-info" title="View History"
-                data-bs-toggle="modal"
-                data-bs-target="#enrollmentHistoryModal"
-                onclick="enrollmentController.showEnrollmentHistory(${enrollment.student_id}, '${fullName}')">
-                <i class="bx bx-history"></i>
-            </button>
+        const historyItem = `
+            <li>
+                <a class="dropdown-item" href="#"
+                    data-bs-toggle="modal"
+                    data-bs-target="#enrollmentHistoryModal"
+                    onclick="enrollmentController.showEnrollmentHistory(${enrollment.student_id}, '${fullName}')">
+                    <i class="bx bx-history me-2"></i>View History
+                </a>
+            </li>
         `;
 
         if (enrollment.enrollment_status !== 'Enrolled') {
             const badgeColor = enrollmentController.getStatusBadgeColor(enrollment.enrollment_status);
-            return historyBtn + `<span class="badge bg-${badgeColor}">${enrollment.enrollment_status}</span>`;
+            return `
+                <span class="badge bg-${badgeColor} me-1">${enrollment.enrollment_status}</span>
+                <div class="dropdown d-inline-block">
+                    <button class="btn btn-sm btn-icon btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions" aria-label="Actions">
+                        <i class="bx bx-dots-vertical-rounded"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">${historyItem}</ul>
+                </div>
+            `;
         }
 
         const terminalGrade = enrollmentController.getTerminalGradeLevel();
-        const graduateBtn = enrollment.grade_level === terminalGrade
+        const graduateItem = enrollment.grade_level === terminalGrade
             ? `
-                <button class="btn btn-sm btn-primary" title="Mark as Graduated"
-                    onclick="enrollmentController.graduateStudent(${enrollment.enrollment_id}, '${fullName}')">
-                    <i class="bx bx-medal"></i>
-                </button>
+                <li>
+                    <a class="dropdown-item" href="#"
+                        onclick="enrollmentController.graduateStudent(${enrollment.enrollment_id}, '${fullName}')">
+                        <i class="bx bx-medal me-2"></i>Mark as Graduated
+                    </a>
+                </li>
             `
             : `
-                <button class="btn btn-sm btn-outline-secondary" disabled
-                    title="Not yet eligible to graduate (must reach ${terminalGrade})">
-                    <i class="bx bx-medal"></i>
-                </button>
+                <li>
+                    <span class="dropdown-item disabled" title="Not yet eligible to graduate (must reach ${terminalGrade})">
+                        <i class="bx bx-medal me-2"></i>Mark as Graduated
+                    </span>
+                </li>
             `;
 
-        return historyBtn + `
-            <button class="btn btn-sm btn-danger" title="Mark as Dropped"
-                onclick="enrollmentController.dropStudent(${enrollment.enrollment_id}, '${fullName}')">
-                <i class="bx bx-x-circle"></i>
-            </button>
-            <button class="btn btn-sm btn-warning" title="Mark as Transferred"
-                onclick="enrollmentController.transferStudent(${enrollment.enrollment_id}, '${fullName}')">
-                <i class="bx bx-transfer"></i>
-            </button>
-            ${graduateBtn}
-            <button class="btn btn-sm btn-outline-dark" title="Revert Enrollment (wrong school year or section)"
-                onclick="enrollmentController.revertEnrollment(${enrollment.enrollment_id}, '${fullName}')">
-                <i class="bx bx-undo"></i>
-            </button>
+        return `
+            <div class="dropdown d-inline-block">
+                <button class="btn btn-sm btn-icon btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions" aria-label="Actions">
+                    <i class="bx bx-dots-vertical-rounded"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    ${historyItem}
+                    <li>
+                        <a class="dropdown-item" href="#"
+                            onclick="enrollmentController.openEditEnrollment(${enrollment.enrollment_id}, ${enrollment.school_year_id}, '${enrollment.grade_level}', ${enrollment.section_id || 0}, '${fullName}', '${enrollment.lrn || ''}')">
+                            <i class="bx bx-edit me-2"></i>Edit Enrollment
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="#"
+                            onclick="enrollmentController.transferStudent(${enrollment.enrollment_id}, '${fullName}')">
+                            <i class="bx bx-transfer me-2"></i>Mark as Transferred
+                        </a>
+                    </li>
+                    ${graduateItem}
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item text-danger" href="#"
+                            onclick="enrollmentController.dropStudent(${enrollment.enrollment_id}, '${fullName}')">
+                            <i class="bx bx-x-circle me-2"></i>Mark as Dropped
+                        </a>
+                    </li>
+                </ul>
+            </div>
         `;
     },
 
-    revertEnrollment: function(enrollmentId, studentName) {
-        if (!confirm(`Revert ${studentName}'s enrollment? This permanently deletes this enrollment record (e.g. wrong school year or section was selected) so the student can be enrolled again correctly. This cannot be undone.`)) {
+    openEditEnrollment: function(enrollmentId, schoolYearId, gradeLevel, sectionId, studentName, lrn) {
+        document.getElementById('editEnrollmentId').value = enrollmentId;
+        document.getElementById('editEnrollmentStudentName').textContent =
+            `Correcting the enrollment for ${studentName}${lrn ? ' (LRN: ' + lrn + ')' : ''}.`;
+        document.getElementById('editEnrollSchoolYear').value = schoolYearId;
+        document.getElementById('editEnrollGradeLevel').value = gradeLevel;
+
+        enrollmentController.loadEditSections(sectionId);
+
+        const modalEl = document.getElementById('editEnrollmentModal');
+        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    },
+
+    loadEditSections: function(preselectSectionId) {
+        const schoolYearId = document.getElementById('editEnrollSchoolYear').value;
+        const gradeLevel = document.getElementById('editEnrollGradeLevel').value;
+
+        if (!schoolYearId || !gradeLevel) {
+            document.getElementById('editEnrollSection').innerHTML =
+                '<option value="" disabled selected>Select Section</option>';
+            document.getElementById('editEnrollSectionCapacityInfo').innerHTML = '';
             return;
         }
 
@@ -426,8 +483,58 @@ const enrollmentController = {
             url: '../../../app/controllers/registrar/EnrollmentController.php',
             type: 'POST',
             data: {
-                revert_enrollment: 1,
+                get_sections: 1,
+                school_year_id: schoolYearId,
+                grade_level: gradeLevel
+            },
+            dataType: 'json',
+            success: function(data) {
+                let html = '<option value="" disabled>Select Section</option>';
+
+                if (data.length > 0) {
+                    data.forEach(section => {
+                        const available = section.max_students - section.current_enrollment;
+                        // The section currently on this enrollment stays selectable even
+                        // if it's otherwise full, so editing doesn't lock you out of it.
+                        const isFull = (available <= 0 && section.id != preselectSectionId) ? 'disabled' : '';
+                        const selected = section.id == preselectSectionId ? 'selected' : '';
+
+                        html += `
+                            <option value="${section.id}" ${isFull} ${selected}>
+                                ${section.section_name}
+                                (${section.current_enrollment}/${section.max_students})
+                            </option>
+                        `;
+                    });
+                } else {
+                    html += '<option disabled>No sections available</option>';
+                }
+
+                document.getElementById('editEnrollSection').innerHTML = html;
+            }
+        });
+    },
+
+    submitEditEnrollment: function() {
+        const enrollmentId = document.getElementById('editEnrollmentId').value;
+        const schoolYearId = document.getElementById('editEnrollSchoolYear').value;
+        const gradeLevel = document.getElementById('editEnrollGradeLevel').value;
+        const sectionId = document.getElementById('editEnrollSection').value;
+
+        if (!schoolYearId || !gradeLevel || !sectionId) {
+            Toast.error('Please fill in School Year, Grade Level, and Section.');
+            return;
+        }
+
+        $.ajax({
+            url: '../../../app/controllers/registrar/EnrollmentController.php',
+            type: 'POST',
+            data: {
+                edit_enrollment: 1,
                 enrollment_id: enrollmentId,
+                school_year_id: schoolYearId,
+                grade_level: gradeLevel,
+                section_id: sectionId,
                 csrf_token: getCsrfToken()
             },
             dataType: 'json',
@@ -440,7 +547,7 @@ const enrollmentController = {
                 }
             },
             error: function() {
-                Toast.error('Error reverting enrollment.');
+                Toast.error('Error updating enrollment.');
             }
         });
     },
@@ -645,6 +752,16 @@ document.addEventListener('DOMContentLoaded', function () {
             enrollmentController.updateCapacityInfo();
         });
 
+    document.getElementById('editEnrollSchoolYear')
+        .addEventListener('change', function () {
+            enrollmentController.loadEditSections();
+        });
+
+    document.getElementById('editEnrollGradeLevel')
+        .addEventListener('change', function () {
+            enrollmentController.loadEditSections();
+        });
+
     // Search enrolled students — server-side WHERE LIKE
     let searchTimer = null;
     document.getElementById('searchInput').addEventListener('keyup', function () {
@@ -653,7 +770,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (keyword === '') {
             // Restore PHP-rendered table by reloading page
-            window.location.href = '?status=' + encodeURIComponent(enrollmentController.getCurrentStatusFilter()) + '&page=1';
+            window.location.href = '?status=' + encodeURIComponent(enrollmentController.getCurrentStatusFilter()) + '&grade_level=' + encodeURIComponent(enrollmentController.getCurrentGradeFilter()) + '&page=1';
             return;
         }
 

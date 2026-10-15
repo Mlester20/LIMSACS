@@ -42,6 +42,17 @@ require_once __DIR__ . '/../../../database/config/config.php';
           return $this->studentsService->searchStudents($keyword);
      }
 
+     /**
+      * All documents matching a given status (Pending/Verified/Rejected/Submitted),
+      * student/document-type names already joined in. Powers the dashboard's
+      * "click a status card -> see the list, then print" modal.
+      * @param string $status
+      * @return array
+      */
+     public function getByStatus($status){
+          return $this->model->getPaginated(1000, 0, $status);
+     }
+
      public function create($data){
           try{
                if($this->model->create($data)){
@@ -149,6 +160,20 @@ require_once __DIR__ . '/../../../database/config/config.php';
           exit();
      }
 
+     // ---- AJAX: documents by status (powers the dashboard's status-card modal) ----
+     // GET /student-documents.php?action=get_by_status&status=Pending
+     if($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['action'] ?? null) === 'get_by_status'){
+          header('Content-Type: application/json');
+          $allowedStatuses = ['Submitted', 'Verified', 'Pending', 'Rejected'];
+          $status = $_GET['status'] ?? '';
+          if(!in_array($status, $allowedStatuses, true)){
+               echo json_encode(['success' => false, 'message' => 'Invalid status.']);
+               exit();
+          }
+          echo json_encode(['success' => true, 'data' => $controller->getByStatus($status)]);
+          exit();
+     }
+
      $documentTypes = $controller->getDocumentTypes();
 
      if($_SERVER['REQUEST_METHOD'] === 'POST'){
@@ -157,6 +182,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
           }
 
           if(isset($_POST['submit_document'])){
+               if(($_POST['status'] ?? '') === 'Rejected' && trim($_POST['remarks'] ?? '') === ''){
+                    FlashMessage::setFlash('error', 'Remarks are required when a document is marked as Rejected.');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/student-documents.php');
+                    exit();
+               }
                $controller->create(
                     [
                          'student_id' => $_POST['student_id'] ?? null,
@@ -173,6 +203,11 @@ require_once __DIR__ . '/../../../database/config/config.php';
           }
 
           if(isset($_POST['update_document'])){
+               if(($_POST['status'] ?? '') === 'Rejected' && trim($_POST['remarks'] ?? '') === ''){
+                    FlashMessage::setFlash('error', 'Remarks are required when a document is marked as Rejected.');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/student-documents.php');
+                    exit();
+               }
                $document_id = $_POST['document_id'] ?? null;
                $controller->update(
                     $document_id,

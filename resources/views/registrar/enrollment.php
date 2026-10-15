@@ -21,14 +21,23 @@ try {
         $statusFilter = 'Enrolled';
     }
 
+    // Get current grade level filter from query parameter
+    $gradeLevelFilter = $_GET['grade_level'] ?? '';
+    if (!in_array($gradeLevelFilter, $gradeLevels, true)) {
+        $gradeLevelFilter = '';
+    }
+
     // Get enrolled students with pagination
-    $paginatedData = $controller->getEnrolledStudentsWithPagination($currentPage, 10, $statusFilter);
+    $paginatedData = $controller->getEnrolledStudentsWithPagination($currentPage, 10, $statusFilter, $gradeLevelFilter);
     $enrollments = $paginatedData['enrollments'];
     $pagination = $paginatedData['pagination'];
 } catch (Exception $e) {
     error_log($e->getMessage());
     $enrollments = [];
     $statusFilter = $statusFilter ?? 'Enrolled';
+    $gradeLevelFilter = $gradeLevelFilter ?? '';
+    $gradeLevels = $gradeLevels ?? [];
+    $schoolYears = $schoolYears ?? [];
     $pagination = [
         'currentPage' => 1,
         'itemsPerPage' => 10,
@@ -52,7 +61,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Enrollment | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?></title>
+    <title>Enrollees | <?php require_once __DIR__ . '/../../../app/helpers/title.php'; ?></title>
     <meta name="csrf-token" content="<?php echo htmlspecialchars(Csrf::token()); ?>">
     <link rel="icon" type="image/x-icon" href="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -78,11 +87,11 @@ try {
 
     <!-- Main content -->
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Enrollment /</span> Student Enrollment</h4>
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Enrollees /</span> Enrollees</h4>
         <div class="row mb-3 align-items-center">
             <div class="col-md-6">
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search Students..." id="searchInput" data-status-filter="<?= htmlspecialchars($statusFilter) ?>">
+                    <input type="text" class="form-control" placeholder="Search Students..." id="searchInput" data-status-filter="<?= htmlspecialchars($statusFilter) ?>" data-grade-filter="<?= htmlspecialchars($gradeLevelFilter) ?>">
                 </div>
             </div>
             <div class="col-md-6 text-end mt-2 mt-md-0">
@@ -92,24 +101,34 @@ try {
             </div>
         </div>
 
-        <ul class="nav nav-pills mb-3" id="statusFilterTabs">
-            <?php
-                $statusTabs = [
-                    'Enrolled' => 'Enrolled',
-                    'Transferred' => 'Transferred',
-                    'Dropped' => 'Dropped',
-                    'Graduated' => 'Graduated',
-                    'All' => 'All'
-                ];
-            ?>
-            <?php foreach ($statusTabs as $tabStatus => $tabLabel): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?= $statusFilter === $tabStatus ? 'active' : '' ?>" href="?status=<?= urlencode($tabStatus) ?>&page=1">
-                        <?= htmlspecialchars($tabLabel) ?>
-                    </a>
-                </li>
-            <?php endforeach; ?>
-        </ul>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <ul class="nav nav-pills mb-0" id="statusFilterTabs">
+                <?php
+                    $statusTabs = [
+                        'Enrolled' => 'Enrolled',
+                        'Transferred' => 'Transferred',
+                        'Dropped' => 'Dropped',
+                        'Graduated' => 'Graduated',
+                        'All' => 'All'
+                    ];
+                ?>
+                <?php foreach ($statusTabs as $tabStatus => $tabLabel): ?>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $statusFilter === $tabStatus ? 'active' : '' ?>" href="?status=<?= urlencode($tabStatus) ?>&grade_level=<?= urlencode($gradeLevelFilter) ?>&page=1">
+                            <?= htmlspecialchars($tabLabel) ?>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
+
+            <select id="gradeLevelFilter" class="form-select form-select-sm" style="max-width: 200px;"
+                onchange="window.location.href = '?status=<?= urlencode($statusFilter) ?>&grade_level=' + encodeURIComponent(this.value) + '&page=1';">
+                <option value="">All Grade Levels</option>
+                <?php foreach ($gradeLevels as $gl): ?>
+                    <option value="<?= htmlspecialchars($gl) ?>" <?= $gradeLevelFilter === $gl ? 'selected' : '' ?>><?= htmlspecialchars($gl) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
 
         <div class="card">
             <h5 class="card-header">
@@ -148,31 +167,52 @@ try {
                                     </td>
                                     <td>
                                         <?php $fullNameJs = htmlspecialchars($enrollment['first_name'] . ' ' . $enrollment['last_name'], ENT_QUOTES); ?>
-                                        <button class="btn btn-sm btn-info" title="View History" data-bs-toggle="modal" data-bs-target="#enrollmentHistoryModal" onclick="enrollmentController.showEnrollmentHistory(<?php echo $enrollment['student_id']; ?>, '<?php echo $fullNameJs; ?>')">
-                                            <i class="bx bx-history"></i>
-                                        </button>
-                                        <?php if ($enrollment['enrollment_status'] === 'Enrolled'): ?>
-                                            <button class="btn btn-sm btn-danger" title="Mark as Dropped" onclick="enrollmentController.dropStudent(<?php echo $enrollment['enrollment_id']; ?>, '<?php echo $fullNameJs; ?>')">
-                                                <i class="bx bx-x-circle"></i>
-                                            </button>
-                                            <button class="btn btn-sm btn-warning" title="Mark as Transferred" onclick="enrollmentController.transferStudent(<?php echo $enrollment['enrollment_id']; ?>, '<?php echo $fullNameJs; ?>')">
-                                                <i class="bx bx-transfer"></i>
-                                            </button>
-                                            <?php if ($enrollment['grade_level'] === EnrollmentController::TERMINAL_GRADE_LEVEL): ?>
-                                                <button class="btn btn-sm btn-primary" title="Mark as Graduated" onclick="enrollmentController.graduateStudent(<?php echo $enrollment['enrollment_id']; ?>, '<?php echo $fullNameJs; ?>')">
-                                                    <i class="bx bx-medal"></i>
-                                                </button>
-                                            <?php else: ?>
-                                                <button class="btn btn-sm btn-outline-secondary" disabled title="Not yet eligible to graduate (must reach <?php echo htmlspecialchars(EnrollmentController::TERMINAL_GRADE_LEVEL); ?>)">
-                                                    <i class="bx bx-medal"></i>
-                                                </button>
-                                            <?php endif; ?>
-                                            <button class="btn btn-sm btn-outline-dark" title="Revert Enrollment (wrong school year or section)" onclick="enrollmentController.revertEnrollment(<?php echo $enrollment['enrollment_id']; ?>, '<?php echo $fullNameJs; ?>')">
-                                                <i class="bx bx-undo"></i>
-                                            </button>
-                                        <?php else: ?>
-                                            <span class="badge bg-<?php echo $rowBadgeColor; ?>"><?php echo htmlspecialchars($enrollment['enrollment_status']); ?></span>
+                                        <?php if ($enrollment['enrollment_status'] !== 'Enrolled'): ?>
+                                            <span class="badge bg-<?php echo $rowBadgeColor; ?> me-1"><?php echo htmlspecialchars($enrollment['enrollment_status']); ?></span>
                                         <?php endif; ?>
+                                        <div class="dropdown d-inline-block">
+                                            <button class="btn btn-sm btn-icon btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions" aria-label="Actions">
+                                                <i class="bx bx-dots-vertical-rounded"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end">
+                                                <li>
+                                                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#enrollmentHistoryModal" onclick="enrollmentController.showEnrollmentHistory(<?php echo $enrollment['student_id']; ?>, '<?php echo $fullNameJs; ?>')">
+                                                        <i class="bx bx-history me-2"></i>View History
+                                                    </a>
+                                                </li>
+                                                <?php if ($enrollment['enrollment_status'] === 'Enrolled'): ?>
+                                                    <li>
+                                                        <a class="dropdown-item" href="#" onclick="enrollmentController.openEditEnrollment(<?php echo $enrollment['enrollment_id']; ?>, <?php echo (int) $enrollment['school_year_id']; ?>, '<?php echo htmlspecialchars($enrollment['grade_level'], ENT_QUOTES); ?>', <?php echo (int) ($enrollment['section_id'] ?? 0); ?>, '<?php echo $fullNameJs; ?>', '<?php echo htmlspecialchars($enrollment['lrn'] ?? '', ENT_QUOTES); ?>')">
+                                                            <i class="bx bx-edit me-2"></i>Edit Enrollment
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="#" onclick="enrollmentController.transferStudent(<?php echo $enrollment['enrollment_id']; ?>, '<?php echo $fullNameJs; ?>')">
+                                                            <i class="bx bx-transfer me-2"></i>Mark as Transferred
+                                                        </a>
+                                                    </li>
+                                                    <?php if ($enrollment['grade_level'] === EnrollmentController::TERMINAL_GRADE_LEVEL): ?>
+                                                        <li>
+                                                            <a class="dropdown-item" href="#" onclick="enrollmentController.graduateStudent(<?php echo $enrollment['enrollment_id']; ?>, '<?php echo $fullNameJs; ?>')">
+                                                                <i class="bx bx-medal me-2"></i>Mark as Graduated
+                                                            </a>
+                                                        </li>
+                                                    <?php else: ?>
+                                                        <li>
+                                                            <span class="dropdown-item disabled" title="Not yet eligible to graduate (must reach <?php echo htmlspecialchars(EnrollmentController::TERMINAL_GRADE_LEVEL); ?>)">
+                                                                <i class="bx bx-medal me-2"></i>Mark as Graduated
+                                                            </span>
+                                                        </li>
+                                                    <?php endif; ?>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <a class="dropdown-item text-danger" href="#" onclick="enrollmentController.dropStudent(<?php echo $enrollment['enrollment_id']; ?>, '<?php echo $fullNameJs; ?>')">
+                                                            <i class="bx bx-x-circle me-2"></i>Mark as Dropped
+                                                        </a>
+                                                    </li>
+                                                <?php endif; ?>
+                                            </ul>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -347,6 +387,61 @@ try {
                             </div>
                         </form>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Enrollment (correct a wrongly-made enrollment in place) -->
+    <div class="modal fade" id="editEnrollmentModal" tabindex="-1" aria-labelledby="editEnrollmentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editEnrollmentModalLabel">
+                        <i class="bx bx-edit"></i> Edit Enrollment
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small mb-3" id="editEnrollmentStudentName"></p>
+                    <input type="hidden" id="editEnrollmentId">
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label form-label-sm mb-1">School Year <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-sm" id="editEnrollSchoolYear" required>
+                                <option value="" disabled>Select School Year</option>
+                                <?php foreach ($schoolYears as $sy): ?>
+                                    <option value="<?= $sy['id'] ?>"><?= htmlspecialchars($sy['school_year']) ?> (<?= ucfirst($sy['status']) ?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label form-label-sm mb-1">Grade Level <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-sm" id="editEnrollGradeLevel" required>
+                                <option value="" disabled>Select Grade Level</option>
+                                <?php foreach ($gradeLevels as $grade): ?>
+                                    <option value="<?= htmlspecialchars($grade) ?>"><?= htmlspecialchars($grade) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-md-12">
+                            <label class="form-label form-label-sm mb-1">Section <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-sm" id="editEnrollSection" required>
+                                <option value="" disabled>Select Section</option>
+                            </select>
+                            <small class="text-muted d-block mt-1" id="editEnrollSectionCapacityInfo"></small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="enrollmentController.submitEditEnrollment()">
+                        <i class="bx bx-check"></i> Save Changes
+                    </button>
                 </div>
             </div>
         </div>

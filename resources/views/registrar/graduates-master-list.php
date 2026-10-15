@@ -120,7 +120,7 @@ $exportQs = function ($type) use ($filters) {
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label small">Section</label>
                     <select name="section_id" class="form-select">
                         <option value="">All</option>
@@ -129,15 +129,7 @@ $exportQs = function ($type) use ($filters) {
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label small">Gender</label>
-                    <select name="gender" class="form-select">
-                        <option value="">All</option>
-                        <option value="Male" <?= $gender_filter === 'Male' ? 'selected' : '' ?>>Male</option>
-                        <option value="Female" <?= $gender_filter === 'Female' ? 'selected' : '' ?>>Female</option>
-                    </select>
-                </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label small">Status</label>
                     <select name="status" class="form-select">
                         <option value="">All</option>
