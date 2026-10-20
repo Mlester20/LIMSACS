@@ -393,11 +393,9 @@ const enrollmentController = {
         `;
 
         if (enrollment.enrollment_status !== 'Enrolled') {
-            const badgeColor = enrollmentController.getStatusBadgeColor(enrollment.enrollment_status);
             return `
-                <span class="badge bg-${badgeColor} me-1">${enrollment.enrollment_status}</span>
                 <div class="dropdown d-inline-block">
-                    <button class="btn btn-sm btn-icon btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions" aria-label="Actions">
+                    <button class="btn btn-sm btn-icon btn-outline-secondary" type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport" aria-expanded="false" title="Actions" aria-label="Actions">
                         <i class="bx bx-dots-vertical-rounded"></i>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">${historyItem}</ul>
@@ -425,7 +423,7 @@ const enrollmentController = {
 
         return `
             <div class="dropdown d-inline-block">
-                <button class="btn btn-sm btn-icon btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions" aria-label="Actions">
+                <button class="btn btn-sm btn-icon btn-outline-secondary" type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport" aria-expanded="false" title="Actions" aria-label="Actions">
                     <i class="bx bx-dots-vertical-rounded"></i>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end">

@@ -455,9 +455,9 @@ document.getElementById('editBirthDate').addEventListener('change', function () 
 // birth date shouldn't be allowed to create a student record.
 document.getElementById('enrollStudentForm').addEventListener('submit', function (e) {
     const age = parseInt(document.getElementById('ageInput').value, 10);
-    if (!age || age < 1) {
+    if (!age || age <= 5) {
         e.preventDefault();
-        alert('Please select a valid birth date. The student\'s age cannot be 0.');
+        alert('Please select a valid birth date. The student\'s age cannot be less than 5.');
     }
 });
 
@@ -632,7 +632,7 @@ function renderSearchResults(results){
                 </td>
                 <td>
                     <div class="dropdown">
-                        <button class="btn btn-sm btn-icon btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions" aria-label="Actions">
+                        <button class="btn btn-sm btn-icon btn-outline-secondary" type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport" aria-expanded="false" title="Actions" aria-label="Actions">
                             <i class="bx bx-dots-vertical-rounded"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">

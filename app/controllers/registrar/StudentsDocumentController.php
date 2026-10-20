@@ -53,6 +53,16 @@ require_once __DIR__ . '/../../../database/config/config.php';
           return $this->model->getPaginated(1000, 0, $status);
      }
 
+     /**
+      * Required document types a student hasn't submitted yet. Powers the
+      * "click a student's name" missing-documents modal.
+      * @param int $student_id
+      * @return array
+      */
+     public function getMissingDocuments($student_id){
+          return $this->model->getMissingRequiredDocuments($student_id);
+     }
+
      public function create($data){
           try{
                if($this->model->create($data)){
@@ -108,6 +118,37 @@ require_once __DIR__ . '/../../../database/config/config.php';
                }
           }catch(Exception $e){
                ErrorHandler::log($e, 'StudentsDocumentController::update');
+               return false;
+          }
+     }
+
+     /**
+      * Quick "mark as Verified" action from the Actions column, bypassing the
+      * full Edit modal since status is the only thing changing.
+      * @param int $id
+      */
+     public function verifyDocument($id){
+          try{
+               if($this->model->updateStatus($id, 'Verified')){
+                    $this->auditLogs->log(
+                        $_SESSION['id'] ?? null,
+                        $_SESSION['role'] ?? 'unknown',
+                        'VERIFY DOCUMENT',
+                        'STUDENTS_DOCUMENTS',
+                        null,
+                        'students_documents',
+                        $_SESSION['full_name'] . ' marked student document ID: ' . $id . ' as Verified',
+                    );
+                    FlashMessage::setFlash('success', 'Document marked as Verified.');
+                    header('Location: ' . BASE_URL . '/resources/views/registrar/student-documents.php');
+                    exit();
+               }else{
+                    FlashMessage::setFlash("error", "Failed to update document status.");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-documents.php");
+                    exit();
+               }
+          }catch(Exception $e){
+               ErrorHandler::log($e, 'StudentsDocumentController::verifyDocument');
                return false;
           }
      }
@@ -174,11 +215,28 @@ require_once __DIR__ . '/../../../database/config/config.php';
           exit();
      }
 
+     // ---- AJAX: missing required documents for a student (click a student's name) ----
+     // GET /student-documents.php?action=missing_documents&student_id=123
+     if($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['action'] ?? null) === 'missing_documents'){
+          header('Content-Type: application/json');
+          $studentId = filter_var($_GET['student_id'] ?? null, FILTER_VALIDATE_INT);
+          if(!$studentId){
+               echo json_encode(['success' => false, 'message' => 'Invalid student.']);
+               exit();
+          }
+          echo json_encode(['success' => true, 'data' => $controller->getMissingDocuments($studentId)]);
+          exit();
+     }
+
      $documentTypes = $controller->getDocumentTypes();
 
      if($_SERVER['REQUEST_METHOD'] === 'POST'){
-          if(isset($_POST['submit_document']) || isset($_POST['update_document']) || isset($_POST['delete_document'])){
+          if(isset($_POST['submit_document']) || isset($_POST['update_document']) || isset($_POST['delete_document']) || isset($_POST['verify_document'])){
                Csrf::requireValidOnPost(BASE_URL . '/resources/views/registrar/student-documents.php');
+          }
+
+          if(isset($_POST['verify_document'])){
+               $controller->verifyDocument($_POST['document_id'] ?? null);
           }
 
           if(isset($_POST['submit_document'])){

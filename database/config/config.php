@@ -1,5 +1,11 @@
 <?php
 
+    // Load .env (RESEND_API_KEY, APP_URL, MAIL_FROM_* etc.) into $_ENV, once.
+    if(empty($_ENV['APP_URL'])){
+        require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
+        Dotenv\Dotenv::createImmutable(dirname(__DIR__, 2))->safeLoad();
+    }
+
     // BASE_URL is the web path to the project root, derived from where the project
     // lives relative to DOCUMENT_ROOT. "/LIMSACS" when served from a subfolder,
     // "" when served from a domain root. Falls back to "/LIMSACS" where

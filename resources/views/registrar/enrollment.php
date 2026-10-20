@@ -167,11 +167,8 @@ try {
                                     </td>
                                     <td>
                                         <?php $fullNameJs = htmlspecialchars($enrollment['first_name'] . ' ' . $enrollment['last_name'], ENT_QUOTES); ?>
-                                        <?php if ($enrollment['enrollment_status'] !== 'Enrolled'): ?>
-                                            <span class="badge bg-<?php echo $rowBadgeColor; ?> me-1"><?php echo htmlspecialchars($enrollment['enrollment_status']); ?></span>
-                                        <?php endif; ?>
                                         <div class="dropdown d-inline-block">
-                                            <button class="btn btn-sm btn-icon btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions" aria-label="Actions">
+                                            <button class="btn btn-sm btn-icon btn-outline-secondary" type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport" aria-expanded="false" title="Actions" aria-label="Actions">
                                                 <i class="bx bx-dots-vertical-rounded"></i>
                                             </button>
                                             <ul class="dropdown-menu dropdown-menu-end">

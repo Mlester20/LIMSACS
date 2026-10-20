@@ -196,7 +196,7 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher'];
                     header("Location: " . BASE_URL . "/resources/views/admin/users.php");
                     exit();
                 }else{
-                    FlashMessage::setFlash("success", "There's something wrong with the server. Please try again.");
+                    FlashMessage::setFlash("error", "There's something wrong with the server. Please try again.");
                     header("Location: " . BASE_URL . "/resources/views/admin/users.php");
                     exit();
                 }

@@ -117,7 +117,7 @@ AuthRole::allowOnly(['registrar']);
                         <div class="row g-2 mb-3">
                             <div class="col-md-12">
                                 <label class="form-label form-label-sm mb-1">LRN (Learner Reference Number)</label>
-                                <input type="text" class="form-control form-control-sm" name="lrn" maxlength="20" placeholder="e.g., 102305621901">
+                                <input type="text" class="form-control form-control-sm" name="lrn" inputmode="numeric" pattern="[0-9]{1,12}" maxlength="12" placeholder="e.g., 102305621901" oninput="this.value = this.value.replace(/\D/g, '').slice(0, 12)">
                             </div>
                         </div>
 
@@ -278,7 +278,7 @@ AuthRole::allowOnly(['registrar']);
                                         $deleteConfirmLrn  = addslashes(htmlspecialchars($student['lrn'] ?? 'N/A', ENT_QUOTES));
                                     ?>
                                     <div class="dropdown">
-                                        <button class="btn btn-sm btn-icon btn-outline-secondary" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Actions" aria-label="Actions">
+                                        <button class="btn btn-sm btn-icon btn-outline-secondary" type="button" data-bs-toggle="dropdown" data-bs-boundary="viewport" aria-expanded="false" title="Actions" aria-label="Actions">
                                             <i class="bx bx-dots-vertical-rounded"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end">
@@ -417,7 +417,7 @@ AuthRole::allowOnly(['registrar']);
                         <div class="row g-2 mb-3">
                             <div class="col-md-12">
                                 <label class="form-label form-label-sm mb-1">LRN (Learner Reference Number)</label>
-                                <input type="text" class="form-control form-control-sm" id="editLrn" name="lrn" maxlength="20">
+                                <input type="text" class="form-control form-control-sm" id="editLrn" name="lrn" inputmode="numeric" pattern="[0-9]{1,12}" maxlength="12" oninput="this.value = this.value.replace(/\D/g, '').slice(0, 12)">
                             </div>
                         </div>
 

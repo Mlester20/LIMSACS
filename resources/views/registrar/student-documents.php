@@ -91,7 +91,23 @@ $totalDocuments = count($documents);
             #layout-menu, #layout-navbar, .no-print, footer { display: none !important; }
             #documentsCard { border: none !important; box-shadow: none !important; }
             .table-responsive { overflow: visible !important; }
+
+            /* Isolate the Missing Required Documents modal when printing just that list */
+            body.printing-missing-docs > *:not(.modal) { display: none !important; }
+            body.printing-missing-docs .modal:not(.show) { display: none !important; }
+            body.printing-missing-docs .modal-backdrop { display: none !important; }
+            body.printing-missing-docs .modal,
+            body.printing-missing-docs .modal-dialog,
+            body.printing-missing-docs .modal-content {
+                position: static !important; display: block !important; max-width: 100% !important; margin: 0 !important;
+            }
+            #missingDocumentsModal .btn-close, #missingDocumentsModal .modal-footer { display: none !important; }
+
+            /* Isolate the rendered-docx print area when printing a student's actual file */
+            body.printing-document-file > *:not(#printDocxArea) { display: none !important; }
+            body.printing-document-file #printDocxArea { display: block !important; }
         }
+        #printDocxArea { display: none; }
     </style>
 </head>
 <body>
@@ -244,13 +260,18 @@ $totalDocuments = count($documents);
                             >
                                 <td><?php echo $index + 1; ?></td>
                                 <td class="align-middle">
-                                    <div class="d-flex align-items-center gap-2">
+                                    <div
+                                        class="d-flex align-items-center gap-2"
+                                        role="button"
+                                        title="View missing required documents"
+                                        onclick="showMissingDocuments(<?php echo (int) $document['student_id']; ?>, '<?php echo addslashes(htmlspecialchars($studentFullName)); ?>')"
+                                    >
                                         <div class="avatar avatar-sm flex-shrink-0">
                                             <span class="avatar-initial rounded-circle bg-label-primary">
                                                 <?php echo htmlspecialchars(strtoupper(substr($studentFullName, 0, 1))); ?>
                                             </span>
                                         </div>
-                                        <span class="fw-medium"><?php echo htmlspecialchars($studentFullName); ?></span>
+                                        <span class="fw-medium text-primary" style="text-decoration: underline dotted;"><?php echo htmlspecialchars($studentFullName); ?></span>
                                     </div>
                                 </td>
                                 <td>
@@ -265,8 +286,16 @@ $totalDocuments = count($documents);
                                 <td><?php echo htmlspecialchars($document['uploaded_by_name'] ?? '—'); ?></td>
                                 <td><?php echo date('M d, Y', strtotime($document['uploaded_at'])); ?></td>
                                 <td class="text-nowrap no-print">
+                                    <?php
+                                        $docExt = strtolower(pathinfo((string) $document['file_path'], PATHINFO_EXTENSION));
+                                        // .docx opened directly just triggers a download (browsers can't
+                                        // render it inline) -- route it through a dedicated preview tab instead.
+                                        $viewHref = $docExt === 'docx'
+                                            ? BASE_URL . '/resources/views/registrar/docx-preview.php?file=' . urlencode(basename((string) $document['file_path']))
+                                            : BASE_URL . $fileUrl($document['file_path']);
+                                    ?>
                                     <a
-                                        href="<?php echo htmlspecialchars(BASE_URL . $fileUrl($document['file_path'])); ?>"
+                                        href="<?php echo htmlspecialchars($viewHref); ?>"
                                         target="_blank"
                                         class="btn btn-sm btn-outline-secondary"
                                         title="View File"
@@ -274,6 +303,19 @@ $totalDocuments = count($documents);
                                     >
                                         <i class="bx bx-show"></i>
                                     </a>
+                                    <button
+                                        class="btn btn-sm btn-outline-primary"
+                                        title="Print Document"
+                                        aria-label="Print Document"
+                                        onclick="printStudentDocument('<?php echo htmlspecialchars(BASE_URL . $fileUrl($document['file_path']), ENT_QUOTES); ?>', '<?php echo htmlspecialchars($docExt, ENT_QUOTES); ?>')"
+                                    >
+                                        <i class="bx bx-printer"></i>
+                                    </button>
+                                    <?php if($document['status'] !== 'Verified'): ?>
+                                        <button class="btn btn-sm btn-success" title="Mark as Verified" aria-label="Mark as Verified" onclick="verifyDocument(<?php echo $document['id']; ?>)">
+                                            <i class="bx bx-check-double"></i>
+                                        </button>
+                                    <?php endif; ?>
                                     <button class="btn btn-sm btn-warning" title="Edit" aria-label="Edit" data-bs-toggle="modal" data-bs-target="#editDocumentModal" onclick="editDocument(<?php echo htmlspecialchars(json_encode($document)); ?>)">
                                         <i class="bx bx-edit"></i>
                                     </button>
@@ -497,6 +539,48 @@ $totalDocuments = count($documents);
         <input type="hidden" name="delete_document" value="1">
     </form>
 
+    <!-- Verify Document Form (Hidden) -->
+    <form action="<?= BASE_URL ?>/app/controllers/registrar/StudentsDocumentController.php" method="post" id="verifyDocumentForm" style="display: none;">
+        <?php echo Csrf::field(); ?>
+        <input type="hidden" name="document_id" id="verify_document_id">
+        <input type="hidden" name="verify_document" value="1">
+    </form>
+
+    <!-- Missing Required Documents Modal -->
+    <div class="modal fade" id="missingDocumentsModal" tabindex="-1" aria-labelledby="missingDocumentsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header py-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-10 rounded-2" style="width:34px;height:34px;">
+                            <i class="bx bx-error text-danger fs-5"></i>
+                        </div>
+                        <h6 class="modal-title fw-bold mb-0" id="missingDocumentsModalLabel">Missing Required Documents</h6>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-3">
+                    <p class="text-muted small mb-3" id="missingDocumentsStudentName"></p>
+                    <div id="missingDocumentsBody">
+                        <div class="text-center text-muted py-3">
+                            <span class="spinner-border spinner-border-sm me-2"></span>Loading...
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer py-2">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="printMissingDocuments()">
+                        <i class="bx bx-printer me-1"></i>Print
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden helpers for printing a student's actual document file (PDF/image via iframe, DOCX via docx-preview) -->
+    <iframe id="printDocumentFrame" style="display:none;" title="Print document"></iframe>
+    <div id="printDocxArea"></div>
+
     <?php require_once __DIR__ . '/partials/footer.php';?>
 
     <script src="<?= BASE_URL ?>/public/assets/vendor/libs/jquery/jquery.js"></script>
@@ -506,6 +590,8 @@ $totalDocuments = count($documents);
     <script src="<?= BASE_URL ?>/public/assets/vendor/js/menu.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/js/main.js"></script>
     <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/vendor/libs/jszip/jszip.min.js"></script>
+    <script src="<?= BASE_URL ?>/public/assets/vendor/libs/docx-preview/docx-preview.js"></script>
     <script src="<?= BASE_URL ?>/public/js/registrar/student-documents.js"></script>
 </body>
 </html>

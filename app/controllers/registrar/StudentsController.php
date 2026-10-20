@@ -138,6 +138,12 @@ require_once __DIR__ . '/../../helpers/csrf.php';
                     exit();
                 }
 
+                if(!empty($data['lrn']) && !preg_match('/^\d{1,12}$/', $data['lrn'])){
+                    FlashMessage::setFlash("error", "LRN must contain numbers only, up to 12 digits.");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php");
+                    exit();
+                }
+
                 // Check if LRN exists
                 if($this->lrnExists($data['lrn'])){
                     FlashMessage::setFlash("error", "LRN already exists. Please use a unique LRN.");
@@ -173,6 +179,12 @@ require_once __DIR__ . '/../../helpers/csrf.php';
             try{
                 if((int)($data['age'] ?? 0) < 1){
                     FlashMessage::setFlash("error", "Invalid age. The student's age cannot be 0.");
+                    header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php?page=" . intval($page));
+                    exit();
+                }
+
+                if(!empty($data['lrn']) && !preg_match('/^\d{1,12}$/', $data['lrn'])){
+                    FlashMessage::setFlash("error", "LRN must contain numbers only, up to 12 digits.");
                     header("Location: " . BASE_URL . "/resources/views/registrar/student-records.php?page=" . intval($page));
                     exit();
                 }

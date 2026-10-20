@@ -129,6 +129,10 @@ use PhpOffice\PhpSpreadsheet\Shared\Date as ExcelDate;
                 $errors[] = 'birth_date is required and must be a valid date';
             }
 
+            if ($lrn !== null && !preg_match('/^\d{1,12}$/', $lrn)) {
+                $errors[] = 'lrn must contain digits only, up to 12 characters';
+            }
+
             // Age is provided as-is if the file supplies it, otherwise computed from
             // birth_date — either way, 0 (or less) isn't a valid age for a student
             // record, matching the same rule enforced on the Add/Edit Student forms.

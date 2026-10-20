@@ -151,6 +151,47 @@ require_once __DIR__ . '/../Model.php';
             }
         }
 
+        /**
+         * Required + active document types this student has no student_documents
+         * row for yet (any status counts as "has it" — this is about documents
+         * never submitted at all, not about re-submission after a Rejected one).
+         * @param int $student_id
+         * @return array
+         */
+        public function getMissingRequiredDocuments($student_id){
+            try{
+                $query = "SELECT dt.id, dt.document_name
+                    FROM {$this->document_types} dt
+                    WHERE dt.is_required = 1 AND dt.is_active = 1
+                    AND dt.id NOT IN (
+                        SELECT document_type_id FROM {$this->student_documents} WHERE student_id = ?
+                    )
+                    ORDER BY dt.document_name ASC
+                ";
+                $stmt = $this->con->prepare($query);
+                $stmt->bind_param("i", $student_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                return $result->fetch_all(MYSQLI_ASSOC);
+            }catch(Exception $e){
+                error_log("Error " . $e->getMessage());
+                return [];
+            }
+        }
+
+        public function updateStatus($id, $status){
+            try{
+                $query = "UPDATE {$this->student_documents} SET status = ? WHERE id = ?";
+                $stmt = $this->con->prepare($query);
+                $stmt->bind_param("si", $status, $id);
+                $stmt->execute();
+                return true;
+            }catch(Exception $e){
+                error_log("Error " . $e->getMessage());
+                return false;
+            }
+        }
+
         public function delete($id){
             try{
                 $query = "DELETE FROM {$this->student_documents} WHERE id = ? ";

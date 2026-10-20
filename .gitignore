@@ -1,5 +1,6 @@
 docs/
-vendor/
+/vendor/
 storage/imports
 database/config/config.local.php
 /manuals/
+*.env

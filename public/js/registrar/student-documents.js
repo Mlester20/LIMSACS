@@ -450,11 +450,58 @@ function editDocument(documentData) {
                 <div class="text-muted small mt-1">Click to open</div>
             `;
             currentFilePreview.style.display = 'block';
+        } else if (ext === 'docx' && typeof docx !== 'undefined') {
+            // .docx (OOXML/zip format) can be rendered in-browser via docx-preview.
+            // Legacy .doc (binary OLE format) isn't supported by that library, so it
+            // falls through to the download-link branch below.
+            // "Open in new tab" points at the dedicated preview page, not the raw
+            // file -- a direct link to a .docx just triggers a download instead of
+            // showing anything, since browsers can't render it inline.
+            const docxPreviewPageUrl = getAppBaseUrl() + '/resources/views/registrar/docx-preview.php?file=' + encodeURIComponent(fileName);
+            currentFilePreview.innerHTML = `
+                <div id="docxPreviewContainer" style="max-height:300px; overflow-y:auto; border:1px solid #dee2e6; border-radius:6px; padding:10px; background:#fff;">
+                    <div class="text-muted small"><span class="spinner-border spinner-border-sm me-2"></span>Loading preview...</div>
+                </div>
+                <div class="text-muted small mt-1">
+                    <a href="${docxPreviewPageUrl}" target="_blank">Open in new tab</a>
+                </div>
+            `;
+            currentFilePreview.style.display = 'block';
+
+            fetch(normalizedPath)
+                .then(res => {
+                    if (!res.ok) throw new Error('File not found');
+                    return res.blob();
+                })
+                .then(blob => {
+                    const container = document.getElementById('docxPreviewContainer');
+                    if (!container) return;
+                    container.innerHTML = '';
+                    return docx.renderAsync(blob, container, undefined, {
+                        inWrapper: false,
+                        ignoreWidth: true,
+                        ignoreHeight: true,
+                    });
+                })
+                .catch(() => {
+                    const container = document.getElementById('docxPreviewContainer');
+                    if (container) {
+                        container.innerHTML = `
+                            <div class="alert alert-warning py-2 px-3 mb-0" role="alert">
+                                <small>
+                                    <i class="bx bx-error-circle me-1"></i>
+                                    <strong>Preview unavailable.</strong>
+                                    <a href="${normalizedPath}" target="_blank" class="alert-link">Download instead</a>
+                                </small>
+                            </div>
+                        `;
+                    }
+                });
         } else {
-            // For DOC/DOCX and other types, just show a download link
+            // For legacy DOC and other types, just show a download link
             currentFilePreview.innerHTML = `
                 <a href="${normalizedPath}" target="_blank" class="btn btn-sm btn-outline-secondary">
-                    <i class="bx bx-download me-1"></i> Download / View File
+                    <i class="bx bx-download me-1"></i>Preview File
                 </a>
             `;
             currentFilePreview.style.display = 'block';
@@ -553,6 +600,136 @@ function deleteDocument(documentId) {
         document.getElementById('delete_document_id').value = documentId;
         document.getElementById('deleteDocumentForm').submit();
     }
+}
+
+// ============== VERIFY DOCUMENT FUNCTION ==============
+
+function verifyDocument(documentId) {
+    if (confirm('Mark this document as Verified?')) {
+        document.getElementById('verify_document_id').value = documentId;
+        document.getElementById('verifyDocumentForm').submit();
+    }
+}
+
+// ============== MISSING REQUIRED DOCUMENTS (click a student's name) ==============
+
+function showMissingDocuments(studentId, studentName) {
+    const modalEl = document.getElementById('missingDocumentsModal');
+    const nameEl = document.getElementById('missingDocumentsStudentName');
+    const bodyEl = document.getElementById('missingDocumentsBody');
+
+    nameEl.textContent = studentName;
+    bodyEl.innerHTML = `
+        <div class="text-center text-muted py-3">
+            <span class="spinner-border spinner-border-sm me-2"></span>Loading...
+        </div>
+    `;
+
+    bootstrap.Modal.getOrCreateInstance(modalEl).show();
+
+    $.ajax({
+        url: 'student-documents.php?action=missing_documents&student_id=' + encodeURIComponent(studentId),
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (!response.success) {
+                bodyEl.innerHTML = `<div class="text-danger small">${response.message || 'Failed to load.'}</div>`;
+                return;
+            }
+
+            if (response.data.length === 0) {
+                bodyEl.innerHTML = `
+                    <div class="text-center text-success py-2">
+                        <i class="bx bx-check-circle fs-3 d-block mb-1"></i>
+                        All required documents are submitted.
+                    </div>
+                    <p class="text-muted small text-center mb-0">
+                        Note: this only means every required document has been submitted —
+                        some may still be <strong>Pending</strong> or awaiting <strong>Verified</strong> status.
+                        Check the Status column in the table for each document's actual status.
+                    </p>
+                `;
+                return;
+            }
+
+            const items = response.data.map(doc => `
+                <li class="list-group-item d-flex align-items-center gap-2">
+                    <i class="bx bx-file-blank text-danger"></i>
+                    ${escapeHtmlDoc(doc.document_name)}
+                </li>
+            `).join('');
+            bodyEl.innerHTML = `<ul class="list-group list-group-flush">${items}</ul>`;
+        },
+        error: function() {
+            bodyEl.innerHTML = '<div class="text-danger small">Error loading missing documents.</div>';
+        }
+    });
+}
+
+function escapeHtmlDoc(text) {
+    if (!text) return '';
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return String(text).replace(/[&<>"']/g, m => map[m]);
+}
+
+function printMissingDocuments() {
+    document.body.classList.add('printing-missing-docs');
+    window.print();
+}
+
+window.addEventListener('afterprint', function () {
+    document.body.classList.remove('printing-missing-docs');
+    document.body.classList.remove('printing-document-file');
+});
+
+// ============== PRINT A STUDENT'S ACTUAL DOCUMENT FILE (PDF/image/docx) ==============
+
+function printStudentDocument(fileUrl, ext) {
+    ext = (ext || '').toLowerCase();
+
+    if (['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+        // The browser's own PDF/image viewer handles printing once loaded in the
+        // hidden iframe — this works without opening a new tab/popup.
+        const frame = document.getElementById('printDocumentFrame');
+        frame.onload = function () {
+            try {
+                frame.contentWindow.focus();
+                frame.contentWindow.print();
+            } catch (e) {
+                window.open(fileUrl, '_blank');
+            }
+        };
+        frame.src = fileUrl;
+        return;
+    }
+
+    if (ext === 'docx' && typeof docx !== 'undefined') {
+        const area = document.getElementById('printDocxArea');
+        area.innerHTML = '';
+
+        fetch(fileUrl)
+            .then(res => {
+                if (!res.ok) throw new Error('File not found');
+                return res.blob();
+            })
+            .then(blob => docx.renderAsync(blob, area, undefined, {
+                inWrapper: false,
+                ignoreWidth: true,
+                ignoreHeight: true,
+            }))
+            .then(() => {
+                document.body.classList.add('printing-document-file');
+                window.print();
+            })
+            .catch(() => {
+                alert('Unable to prepare this document for printing. Try opening/downloading it instead.');
+            });
+        return;
+    }
+
+    // Legacy .doc or other unsupported formats: no in-browser print preview available.
+    alert('This file type can\'t be printed directly from the browser. It will open in a new tab — print from there instead (e.g. Ctrl+P).');
+    window.open(fileUrl, '_blank');
 }
 
 // ============== TABLE SEARCH + STATUS FILTER (combined) ==============

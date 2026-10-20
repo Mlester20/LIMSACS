@@ -109,6 +109,9 @@ require_once __DIR__ . '/database/config/config.php';
                     <i class='bx bx-hide' id="toggleIcon"></i>
                   </span>
                 </div>
+                <div class="text-end mt-1">
+                  <a href="<?= BASE_URL ?>/forgot-password.php" class="auth-footer-text">Forgot password?</a>
+                </div>
               </div>
               <div class="mb-3">
                 <button class="btn auth-btn w-100" type="submit">Sign in</button>
