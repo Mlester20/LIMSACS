@@ -45,7 +45,7 @@ AuthRole::allowOnly(['registrar']);
     <div class="row mb-3 align-items-center">
       <div class="col-md-6">
         <div class="input-group">
-          <input type="text" class="form-control" placeholder="Search Students (e.g., Juan Dela Cruz)" id="searchInput" data-grade-filter="<?= htmlspecialchars($gradeLevelFilter) ?>" data-section-filter="<?= htmlspecialchars($sectionFilter) ?>" data-archived-filter="<?= htmlspecialchars($archivedFilter) ?>">
+          <input type="text" class="form-control" placeholder="Search Students (e.g., Juan Dela Cruz)" id="searchInput" data-grade-filter="<?= htmlspecialchars($gradeLevelFilter) ?>" data-section-filter="<?= htmlspecialchars($sectionFilter) ?>" data-archived-filter="<?= htmlspecialchars($archivedFilter) ?>" data-gender-filter="<?= htmlspecialchars($genderFilter) ?>">
         </div>
       </div>
 
@@ -78,8 +78,15 @@ AuthRole::allowOnly(['registrar']);
           <option value="all" <?= $archivedFilter === 'all' ? 'selected' : '' ?>>All Students</option>
         </select>
       </div>
-      <?php if ($gradeLevelFilter !== '' || $sectionFilter !== ''): ?>
-        <div class="col-md-3">
+      <div class="col-md-3">
+        <select class="form-select" id="genderFilter" onchange="applyStudentFilters()">
+          <option value="">All Genders</option>
+          <option value="Male" <?= $genderFilter === 'Male' ? 'selected' : '' ?>>Male</option>
+          <option value="Female" <?= $genderFilter === 'Female' ? 'selected' : '' ?>>Female</option>
+        </select>
+      </div>
+      <?php if ($gradeLevelFilter !== '' || $sectionFilter !== '' || $genderFilter !== ''): ?>
+        <div class="col-md-3 mt-2 mt-md-0">
           <a href="student-records.php" class="btn btn-outline-secondary">Clear Filter</a>
         </div>
       <?php endif; ?>
@@ -90,9 +97,11 @@ AuthRole::allowOnly(['registrar']);
         const gradeLevel = document.getElementById('gradeLevelFilter').value;
         const sectionId = document.getElementById('sectionFilter').value;
         const archived = document.getElementById('archivedFilter').value;
+        const gender = document.getElementById('genderFilter').value;
         window.location.href = '?grade_level=' + encodeURIComponent(gradeLevel)
           + '&section_id=' + encodeURIComponent(sectionId)
           + '&archived=' + encodeURIComponent(archived)
+          + '&gender=' + encodeURIComponent(gender)
           + '&page=1';
       }
     </script>

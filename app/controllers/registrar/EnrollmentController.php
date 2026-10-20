@@ -112,6 +112,13 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
         }
 
         /**
+         * @return array|null the currently active school year, or null if none
+         */
+        public function getActiveSchoolYear() {
+            return $this->sectionsModel->getActiveSchoolYear();
+        }
+
+        /**
          * Get sections by school year and grade level
          * @param int $school_year_id
          * @param string $grade_level
@@ -127,6 +134,14 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
          */
         public function getGradeLevels() {
             return $this->sectionsModel->getDistinctGradeLevels();
+        }
+
+        /**
+         * All sections (any school year), for the Section filter dropdown.
+         * @return array
+         */
+        public function getAllSections() {
+            return $this->sectionsModel->index();
         }
 
         /**
@@ -279,8 +294,8 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
          * @param string $status - Enrollment status to filter by, or 'All' for every status
          * @return array - Array with 'enrollments' and 'pagination' keys
          */
-        public function getEnrolledStudentsWithPagination($page = 1, $itemsPerPage = 10, $status = 'Enrolled', $gradeLevel = '') {
-            return $this->enrollmentService->getEnrolledStudentsWithPagination($page, $itemsPerPage, $status, $gradeLevel);
+        public function getEnrolledStudentsWithPagination($page = 1, $itemsPerPage = 10, $status = 'Enrolled', $gradeLevel = '', $gender = '', $sectionId = '') {
+            return $this->enrollmentService->getEnrolledStudentsWithPagination($page, $itemsPerPage, $status, $gradeLevel, $gender, $sectionId);
         }
 
         /**
@@ -290,10 +305,12 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
          * @param int $itemsPerPage
          * @param string $status Enrollment status to filter by, or 'All' for every status
          * @param string $gradeLevel Grade level to filter by, or '' for every grade level
+         * @param string $gender 'Male' | 'Female', or '' for all
+         * @param string|int $sectionId Exact section_id match, or '' for all
          * @return array ['enrollments' => array, 'pagination' => array]
          */
-        public function searchEnrolledStudents($keyword, $page = 1, $itemsPerPage = 10, $status = 'Enrolled', $gradeLevel = '') {
-            return $this->enrollmentService->searchEnrolledStudents($keyword, $page, $itemsPerPage, $status, $gradeLevel);
+        public function searchEnrolledStudents($keyword, $page = 1, $itemsPerPage = 10, $status = 'Enrolled', $gradeLevel = '', $gender = '', $sectionId = '') {
+            return $this->enrollmentService->searchEnrolledStudents($keyword, $page, $itemsPerPage, $status, $gradeLevel, $gender, $sectionId);
         }
 
         /**
@@ -303,6 +320,158 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
          */
         public function getAllEnrolledStudents($limit = 100) {
             return $this->academicHistoryModel->getAllEnrolled($limit);
+        }
+
+        /**
+         * All matching enrollments grouped by section, for the printable
+         * per-section report.
+         * @param string $status
+         * @param string $gradeLevel
+         * @param string $gender
+         * @param string|int $sectionId
+         * @return array<string, array{section_name:string, grade_level:string, adviser_name:?string, school_year:?string, students:array}>
+         */
+        public function getEnrolledGroupedBySection($status = 'Enrolled', $gradeLevel = '', $gender = '', $sectionId = '') {
+            $records = $this->enrollmentService->getEnrolledGroupedBySection($status, $gradeLevel, $gender, $sectionId);
+
+            $groups = [];
+            foreach ($records as $row) {
+                $key = $row['section_name'] ?? 'Unassigned';
+                if (!isset($groups[$key])) {
+                    $groups[$key] = [
+                        'section_name' => $row['section_name'] ?? 'Unassigned',
+                        'grade_level'  => $row['grade_level'],
+                        'adviser_name' => $row['adviser_name'],
+                        'school_year'  => $row['school_year'],
+                        'students'     => [],
+                    ];
+                }
+                $groups[$key]['students'][] = $row;
+            }
+
+            return $groups;
+        }
+
+        /**
+         * Candidate source sections for bulk grade-level promotion: any
+         * section NOT in the currently active school year (it's a prior
+         * year's section whose students are ready to move up), and not
+         * already at the terminal grade level (Grade 6 students graduate
+         * through the existing "Mark as Graduated" flow instead).
+         * @return array each row gets a 'next_grade_level' key attached
+         */
+        public function getPromotableSections() {
+            $activeSy = $this->sectionsModel->getActiveSchoolYear();
+            $activeSyId = $activeSy['id'] ?? null;
+
+            $allSections = $this->sectionsModel->index();
+
+            $candidates = array_values(array_filter($allSections, function ($section) use ($activeSyId) {
+                return (int) $section['school_year_id'] !== (int) $activeSyId;
+            }));
+
+            foreach ($candidates as &$section) {
+                $section['next_grade_level'] = EnrollmentService::nextGradeLevel($section['grade_level']);
+            }
+            unset($section);
+
+            // A section with no next grade level (Grade 6) isn't promotable.
+            return array_values(array_filter($candidates, function ($section) {
+                return $section['next_grade_level'] !== null;
+            }));
+        }
+
+        /**
+         * Students currently Enrolled in a section, for the bulk-promotion checklist.
+         * @param int $section_id
+         * @param int $school_year_id
+         * @return array
+         */
+        public function getEnrolledInSection($section_id, $school_year_id) {
+            return $this->academicHistoryModel->getEnrolledBySection($section_id, $school_year_id);
+        }
+
+        /**
+         * Bulk-promote the given students into a target section. $source_section_id
+         * is required for validation only, not to look up the students -- it
+         * confirms the target section is actually the next grade level up from
+         * the source, so a tampered/stale request can't promote students into
+         * an unrelated grade level even though the dropdowns are already
+         * filtered client-side to prevent that in normal use.
+         * @param int[] $studentIds
+         * @param int $source_section_id
+         * @param int $target_section_id
+         * @return array ['success' => bool, 'message' => string, 'promoted' => int, 'skipped' => array]
+         */
+        public function promoteStudents($studentIds, $source_section_id, $target_section_id) {
+            $sourceSection = $this->sectionsModel->getById($source_section_id);
+            if (!$sourceSection) {
+                return ['success' => false, 'message' => 'Source section not found.', 'promoted' => 0, 'skipped' => []];
+            }
+
+            $targetSection = $this->sectionsModel->getById($target_section_id);
+            if (!$targetSection) {
+                return ['success' => false, 'message' => 'Target section not found.', 'promoted' => 0, 'skipped' => []];
+            }
+
+            $expectedGradeLevel = EnrollmentService::nextGradeLevel($sourceSection['grade_level']);
+            if ($expectedGradeLevel === null || $targetSection['grade_level'] !== $expectedGradeLevel) {
+                return [
+                    'success' => false,
+                    'message' => "Target section's grade level ({$targetSection['grade_level']}) doesn't match the expected next grade level ({$expectedGradeLevel}) for {$sourceSection['grade_level']}.",
+                    'promoted' => 0,
+                    'skipped' => [],
+                ];
+            }
+
+            if ((int) $targetSection['school_year_id'] === (int) $sourceSection['school_year_id']) {
+                return ['success' => false, 'message' => 'Target section must belong to a different (newer) school year than the source section.', 'promoted' => 0, 'skipped' => []];
+            }
+
+            // Only promote student IDs that are actually enrolled in the claimed
+            // source section -- ignores anything else a tampered request might
+            // have included, rather than trusting the posted ID list outright.
+            $actuallyEnrolled = $this->academicHistoryModel->getEnrolledBySection($source_section_id, $sourceSection['school_year_id']);
+            $validStudentIds = array_column($actuallyEnrolled, 'student_id');
+            $studentIds = array_values(array_intersect(array_map('intval', $studentIds), $validStudentIds));
+
+            if (empty($studentIds)) {
+                return ['success' => false, 'message' => 'None of the selected students are actually enrolled in the source section.', 'promoted' => 0, 'skipped' => []];
+            }
+
+            $result = $this->enrollmentService->promoteStudents(
+                $studentIds,
+                $targetSection['school_year_id'],
+                $targetSection['grade_level'],
+                $target_section_id,
+                $_SESSION['id'] ?? null
+            );
+
+            $promotedCount = count($result['promoted']);
+
+            if ($promotedCount > 0) {
+                $this->auditLogs->log(
+                    $_SESSION['id'],
+                    $_SESSION['role'],
+                    'PROMOTE STUDENTS',
+                    'ENROLLMENT',
+                    null,
+                    'academic_history',
+                    "Promoted {$promotedCount} student(s) to {$targetSection['grade_level']} - {$targetSection['section_name']}"
+                );
+            }
+
+            $message = "{$promotedCount} student(s) promoted.";
+            if (!empty($result['skipped'])) {
+                $message .= ' ' . count($result['skipped']) . ' skipped (already enrolled or section full).';
+            }
+
+            return [
+                'success' => $promotedCount > 0,
+                'message' => $message,
+                'promoted' => $promotedCount,
+                'skipped' => $result['skipped'],
+            ];
         }
     }
 
@@ -395,13 +564,15 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
                 $itemsPerPage = $_POST['items_per_page'] ?? 10;
                 $status       = $_POST['status'] ?? 'Enrolled';
                 $gradeLevel   = $_POST['grade_level'] ?? '';
+                $gender       = in_array($_POST['gender'] ?? '', ['Male', 'Female'], true) ? $_POST['gender'] : '';
+                $sectionId    = $_POST['section_id'] ?? '';
 
                 $allowedStatusFilters = ['Enrolled', 'Transferred', 'Dropped', 'Graduated', 'All'];
                 if (!in_array($status, $allowedStatusFilters, true)) {
                     $status = 'Enrolled';
                 }
 
-                $result = $controller->searchEnrolledStudents($keyword, $page, $itemsPerPage, $status, $gradeLevel);
+                $result = $controller->searchEnrolledStudents($keyword, $page, $itemsPerPage, $status, $gradeLevel, $gender, $sectionId);
                 header('Content-Type: application/json');
                 echo json_encode($result);
                 exit();
@@ -441,6 +612,49 @@ require_once __DIR__ . '/../../services/EnrollmentService.php';
                 }
 
                 $result = $controller->updateStudentStatus($enrollment_id, $new_status, $graduateData);
+                echo json_encode($result);
+                exit();
+            }
+
+            // Candidate source sections for bulk grade-level promotion
+            if (isset($_POST['get_promotable_sections'])) {
+                $sections = $controller->getPromotableSections();
+                header('Content-Type: application/json');
+                echo json_encode($sections);
+                exit();
+            }
+
+            // Students currently Enrolled in a section (promotion checklist)
+            if (isset($_POST['get_enrolled_for_promotion'])) {
+                $section_id = $_POST['section_id'] ?? null;
+                $school_year_id = $_POST['school_year_id'] ?? null;
+                if ($section_id && $school_year_id) {
+                    $students = $controller->getEnrolledInSection($section_id, $school_year_id);
+                    header('Content-Type: application/json');
+                    echo json_encode($students);
+                    exit();
+                }
+            }
+
+            // Bulk-promote the checked students into a target section
+            if (isset($_POST['promote_students'])) {
+                header('Content-Type: application/json');
+
+                if (!Csrf::isValid($_POST['csrf_token'] ?? null)) {
+                    echo json_encode(['success' => false, 'message' => 'Your session has expired. Please refresh the page and try again.']);
+                    exit();
+                }
+
+                $studentIds = $_POST['student_ids'] ?? [];
+                $sourceSectionId = $_POST['source_section_id'] ?? null;
+                $targetSectionId = $_POST['target_section_id'] ?? null;
+
+                if (empty($studentIds) || !is_array($studentIds) || !$sourceSectionId || !$targetSectionId) {
+                    echo json_encode(['success' => false, 'message' => 'Select at least one student and a target section.']);
+                    exit();
+                }
+
+                $result = $controller->promoteStudents($studentIds, $sourceSectionId, $targetSectionId);
                 echo json_encode($result);
                 exit();
             }

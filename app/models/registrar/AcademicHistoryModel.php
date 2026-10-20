@@ -151,6 +151,40 @@ require_once __DIR__ . '/../Model.php';
         }
 
         /**
+         * Students currently 'Enrolled' in a given section for a given school
+         * year -- the checklist used by bulk grade-level promotion (excludes
+         * students already Transferred/Dropped/Graduated out of that section).
+         * @param int $section_id
+         * @param int $school_year_id
+         * @return array
+         */
+        public function getEnrolledBySection($section_id, $school_year_id) {
+            try {
+                $query = "SELECT
+                            ah.id AS enrollment_id,
+                            s.id AS student_id,
+                            s.first_name,
+                            s.middle_name,
+                            s.last_name,
+                            s.lrn
+                        FROM {$this->academic_history} ah
+                        JOIN {$this->students} s ON ah.student_id = s.id
+                        WHERE ah.section_id = ? AND ah.school_year_id = ? AND ah.enrollment_status = 'Enrolled'
+                        ORDER BY s.last_name ASC, s.first_name ASC";
+
+                $stmt = $this->con->prepare($query);
+                $stmt->bind_param('ii', $section_id, $school_year_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                return $result->fetch_all(MYSQLI_ASSOC);
+            } catch (Exception $e) {
+                error_log("Get enrolled by section error: " . $e->getMessage());
+                return [];
+            }
+        }
+
+        /**
          * Get a single enrollment record by id, joined with the student's name
          * @param int $id Enrollment record ID
          * @return array|null

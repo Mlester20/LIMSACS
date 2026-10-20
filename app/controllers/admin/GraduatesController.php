@@ -2,15 +2,18 @@
 session_start();
 
 require_once __DIR__ . '/../../models/admin/GraduatesModel.php';
+require_once __DIR__ . '/../../models/SchoolSettingsModel.php';
 require_once __DIR__ . '/../../core/errorHandler.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 require_once __DIR__ . '/../../helpers/graduatesPdfTemplate.php';
 
     class GraduatesController{
         private $model;
+        private $settingsModel;
 
         public function __construct($con){
             $this->model = new GraduatesModel($con);
+            $this->settingsModel = new SchoolSettingsModel($con);
         }
 
         /**
@@ -52,6 +55,17 @@ require_once __DIR__ . '/../../helpers/graduatesPdfTemplate.php';
         }
 
         /**
+         * Every matching record, unpaginated -- used for Print (so a batch with
+         * more than one page of results doesn't get silently cut off) and for
+         * exports, which already needed the full set.
+         * @param array $filters
+         * @return array
+         */
+        public function allForPrint($filters = []): array{
+            return $this->model->getAllForExport($filters);
+        }
+
+        /**
          * Full profile for a single graduate: personal info, academic history
          * timeline, section history (derived from academic history) and documents.
          */
@@ -68,12 +82,51 @@ require_once __DIR__ . '/../../helpers/graduatesPdfTemplate.php';
             ];
         }
 
+        /**
+         * Full filtered result set, grouped by section, for the printable
+         * per-section report.
+         * @param array $filters
+         * @return array<string, array{section_name:string, grade_level:string, adviser_name:?string, students:array}>
+         */
+        public function bySection($filters = []): array{
+            $records = $this->model->getAllForExportBySection($filters);
+
+            $groups = [];
+            foreach($records as $row){
+                $key = $row['section_name'] ?? 'Unassigned';
+                if(!isset($groups[$key])){
+                    $groups[$key] = [
+                        'section_name' => $row['section_name'] ?? 'Unassigned',
+                        'grade_level'  => $row['grade_level'],
+                        'adviser_name' => $row['adviser_name'],
+                        'students'     => [],
+                    ];
+                }
+                $groups[$key]['students'][] = $row;
+            }
+
+            return $groups;
+        }
+
         public function filterOptions(): array{
             return [
                 'school_years' => $this->model->getSchoolYearOptions(),
-                'grade_levels' => $this->model->getGradeLevelOptions(),
                 'sections'     => $this->model->getSectionOptions(),
             ];
+        }
+
+        /**
+         * "Batch X" label inferred from the records actually being shown/printed,
+         * not from whether a School Year filter was explicitly picked -- if every
+         * record in the result set happens to belong to the same school year
+         * (the common case), that year is the batch. Mixed-year results (or an
+         * empty set) show no batch label.
+         * @param array $records rows with a 'school_year' key
+         * @return string
+         */
+        public static function inferBatchLabel(array $records): string{
+            $years = array_unique(array_filter(array_column($records, 'school_year')));
+            return count($years) === 1 ? (string) reset($years) : '';
         }
 
         /**
@@ -114,7 +167,11 @@ require_once __DIR__ . '/../../helpers/graduatesPdfTemplate.php';
             require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
 
             $records = $this->model->getAllForExport($filters);
-            $html = GraduatesPdfTemplate::render($records);
+
+            $meta = $this->settingsModel->getAll();
+            $meta['batch_label'] = self::inferBatchLabel($records);
+
+            $html = GraduatesPdfTemplate::render($records, $meta);
 
             $options = new \Dompdf\Options();
             $options->set('isRemoteEnabled', false);

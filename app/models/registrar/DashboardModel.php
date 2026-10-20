@@ -79,7 +79,7 @@ require_once __DIR__ . '/../../models/Model.php';
         {
             $result = $this->con->query("
                 SELECT lrn,
-                    CONCAT(first_name, ' ', last_name) AS full_name,
+                    CONCAT(last_name, ', ', first_name) AS full_name,
                     gender,
                     contact_number,
                     created_at

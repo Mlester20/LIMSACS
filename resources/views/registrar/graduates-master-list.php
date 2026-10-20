@@ -1,36 +1,51 @@
 <?php
 require_once __DIR__ . '/../../../app/controllers/registrar/GraduatesController.php';
+require_once __DIR__ . '/../../../app/models/SchoolSettingsModel.php';
 require_once __DIR__ . '/../../../app/middleware/Auth.php';
 AuthRole::allowOnly(['registrar']);
 
 $e = fn($v) => htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8');
+$schoolSettings = (new SchoolSettingsModel($con))->getAll();
 
 $search_term         = trim($_GET['search'] ?? '');
 $school_year_filter   = $_GET['school_year_id'] ?? '';
-$grade_level_filter   = $_GET['grade_level'] ?? '';
 $section_filter       = $_GET['section_id'] ?? '';
 $gender_filter        = $_GET['gender'] ?? '';
-$status_filter        = $_GET['status'] ?? '';
 $page                 = $_GET['page'] ?? 1;
 $print_mode           = isset($_GET['print']);
 
+// This is the Graduates module -- Grade Level and Status aren't real filters
+// here (every row is always Grade 6 / Graduated by definition), so neither
+// is offered as a filter control or accepted from the query string.
 $filters = [
     'search'         => $search_term,
     'school_year_id' => $school_year_filter,
-    'grade_level'    => $grade_level_filter,
     'section_id'     => $section_filter,
     'gender'         => $gender_filter,
-    'status'         => $status_filter,
 ];
 
-$listing = $controller ? $controller->masterList($filters, $page) : ['records' => [], 'current_page' => 1, 'total_pages' => 1, 'total_records' => 0, 'limit' => 10];
-$options = $controller ? $controller->filterOptions() : ['school_years' => [], 'grade_levels' => [], 'sections' => []];
+$options = $controller ? $controller->filterOptions() : ['school_years' => [], 'sections' => []];
 
-$graduates     = $listing['records'];
-$current_page  = $listing['current_page'];
-$total_pages   = $listing['total_pages'];
-$total_records = $listing['total_records'];
-$limit         = $listing['limit'];
+if ($print_mode) {
+    // Print shows every matching record, not just one page -- a batch with
+    // more than 10 graduates shouldn't get silently cut off.
+    $graduates     = $controller ? $controller->allForPrint($filters) : [];
+    $current_page  = 1;
+    $total_pages   = 1;
+    $total_records = count($graduates);
+    $limit         = $total_records ?: 1;
+} else {
+    $listing = $controller ? $controller->masterList($filters, $page) : ['records' => [], 'current_page' => 1, 'total_pages' => 1, 'total_records' => 0, 'limit' => 10];
+    $graduates     = $listing['records'];
+    $current_page  = $listing['current_page'];
+    $total_pages   = $listing['total_pages'];
+    $total_records = $listing['total_records'];
+    $limit         = $listing['limit'];
+}
+
+// "Batch <school year>" label for the print heading -- inferred from the
+// records actually shown, not from whether a School Year filter was picked.
+$batchLabel = GraduatesController::inferBatchLabel($graduates);
 
 $qs = function ($p) use ($filters) {
     return '?' . http_build_query(array_merge($filters, ['page' => $p]));
@@ -80,16 +95,27 @@ $exportQs = function ($type) use ($filters) {
         <?php require_once __DIR__ . '/../../../app/helpers/flashMessage.php'; FlashMessage::showFlash(); ?>
         <?php require_once __DIR__ . '/partials/sidebar.php'; ?>
         <?php require_once __DIR__ . '/partials/topbar.php'; ?>
+    <?php else: ?>
+        <div class="text-center mb-3">
+            <img src="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" alt="School Logo" style="width:70px;height:70px;">
+            <h5 class="fw-bold mb-0 mt-1">Aurora Central School</h5>
+            <p class="text-muted small mb-0">Aurora, Isabela</p>
+        </div>
     <?php endif; ?>
 
     <div class="card mt-4">
         <h5 class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-            Graduates &mdash; Master List
+            <?php if ($print_mode): ?>
+                Graduates Master List<?= $batchLabel !== '' ? ' &mdash; Batch ' . $e($batchLabel) : '' ?>
+            <?php else: ?>
+                Graduates &mdash; Master List
+            <?php endif; ?>
             <?php if (!$print_mode): ?>
             <div class="d-flex gap-2 flex-wrap no-print">
                 <button type="submit" form="graduatesFilterForm" class="btn btn-sm btn-outline-secondary"><i class="bx bx-filter-alt me-1"></i>Filter</button>
                 <a href="<?= $e($exportQs('excel')) ?>" class="btn btn-sm btn-outline-success"><i class="bx bx-spreadsheet me-1"></i>Export Excel</a>
                 <a href="<?= $e($exportQs('pdf')) ?>" class="btn btn-sm btn-outline-danger"><i class="bx bx-file-pdf me-1"></i>Export PDF</a>
+                <a href="graduates-per-section.php" class="btn btn-sm btn-outline-primary"><i class="bx bx-list-ul me-1"></i>Per Section</a>
                 <a href="<?= $e($qs($current_page) . '&print=1') ?>" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bx bx-printer me-1"></i>Print</a>
             </div>
             <?php endif; ?>
@@ -98,25 +124,12 @@ $exportQs = function ($type) use ($filters) {
         <?php if (!$print_mode): ?>
         <div class="card-body border-bottom no-print">
             <form method="GET" id="graduatesFilterForm" class="row g-2 align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label small">Search</label>
-                    <input type="text" name="search" class="form-control" placeholder="LRN or student name" value="<?= $e($search_term) ?>">
-                </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label small">School Year</label>
                     <select name="school_year_id" class="form-select">
                         <option value="">All</option>
                         <?php foreach ($options['school_years'] as $sy): ?>
                             <option value="<?= $e($sy['id']) ?>" <?= (string)$school_year_filter === (string)$sy['id'] ? 'selected' : '' ?>><?= $e($sy['school_year']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label small">Grade Level</label>
-                    <select name="grade_level" class="form-select">
-                        <option value="">All</option>
-                        <?php foreach ($options['grade_levels'] as $gl): ?>
-                            <option value="<?= $e($gl) ?>" <?= $grade_level_filter === $gl ? 'selected' : '' ?>><?= $e($gl) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -129,17 +142,8 @@ $exportQs = function ($type) use ($filters) {
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label small">Status</label>
-                    <select name="status" class="form-select">
-                        <option value="">All</option>
-                        <option value="Graduated" <?= $status_filter === 'Graduated' ? 'selected' : '' ?>>Graduated</option>
-                        <option value="Transferred" <?= $status_filter === 'Transferred' ? 'selected' : '' ?>>Transferred</option>
-                        <option value="Dropped" <?= $status_filter === 'Dropped' ? 'selected' : '' ?>>Dropped</option>
-                    </select>
-                </div>
             </form>
-            <?php if ($search_term !== '' || $school_year_filter !== '' || $grade_level_filter !== '' || $section_filter !== '' || $gender_filter !== '' || $status_filter !== ''): ?>
+            <?php if ($search_term !== '' || $school_year_filter !== '' || $section_filter !== '' || $gender_filter !== ''): ?>
                 <a href="graduates-master-list.php" class="btn btn-link btn-sm px-0 mt-2">Clear all filters</a>
             <?php endif; ?>
         </div>
@@ -153,14 +157,12 @@ $exportQs = function ($type) use ($filters) {
                         <th>LRN</th>
                         <th>Student Name</th>
                         <th>Gender</th>
-                        <th>Grade Level</th>
-                        <th>Section</th>
-                        <th>Adviser</th>
-                        <th>School Year</th>
-                        <th>Date Graduated</th>
-                        <th>Registrar</th>
-                        <th>Status</th>
-                        <?php if (!$print_mode): ?><th class="no-print">Action</th><?php endif; ?>
+                        <?php if (!$print_mode): ?>
+                            <th>School Year</th>
+                            <th>Date Graduated</th>
+                            <th>Status</th>
+                            <th class="no-print">Action</th>
+                        <?php endif; ?>
                     </tr>
                 </thead>
                 <tbody>
@@ -172,43 +174,64 @@ $exportQs = function ($type) use ($filters) {
                                 <td><code class="text-primary"><?= $e($g['lrn']) ?></code></td>
                                 <td class="fw-semibold"><?= $e($g['student_full_name']) ?></td>
                                 <td><?= $e($g['gender']) ?></td>
-                                <td><?= $e($g['grade_level']) ?></td>
-                                <td><?= $e($g['section_name'] ?? '—') ?></td>
-                                <td><?= $e($g['adviser_name'] ?? '—') ?></td>
-                                <td><?= $e($g['school_year'] ?? '—') ?></td>
-                                <td><?= !empty($g['graduation_date']) ? date('F j, Y', strtotime($g['graduation_date'])) : '—' ?></td>
-                                <td><?= $e($g['registrar_name'] ?? '—') ?></td>
-                                <td>
-                                    <?php
-                                        $statusBadges = [
-                                            'Graduated' => 'bg-label-primary',
-                                            'Transferred' => 'bg-label-warning',
-                                            'Dropped' => 'bg-label-danger',
-                                        ];
-                                    ?>
-                                    <span class="badge <?= $statusBadges[$g['enrollment_status']] ?? 'bg-label-secondary' ?>">
-                                        <?= $e($g['enrollment_status']) ?>
-                                    </span>
-                                </td>
                                 <?php if (!$print_mode): ?>
-                                <td class="no-print">
-                                    <?php if (!empty($g['graduate_id'])): ?>
-                                        <a href="graduate-view.php?id=<?= $e($g['graduate_id']) ?>" class="btn btn-sm btn-outline-primary" title="View" aria-label="View"><i class="bx bx-show"></i></a>
-                                    <?php else: ?>
-                                        <span class="text-muted small">No graduate profile</span>
-                                    <?php endif; ?>
-                                </td>
+                                    <td><?= $e($g['school_year'] ?? '—') ?></td>
+                                    <td><?= !empty($g['graduation_date']) ? date('F j, Y', strtotime($g['graduation_date'])) : '—' ?></td>
+                                    <td>
+                                        <?php
+                                            $statusBadges = [
+                                                'Graduated' => 'bg-label-primary',
+                                                'Transferred' => 'bg-label-warning',
+                                                'Dropped' => 'bg-label-danger',
+                                            ];
+                                        ?>
+                                        <span class="badge <?= $statusBadges[$g['enrollment_status']] ?? 'bg-label-secondary' ?>">
+                                            <?= $e($g['enrollment_status']) ?>
+                                        </span>
+                                    </td>
+                                    <td class="no-print">
+                                        <?php if (!empty($g['graduate_id'])): ?>
+                                            <a href="graduate-view.php?id=<?= $e($g['graduate_id']) ?>" class="btn btn-sm btn-outline-primary" title="View" aria-label="View"><i class="bx bx-show"></i></a>
+                                        <?php else: ?>
+                                            <span class="text-muted small">No graduate profile</span>
+                                        <?php endif; ?>
+                                    </td>
                                 <?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="12" class="text-center">No graduate records found.</td>
+                            <td colspan="<?= $print_mode ? 4 : 8 ?>" class="text-center">No graduate records found.</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
         </div>
+
+        <?php if ($print_mode): ?>
+            <?php
+                $registrarSigName = trim($schoolSettings['registrar_name'] ?? '');
+                $principalSigName = trim($schoolSettings['principal_name'] ?? '');
+            ?>
+            <div class="row mt-5 mb-3 px-3">
+                <div class="col-6 text-center">
+                    <p class="mb-5 text-start fw-semibold">Prepared by:</p>
+                    <p class="mb-0" style="border-top:1px solid #333; display:inline-block; min-width:220px; padding-top:4px; font-weight:600;">
+                        <?= $registrarSigName !== '' ? $e($registrarSigName) : '&nbsp;' ?>
+                    </p>
+                    <p class="text-muted small mb-0 fst-italic">Signature over Printed Name</p>
+                    <p class="text-muted small mb-0"><?= $e($schoolSettings['registrar_title'] ?? 'Registrar') ?></p>
+                </div>
+                <div class="col-6 text-center">
+                    <p class="mb-5 text-start fw-semibold">Checked by:</p>
+                    <p class="mb-0" style="border-top:1px solid #333; display:inline-block; min-width:220px; padding-top:4px; font-weight:600;">
+                        <?= $principalSigName !== '' ? $e($principalSigName) : '&nbsp;' ?>
+                    </p>
+                    <p class="text-muted small mb-0 fst-italic">Signature over Printed Name</p>
+                    <p class="text-muted small mb-0"><?= $e($schoolSettings['principal_title'] ?? 'School Principal') ?></p>
+                </div>
+            </div>
+        <?php endif; ?>
 
         <?php if ($total_pages > 1 && !$print_mode): ?>
             <div class="card-footer d-flex justify-content-between align-items-center no-print">

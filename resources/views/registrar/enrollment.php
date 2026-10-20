@@ -10,6 +10,7 @@ try {
     $controller = new EnrollmentController($con);
     $schoolYears = $controller->getSchoolYears();
     $gradeLevels = $controller->getGradeLevels();
+    $allSections = $controller->getAllSections();
 
     // Get current page from query parameter
     $currentPage = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
@@ -27,8 +28,17 @@ try {
         $gradeLevelFilter = '';
     }
 
+    // Get current gender filter from query parameter
+    $genderFilter = $_GET['gender'] ?? '';
+    if (!in_array($genderFilter, ['Male', 'Female'], true)) {
+        $genderFilter = '';
+    }
+
+    // Get current section filter from query parameter
+    $sectionFilter = $_GET['section_id'] ?? '';
+
     // Get enrolled students with pagination
-    $paginatedData = $controller->getEnrolledStudentsWithPagination($currentPage, 10, $statusFilter, $gradeLevelFilter);
+    $paginatedData = $controller->getEnrolledStudentsWithPagination($currentPage, 10, $statusFilter, $gradeLevelFilter, $genderFilter, $sectionFilter);
     $enrollments = $paginatedData['enrollments'];
     $pagination = $paginatedData['pagination'];
 } catch (Exception $e) {
@@ -36,8 +46,11 @@ try {
     $enrollments = [];
     $statusFilter = $statusFilter ?? 'Enrolled';
     $gradeLevelFilter = $gradeLevelFilter ?? '';
+    $genderFilter = $genderFilter ?? '';
+    $sectionFilter = $sectionFilter ?? '';
     $gradeLevels = $gradeLevels ?? [];
     $schoolYears = $schoolYears ?? [];
+    $allSections = $allSections ?? [];
     $pagination = [
         'currentPage' => 1,
         'itemsPerPage' => 10,
@@ -91,13 +104,21 @@ try {
         <div class="row mb-3 align-items-center">
             <div class="col-md-6">
                 <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search Students..." id="searchInput" data-status-filter="<?= htmlspecialchars($statusFilter) ?>" data-grade-filter="<?= htmlspecialchars($gradeLevelFilter) ?>">
+                    <input type="text" class="form-control" placeholder="Search Students..." id="searchInput" data-status-filter="<?= htmlspecialchars($statusFilter) ?>" data-grade-filter="<?= htmlspecialchars($gradeLevelFilter) ?>" data-gender-filter="<?= htmlspecialchars($genderFilter) ?>" data-section-filter="<?= htmlspecialchars($sectionFilter) ?>">
                 </div>
             </div>
-            <div class="col-md-6 text-end mt-2 mt-md-0">
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#enrollmentFormModal">
-                    <i class="bx bx-plus"></i> Enroll Student
-                </button>
+            <div class="col-md-6 mt-2 mt-md-0">
+                <div class="d-flex flex-wrap justify-content-md-end gap-2">
+                    <a href="<?= BASE_URL ?>/resources/views/registrar/enrollment-per-section.php" class="btn btn-outline-secondary">
+                        <i class="bx bx-list-ul"></i> Per Section
+                    </a>
+                    <a href="<?= BASE_URL ?>/resources/views/registrar/promote-students.php" class="btn btn-outline-primary">
+                        <i class="bx bx-up-arrow-alt"></i> Promote Students
+                    </a>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#enrollmentFormModal">
+                        <i class="bx bx-plus"></i> Enroll Student
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -111,24 +132,57 @@ try {
                         'Graduated' => 'Graduated',
                         'All' => 'All'
                     ];
+                    $tabQs = function ($tabStatus) use ($gradeLevelFilter, $genderFilter, $sectionFilter) {
+                        return '?status=' . urlencode($tabStatus)
+                            . '&grade_level=' . urlencode($gradeLevelFilter)
+                            . '&gender=' . urlencode($genderFilter)
+                            . '&section_id=' . urlencode($sectionFilter)
+                            . '&page=1';
+                    };
                 ?>
                 <?php foreach ($statusTabs as $tabStatus => $tabLabel): ?>
                     <li class="nav-item">
-                        <a class="nav-link <?= $statusFilter === $tabStatus ? 'active' : '' ?>" href="?status=<?= urlencode($tabStatus) ?>&grade_level=<?= urlencode($gradeLevelFilter) ?>&page=1">
+                        <a class="nav-link <?= $statusFilter === $tabStatus ? 'active' : '' ?>" href="<?= htmlspecialchars($tabQs($tabStatus)) ?>">
                             <?= htmlspecialchars($tabLabel) ?>
                         </a>
                     </li>
                 <?php endforeach; ?>
             </ul>
 
-            <select id="gradeLevelFilter" class="form-select form-select-sm" style="max-width: 200px;"
-                onchange="window.location.href = '?status=<?= urlencode($statusFilter) ?>&grade_level=' + encodeURIComponent(this.value) + '&page=1';">
-                <option value="">All Grade Levels</option>
-                <?php foreach ($gradeLevels as $gl): ?>
-                    <option value="<?= htmlspecialchars($gl) ?>" <?= $gradeLevelFilter === $gl ? 'selected' : '' ?>><?= htmlspecialchars($gl) ?></option>
-                <?php endforeach; ?>
-            </select>
+            <div class="d-flex gap-2 flex-wrap">
+                <select id="gradeLevelFilter" class="form-select form-select-sm" style="max-width: 200px;" onchange="applyEnrollmentFilters()">
+                    <option value="">All Grade Levels</option>
+                    <?php foreach ($gradeLevels as $gl): ?>
+                        <option value="<?= htmlspecialchars($gl) ?>" <?= $gradeLevelFilter === $gl ? 'selected' : '' ?>><?= htmlspecialchars($gl) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <select id="sectionFilterSelect" class="form-select form-select-sm" style="max-width: 220px;" onchange="applyEnrollmentFilters()">
+                    <option value="">All Sections</option>
+                    <?php foreach ($allSections as $sec): ?>
+                        <option value="<?= htmlspecialchars($sec['id']) ?>" <?= (string)$sectionFilter === (string)$sec['id'] ? 'selected' : '' ?>><?= htmlspecialchars($sec['section_name'] . ' (' . $sec['grade_level'] . ')') ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <select id="genderFilterSelect" class="form-select form-select-sm" style="max-width: 160px;" onchange="applyEnrollmentFilters()">
+                    <option value="">All Genders</option>
+                    <option value="Male" <?= $genderFilter === 'Male' ? 'selected' : '' ?>>Male</option>
+                    <option value="Female" <?= $genderFilter === 'Female' ? 'selected' : '' ?>>Female</option>
+                </select>
+            </div>
         </div>
+
+        <script>
+            function applyEnrollmentFilters() {
+                const status = <?= json_encode($statusFilter) ?>;
+                const gradeLevel = document.getElementById('gradeLevelFilter').value;
+                const sectionId = document.getElementById('sectionFilterSelect').value;
+                const gender = document.getElementById('genderFilterSelect').value;
+                window.location.href = '?status=' + encodeURIComponent(status)
+                    + '&grade_level=' + encodeURIComponent(gradeLevel)
+                    + '&section_id=' + encodeURIComponent(sectionId)
+                    + '&gender=' + encodeURIComponent(gender)
+                    + '&page=1';
+            }
+        </script>
 
         <div class="card">
             <h5 class="card-header">

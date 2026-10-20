@@ -42,9 +42,10 @@ require_once __DIR__ . '/../../helpers/csrf.php';
          * @param string $gradeLevel Filter by grade level, or '' for all
          * @param string|int $sectionId Filter by section, or '' for all
          * @param string $archivedFilter '0' = active only (default), '1' = archived only, 'all' = both
+         * @param string $gender 'Male' | 'Female', or '' for all
          * @return array Pagination data with students
          */
-        public function index($page = 1, $gradeLevel = '', $sectionId = '', $archivedFilter = '0'){
+        public function index($page = 1, $gradeLevel = '', $sectionId = '', $archivedFilter = '0', $gender = ''){
             // Ensure page is at least 1
             $page = max(1, intval($page));
 
@@ -52,13 +53,13 @@ require_once __DIR__ . '/../../helpers/csrf.php';
             $offset = ($page - 1) * $this->itemsPerPage;
 
             // Get paginated students
-            $students = $this->model->getPaginated($this->itemsPerPage, $offset, $gradeLevel, $sectionId, $archivedFilter);
+            $students = $this->model->getPaginated($this->itemsPerPage, $offset, $gradeLevel, $sectionId, $archivedFilter, $gender);
 
             // Add full names
             $studentsWithFullNames = StudentsService::addFullNames($students);
 
             // Get total count
-            $totalCount = $this->model->getTotalCount($gradeLevel, $sectionId, $archivedFilter);
+            $totalCount = $this->model->getTotalCount($gradeLevel, $sectionId, $archivedFilter, $gender);
             $totalPages = ceil($totalCount / $this->itemsPerPage);
 
             return [
@@ -295,8 +296,12 @@ require_once __DIR__ . '/../../helpers/csrf.php';
         if(!in_array($archivedFilter, ['0', '1', 'all'], true)){
             $archivedFilter = '0';
         }
+        $genderFilter = $_GET['gender'] ?? '';
+        if(!in_array($genderFilter, ['Male', 'Female'], true)){
+            $genderFilter = '';
+        }
         $filterOptions = $controller->getFilterOptions();
-        $paginationData = $controller->index($currentPage, $gradeLevelFilter, $sectionFilter, $archivedFilter);
+        $paginationData = $controller->index($currentPage, $gradeLevelFilter, $sectionFilter, $archivedFilter, $genderFilter);
         $students = $paginationData['students'];
         $pagination = [
             'currentPage' => $paginationData['currentPage'],

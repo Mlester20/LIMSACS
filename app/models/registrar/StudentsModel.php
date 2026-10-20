@@ -26,11 +26,12 @@ require_once __DIR__ . '/../Model.php';
          * @param string $gradeLevel Exact grade_level match, or '' for all
          * @param string|int $sectionId Exact section_id match, or '' for all
          * @param string $archivedFilter '0' = active only (default), '1' = archived only, 'all' = both
+         * @param string $gender 'Male' | 'Female', or '' for all
          * @return array Paginated student records
          */
-        public function getPaginated($limit = 10, $offset = 0, $gradeLevel = '', $sectionId = '', $archivedFilter = '0'){
+        public function getPaginated($limit = 10, $offset = 0, $gradeLevel = '', $sectionId = '', $archivedFilter = '0', $gender = ''){
             try{
-                [$where, $params, $types] = $this->buildStudentFilter($gradeLevel, $sectionId, $archivedFilter);
+                [$where, $params, $types] = $this->buildStudentFilter($gradeLevel, $sectionId, $archivedFilter, $gender);
 
                 $query = "
                     SELECT s.*, ah.grade_level AS current_grade_level, sec.section_name AS current_section_name, ah.enrollment_status AS current_enrollment_status
@@ -58,9 +59,9 @@ require_once __DIR__ . '/../Model.php';
          * Get total count of students, honoring the same filters as getPaginated().
          * @return int Total number of students
          */
-        public function getTotalCount($gradeLevel = '', $sectionId = '', $archivedFilter = '0'){
+        public function getTotalCount($gradeLevel = '', $sectionId = '', $archivedFilter = '0', $gender = ''){
             try{
-                [$where, $params, $types] = $this->buildStudentFilter($gradeLevel, $sectionId, $archivedFilter);
+                [$where, $params, $types] = $this->buildStudentFilter($gradeLevel, $sectionId, $archivedFilter, $gender);
 
                 $query = "
                     SELECT COUNT(*) as total
@@ -88,7 +89,7 @@ require_once __DIR__ . '/../Model.php';
         /**
          * @return array{0:string,1:array,2:string} [WHERE clause, params, bind types]
          */
-        private function buildStudentFilter($gradeLevel, $sectionId, $archivedFilter = '0'){
+        private function buildStudentFilter($gradeLevel, $sectionId, $archivedFilter = '0', $gender = ''){
             $conditions = [];
             $params = [];
             $types = '';
@@ -106,6 +107,11 @@ require_once __DIR__ . '/../Model.php';
                 $conditions[] = "s.archived = ?";
                 $params[] = (int)$archivedFilter;
                 $types .= 'i';
+            }
+            if($gender === 'Male' || $gender === 'Female'){
+                $conditions[] = "s.gender = ?";
+                $params[] = $gender;
+                $types .= 's';
             }
             $where = $conditions ? "WHERE " . implode(' AND ', $conditions) : "";
             return [$where, $params, $types];

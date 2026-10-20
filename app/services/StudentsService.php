@@ -70,8 +70,9 @@ require_once __DIR__ . '/../models/Model.php';
          * @param string $gradeLevel Optional exact grade_level filter, '' for all
          * @param string|int $sectionId Optional exact section_id filter, '' for all
          * @param string $archivedFilter '0' = active only (default), '1' = archived only, 'all' = both
+         * @param string $gender 'Male' | 'Female', or '' for all
         */
-        public function searchStudents($keyword, $gradeLevel = '', $sectionId = '', $archivedFilter = '0'){
+        public function searchStudents($keyword, $gradeLevel = '', $sectionId = '', $archivedFilter = '0', $gender = ''){
             $keyword = trim($keyword);
 
             if(empty($keyword) || strlen($keyword) < 2){
@@ -98,6 +99,11 @@ require_once __DIR__ . '/../models/Model.php';
                 $extraConditions .= " AND s.archived = ?";
                 $extraParams[] = (int)$archivedFilter;
                 $extraTypes .= 'i';
+            }
+            if($gender === 'Male' || $gender === 'Female'){
+                $extraConditions .= " AND s.gender = ?";
+                $extraParams[] = $gender;
+                $extraTypes .= 's';
             }
 
             $query = "SELECT

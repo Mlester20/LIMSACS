@@ -10,6 +10,11 @@ class EnrollmentService extends Model {
     // grade level before they're eligible to be marked as Graduated.
     const TERMINAL_GRADE_LEVEL = 'Grade 6';
 
+    // Same ordering as SectionsController::GRADE_LEVELS -- duplicated here
+    // (rather than requiring that controller from this service) so
+    // nextGradeLevel() can compute where a bulk-promoted section goes next.
+    const GRADE_LEVELS = ['Kindergarten', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6'];
+
     protected $academicHistory = 'academic_history';
     protected $students = 'students';
     protected $schoolYear = 'school_year';
@@ -75,6 +80,52 @@ class EnrollmentService extends Model {
             error_log("Enroll student error: " . $e->getMessage());
             return ['success' => false, 'message' => 'An error occurred during enrollment.'];
         }
+    }
+
+    /**
+     * The grade level right after $gradeLevel, or null if it's already the
+     * last one (Grade 6 -- promoted past this point means Graduated, a
+     * separate flow from grade-level promotion).
+     * @param string $gradeLevel
+     * @return string|null
+     */
+    public static function nextGradeLevel($gradeLevel) {
+        $index = array_search($gradeLevel, self::GRADE_LEVELS, true);
+        if ($index === false || $index + 1 >= count(self::GRADE_LEVELS)) {
+            return null;
+        }
+        return self::GRADE_LEVELS[$index + 1];
+    }
+
+    /**
+     * Bulk-promote a list of students into a target section (typically the
+     * next grade level, in the newly active school year). Reuses
+     * enrollStudent() per student, so each one individually gets the same
+     * duplicate-enrollment and section-capacity checks a single enrollment
+     * would -- a student already enrolled for that school year, or a section
+     * that fills up partway through the batch, is skipped rather than
+     * breaking the whole batch.
+     * @param int[] $studentIds
+     * @param int $school_year_id
+     * @param string $grade_level
+     * @param int $section_id
+     * @param int|null $enrolled_by
+     * @return array{promoted: int[], skipped: array} skipped entries: ['student_id'=>int, 'reason'=>string]
+     */
+    public function promoteStudents($studentIds, $school_year_id, $grade_level, $section_id, $enrolled_by) {
+        $promoted = [];
+        $skipped = [];
+
+        foreach ($studentIds as $studentId) {
+            $result = $this->enrollStudent($studentId, $school_year_id, $grade_level, $section_id, $enrolled_by);
+            if ($result['success']) {
+                $promoted[] = (int) $studentId;
+            } else {
+                $skipped[] = ['student_id' => (int) $studentId, 'reason' => $result['message']];
+            }
+        }
+
+        return ['promoted' => $promoted, 'skipped' => $skipped];
     }
 
     /**
@@ -220,9 +271,12 @@ class EnrollmentService extends Model {
      * @param int $page Current page number (default: 1)
      * @param int $itemsPerPage Items per page (default: 10)
      * @param string $status Enrollment status to filter by, or 'All' for every status
+     * @param string $gradeLevel Exact grade_level match, or '' for all
+     * @param string $gender 'Male' | 'Female', or '' for all
+     * @param string|int $sectionId Exact section_id match, or '' for all
      * @return array ['enrollments' => array, 'pagination' => array]
      */
-    public function getEnrolledStudentsWithPagination($page = 1, $itemsPerPage = 10, $status = 'Enrolled', $gradeLevel = '') {
+    public function getEnrolledStudentsWithPagination($page = 1, $itemsPerPage = 10, $status = 'Enrolled', $gradeLevel = '', $gender = '', $sectionId = '') {
         try {
             $page = max(1, (int)$page);
             $itemsPerPage = max(1, (int)$itemsPerPage);
@@ -240,6 +294,16 @@ class EnrollmentService extends Model {
                 $conditions[] = "ah.grade_level = ?";
                 $params[] = $gradeLevel;
                 $types .= 's';
+            }
+            if ($gender === 'Male' || $gender === 'Female') {
+                $conditions[] = "s.gender = ?";
+                $params[] = $gender;
+                $types .= 's';
+            }
+            if ($sectionId !== '') {
+                $conditions[] = "ah.section_id = ?";
+                $params[] = $sectionId;
+                $types .= 'i';
             }
             $where = $conditions ? "WHERE " . implode(' AND ', $conditions) : "";
 
@@ -317,9 +381,12 @@ class EnrollmentService extends Model {
      * @param int $page
      * @param int $itemsPerPage
      * @param string $status Enrollment status to filter by, or 'All' for every status
+     * @param string $gradeLevel Exact grade_level match, or '' for all
+     * @param string $gender 'Male' | 'Female', or '' for all
+     * @param string|int $sectionId Exact section_id match, or '' for all
      * @return array ['enrollments' => array, 'pagination' => array]
      */
-    public function searchEnrolledStudents($keyword, $page = 1, $itemsPerPage = 10, $status = 'Enrolled', $gradeLevel = '') {
+    public function searchEnrolledStudents($keyword, $page = 1, $itemsPerPage = 10, $status = 'Enrolled', $gradeLevel = '', $gender = '', $sectionId = '') {
         try {
             $page = max(1, (int)$page);
             $itemsPerPage = max(1, (int)$itemsPerPage);
@@ -338,6 +405,16 @@ class EnrollmentService extends Model {
                 $extraConditions .= " AND ah.grade_level = ?";
                 $extraParams[] = $gradeLevel;
                 $extraTypes .= 's';
+            }
+            if ($gender === 'Male' || $gender === 'Female') {
+                $extraConditions .= " AND s.gender = ?";
+                $extraParams[] = $gender;
+                $extraTypes .= 's';
+            }
+            if ($sectionId !== '') {
+                $extraConditions .= " AND ah.section_id = ?";
+                $extraParams[] = $sectionId;
+                $extraTypes .= 'i';
             }
 
             // Total count for pagination
@@ -405,6 +482,78 @@ class EnrollmentService extends Model {
         } catch (Exception $e) {
             error_log("Search enrolled students error: " . $e->getMessage());
             return ['enrollments' => [], 'pagination' => []];
+        }
+    }
+
+    /**
+     * All matching enrollments (no pagination), ordered by grade level then
+     * section, so the caller can group rows under section headers -- the
+     * "per section" printable report.
+     * @param string $status Enrollment status to filter by, or 'All' for every status
+     * @param string $gradeLevel Exact grade_level match, or '' for all
+     * @param string $gender 'Male' | 'Female', or '' for all
+     * @param string|int $sectionId Exact section_id match, or '' for all
+     * @return array
+     */
+    public function getEnrolledGroupedBySection($status = 'Enrolled', $gradeLevel = '', $gender = '', $sectionId = '') {
+        try {
+            $conditions = [];
+            $params = [];
+            $types = '';
+            if ($status !== 'All') {
+                $conditions[] = "ah.enrollment_status = ?";
+                $params[] = $status;
+                $types .= 's';
+            }
+            if ($gradeLevel !== '') {
+                $conditions[] = "ah.grade_level = ?";
+                $params[] = $gradeLevel;
+                $types .= 's';
+            }
+            if ($gender === 'Male' || $gender === 'Female') {
+                $conditions[] = "s.gender = ?";
+                $params[] = $gender;
+                $types .= 's';
+            }
+            if ($sectionId !== '') {
+                $conditions[] = "ah.section_id = ?";
+                $params[] = $sectionId;
+                $types .= 'i';
+            }
+            $where = $conditions ? "WHERE " . implode(' AND ', $conditions) : "";
+
+            $query = "
+                SELECT
+                    ah.id as enrollment_id,
+                    s.id as student_id,
+                    s.first_name,
+                    s.last_name,
+                    s.lrn,
+                    s.gender,
+                    ah.school_year_id,
+                    sy.school_year,
+                    ah.grade_level,
+                    ah.section_id,
+                    sec.section_name,
+                    adv.full_name as adviser_name,
+                    ah.enrollment_status
+                FROM {$this->academicHistory} ah
+                JOIN {$this->students} s ON ah.student_id = s.id
+                JOIN {$this->schoolYear} sy ON ah.school_year_id = sy.id
+                JOIN {$this->sections} sec ON ah.section_id = sec.id
+                LEFT JOIN users adv ON sec.adviser_id = adv.id
+                {$where}
+                ORDER BY ah.grade_level ASC, sec.section_name ASC, s.last_name ASC, s.first_name ASC
+            ";
+            $stmt = $this->con->prepare($query);
+            if ($types !== '') {
+                $stmt->bind_param($types, ...$params);
+            }
+            $stmt->execute();
+            return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        } catch (Exception $e) {
+            error_log("Get enrolled grouped by section error: " . $e->getMessage());
+            return [];
         }
     }
 }

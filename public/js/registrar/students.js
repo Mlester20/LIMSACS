@@ -537,14 +537,15 @@ async function searchStudents(keyword){
             tableBody.innerHTML = '<tr><td colspan="10" class="text-center"><span class="spinner-border spinner-border-sm me-2"></span>Searching...</td></tr>';
         }
 
-        //build  api url with absolute path, preserving the active Grade Level/Section/Archived filter
+        //build  api url with absolute path, preserving the active Grade Level/Section/Archived/Gender filter
         const searchInputEl = document.getElementById('searchInput');
         const gradeFilter = (searchInputEl && searchInputEl.dataset.gradeFilter) || '';
         const sectionFilter = (searchInputEl && searchInputEl.dataset.sectionFilter) || '';
         const archivedFilter = (searchInputEl && searchInputEl.dataset.archivedFilter) || '0';
+        const genderFilter = (searchInputEl && searchInputEl.dataset.genderFilter) || '';
         const apiUrl = getAppBaseUrl() + '/app/api/registrar/search-students.php?q=' + encodeURIComponent(keyword.trim())
             + '&grade_level=' + encodeURIComponent(gradeFilter) + '&section_id=' + encodeURIComponent(sectionFilter)
-            + '&archived=' + encodeURIComponent(archivedFilter);
+            + '&archived=' + encodeURIComponent(archivedFilter) + '&gender=' + encodeURIComponent(genderFilter);
 
         const response = await fetch(apiUrl, {
             method: 'GET', 

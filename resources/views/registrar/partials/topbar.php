@@ -6,7 +6,12 @@
           </a>
         </div>
         <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-          
+          <div class="navbar-nav align-items-center">
+            <div class="nav-item d-flex align-items-center">
+              <i class="bx bx-file fs-4 lh-0 me-2 text-muted"></i>
+              <span class="text-muted small fw-semibold">LEARNER'S INFORMATION MANAGEMENT SYSTEM OF AURORA CENTRAL SCHOOL</span>
+            </div>
+          </div>
           <ul class="navbar-nav flex-row align-items-center ms-auto">
             <li class="nav-item navbar-dropdown dropdown-user dropdown">
               <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">

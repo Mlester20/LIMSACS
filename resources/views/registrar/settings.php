@@ -5,9 +5,10 @@ require_once __DIR__ . '/../../../app/middleware/Auth.php';
 require_once __DIR__ . '/../../../app/helpers/flashMessage.php';
 require_once __DIR__ . '/../../../app/helpers/csrf.php';
 require_once __DIR__ . '/../../../app/models/UpdateProfileModel.php';
+require_once __DIR__ . '/../../../app/models/SchoolSettingsModel.php';
 require_once __DIR__ . '/../../../database/config/config.php';
 
-AuthRole::allowOnly(['registrar']); 
+AuthRole::allowOnly(['registrar']);
 
 // Get user profile data
 $updateProfileModel = new UpdateProfileModel($con);
@@ -15,6 +16,10 @@ $userProfile = $updateProfileModel->getUserById($_SESSION['id']);
 
 // Format the Member Since date
 $memberSince = $userProfile['created_at'] ? date('M d, Y', strtotime($userProfile['created_at'])) : 'Unknown';
+
+// Who signs official printed/exported reports (e.g. Graduates Master List)
+$schoolSettings = (new SchoolSettingsModel($con))->getAll();
+$e = fn($v) => htmlspecialchars((string) ($v ?? ''), ENT_QUOTES, 'UTF-8');
 ?>
 
 <!DOCTYPE html>
@@ -187,6 +192,43 @@ $memberSince = $userProfile['created_at'] ? date('M d, Y', strtotime($userProfil
                     </div>
                     </form>
                     <!-- /Account -->
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mb-4">
+                    <h5 class="card-header">Report Signatories</h5>
+                    <div class="card-body">
+                        <p class="text-muted small">
+                            Used on official printed/exported reports (e.g. the Graduates Master List) as the signature block. Leave the name blank to show just a blank signature line.
+                        </p>
+                        <form action="<?= BASE_URL ?>/app/controllers/registrar/SchoolSettingsController.php" method="POST">
+                            <?php echo Csrf::field(); ?>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="registrar_name" class="form-label">Registrar Name</label>
+                                    <input type="text" class="form-control" id="registrar_name" name="registrar_name" value="<?= $e($schoolSettings['registrar_name'] ?? '') ?>" placeholder="e.g., Juan Dela Cruz">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="registrar_title" class="form-label">Registrar Title</label>
+                                    <input type="text" class="form-control" id="registrar_title" name="registrar_title" value="<?= $e($schoolSettings['registrar_title'] ?? 'Registrar') ?>" placeholder="Registrar">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="principal_name" class="form-label">Principal Name</label>
+                                    <input type="text" class="form-control" id="principal_name" name="principal_name" value="<?= $e($schoolSettings['principal_name'] ?? '') ?>" placeholder="e.g., Maria Santos">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="principal_title" class="form-label">Principal Title</label>
+                                    <input type="text" class="form-control" id="principal_title" name="principal_title" value="<?= $e($schoolSettings['principal_title'] ?? 'School Principal') ?>" placeholder="School Principal">
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-primary" name="update_signatories">Save Signatories</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

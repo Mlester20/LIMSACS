@@ -32,8 +32,9 @@ header('Content-Type: application/json');
         $gradeLevel = $_GET['grade_level'] ?? '';
         $sectionId = $_GET['section_id'] ?? '';
         $archivedFilter = $_GET['archived'] ?? '0';
+        $gender = in_array($_GET['gender'] ?? '', ['Male', 'Female'], true) ? $_GET['gender'] : '';
         $studentService = new StudentsService($con);
-        $results = $studentService->searchStudents($keyword, $gradeLevel, $sectionId, $archivedFilter);
+        $results = $studentService->searchStudents($keyword, $gradeLevel, $sectionId, $archivedFilter, $gender);
 
         echo json_encode([
             "success" => true,

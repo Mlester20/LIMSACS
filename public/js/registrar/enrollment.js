@@ -261,7 +261,17 @@ const enrollmentController = {
         return (input && input.dataset.gradeFilter) || '';
     },
 
-    searchEnrolled: function (keyword, page = 1, status = null, gradeLevel = null) {
+    getCurrentGenderFilter: function () {
+        const input = document.getElementById('searchInput');
+        return (input && input.dataset.genderFilter) || '';
+    },
+
+    getCurrentSectionFilter: function () {
+        const input = document.getElementById('searchInput');
+        return (input && input.dataset.sectionFilter) || '';
+    },
+
+    searchEnrolled: function (keyword, page = 1, status = null, gradeLevel = null, gender = null, sectionId = null) {
         const tbody = document.querySelector('.table tbody');
         if (!tbody) return;
 
@@ -270,6 +280,12 @@ const enrollmentController = {
         }
         if (gradeLevel === null) {
             gradeLevel = enrollmentController.getCurrentGradeFilter();
+        }
+        if (gender === null) {
+            gender = enrollmentController.getCurrentGenderFilter();
+        }
+        if (sectionId === null) {
+            sectionId = enrollmentController.getCurrentSectionFilter();
         }
 
         // Show loading state
@@ -284,7 +300,9 @@ const enrollmentController = {
                 page: page,
                 items_per_page: 10,
                 status: status,
-                grade_level: gradeLevel
+                grade_level: gradeLevel,
+                gender: gender,
+                section_id: sectionId
             },
             dataType: 'json',
             success: function (data) {
@@ -316,7 +334,7 @@ const enrollmentController = {
                 tbody.innerHTML = html;
 
                 // Update pagination UI
-                enrollmentController.updateSearchPagination(keyword, pagination, status, gradeLevel);
+                enrollmentController.updateSearchPagination(keyword, pagination, status, gradeLevel, gender, sectionId);
             },
             error: function () {
                 tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger py-3">Search error. Please try again.</td></tr>';
@@ -324,16 +342,19 @@ const enrollmentController = {
         });
     },
 
-    updateSearchPagination: function (keyword, pagination, status, gradeLevel) {
+    updateSearchPagination: function (keyword, pagination, status, gradeLevel, gender, sectionId) {
         const paginationEl = document.querySelector('.pagination');
         if (!paginationEl) return;
 
         status = status || enrollmentController.getCurrentStatusFilter();
         gradeLevel = gradeLevel === undefined ? enrollmentController.getCurrentGradeFilter() : gradeLevel;
+        gender = gender === undefined ? enrollmentController.getCurrentGenderFilter() : gender;
+        sectionId = sectionId === undefined ? enrollmentController.getCurrentSectionFilter() : sectionId;
 
         if (!keyword || keyword.trim() === '') {
             // Reload the page to restore PHP pagination when search is cleared
-            window.location.href = '?status=' + encodeURIComponent(status) + '&grade_level=' + encodeURIComponent(gradeLevel) + '&page=1';
+            window.location.href = '?status=' + encodeURIComponent(status) + '&grade_level=' + encodeURIComponent(gradeLevel)
+                + '&gender=' + encodeURIComponent(gender) + '&section_id=' + encodeURIComponent(sectionId) + '&page=1';
             return;
         }
 
@@ -341,7 +362,7 @@ const enrollmentController = {
 
         // Previous
         html += pagination.hasPrevPage
-            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage - 1}, '${status}', '${gradeLevel}'); return false;">Previous</a></li>`
+            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage - 1}, '${status}', '${gradeLevel}', '${gender}', '${sectionId}'); return false;">Previous</a></li>`
             : `<li class="page-item disabled"><span class="page-link">Previous</span></li>`;
 
         // Page numbers
@@ -351,12 +372,12 @@ const enrollmentController = {
         for (let i = start; i <= end; i++) {
             html += i === pagination.currentPage
                 ? `<li class="page-item active"><span class="page-link">${i}</span></li>`
-                : `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${i}, '${status}', '${gradeLevel}'); return false;">${i}</a></li>`;
+                : `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${i}, '${status}', '${gradeLevel}', '${gender}', '${sectionId}'); return false;">${i}</a></li>`;
         }
 
         // Next
         html += pagination.hasNextPage
-            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage + 1}, '${status}', '${gradeLevel}'); return false;">Next</a></li>`
+            ? `<li class="page-item"><a class="page-link" href="#" onclick="enrollmentController.searchEnrolled('${keyword}', ${pagination.currentPage + 1}, '${status}', '${gradeLevel}', '${gender}', '${sectionId}'); return false;">Next</a></li>`
             : `<li class="page-item disabled"><span class="page-link">Next</span></li>`;
 
         paginationEl.innerHTML = html;

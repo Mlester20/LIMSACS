@@ -191,6 +191,51 @@ require_once __DIR__ . '/../Model.php';
             }
         }
 
+        /**
+         * Same records/filters as getAllForExport(), but ordered by grade level
+         * then section so the caller can group rows under section headers (the
+         * "per section" printable report).
+         * @param array $filters
+         * @return array
+         */
+        public function getAllForExportBySection($filters = []){
+            try{
+                [$where, $params, $types] = $this->buildFilters($filters);
+
+                $query = "SELECT
+                        s.lrn,
+                        CONCAT(s.first_name, ' ', s.last_name) AS student_full_name,
+                        s.gender,
+                        ah.grade_level,
+                        ah.enrollment_status,
+                        ah.section_id,
+                        sec.section_name,
+                        sy.school_year,
+                        g.graduation_date,
+                        u.full_name AS registrar_name,
+                        adv.full_name AS adviser_name
+                    FROM {$this->academic_history} ah
+                    JOIN {$this->students} s ON ah.student_id = s.id
+                    LEFT JOIN {$this->graduates} g ON g.academic_history_id = ah.id
+                    LEFT JOIN {$this->sections} sec ON ah.section_id = sec.id
+                    LEFT JOIN {$this->school_year} sy ON ah.school_year_id = sy.id
+                    LEFT JOIN {$this->users} u ON g.recorded_by = u.id
+                    LEFT JOIN {$this->users} adv ON sec.adviser_id = adv.id
+                    {$where}
+                    ORDER BY ah.grade_level ASC, sec.section_name ASC, s.last_name ASC, s.first_name ASC
+                ";
+                $stmt = $this->con->prepare($query);
+                if($types !== ''){
+                    $stmt->bind_param($types, ...$params);
+                }
+                $stmt->execute();
+                return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            }catch(Exception $e){
+                error_log($e->getMessage());
+                return [];
+            }
+        }
+
         private function buildFilters($filters){
             $conditions = [];
             $params = [];
@@ -212,13 +257,6 @@ require_once __DIR__ . '/../Model.php';
                 $types .= 'i';
             }
 
-            $gradeLevel = $filters['grade_level'] ?? '';
-            if($gradeLevel !== ''){
-                $conditions[] = "ah.grade_level = ?";
-                $params[] = $gradeLevel;
-                $types .= 's';
-            }
-
             $sectionId = $filters['section_id'] ?? '';
             if($sectionId !== ''){
                 $conditions[] = "ah.section_id = ?";
@@ -233,14 +271,11 @@ require_once __DIR__ . '/../Model.php';
                 $types .= 's';
             }
 
-            $status = $filters['status'] ?? '';
-            if($status !== ''){
-                $conditions[] = "ah.enrollment_status = ?";
-                $params[] = $status;
-                $types .= 's';
-            }else{
-                $conditions[] = "ah.enrollment_status IN ('Graduated', 'Transferred', 'Dropped')";
-            }
+            // This is the Graduates module -- it only ever shows actual graduates,
+            // never Transferred/Dropped (those belong to the Enrollment module's
+            // own status tabs) and never a grade level other than the terminal one,
+            // since a student can't be Graduated before reaching it.
+            $conditions[] = "ah.enrollment_status = 'Graduated'";
 
             $where = $conditions ? ' WHERE ' . implode(' AND ', $conditions) : '';
             return [$where, $params, $types];
