@@ -635,7 +635,7 @@ $jsonOpts = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP;
 
             let rows = '';
             response.data.forEach((doc, i) => {
-              const studentName = `${doc.student_first_name || ''} ${doc.student_last_name || ''}`.trim();
+              const studentName = `${doc.student_last_name || ''}, ${doc.student_first_name || ''}`.trim();
               const uploadedAt = doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—';
               rows += `
                 <tr>

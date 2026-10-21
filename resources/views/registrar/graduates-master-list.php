@@ -103,6 +103,10 @@ $exportQs = function ($type) use ($filters) {
         </div>
     <?php endif; ?>
 
+    <div class="text-left">
+        <a href="graduates.php" class="btn btn-md btn-success">Back to Dashboard</a>
+    </div>
+
     <div class="card mt-4">
         <h5 class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
             <?php if ($print_mode): ?>

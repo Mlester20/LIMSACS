@@ -99,7 +99,7 @@ $status_options = ['Submitted', 'Pending', 'Verified', 'Rejected'];
                         <?php [$statusBadgeClass, $statusIcon] = $statusMeta($document['status']); ?>
                         <tr>
                             <td><?= $rowNumber++ ?></td>
-                            <td><?= htmlspecialchars(trim(($document['student_first_name'] ?? '') . ' ' . ($document['student_last_name'] ?? ''))) ?></td>
+                            <td><?= htmlspecialchars(trim(($document['student_last_name'] ?? '') . ', ' . ($document['student_first_name'] ?? ''), ', ')) ?></td>
                             <td><?= htmlspecialchars($document['document_type_name'] ?? '') ?></td>
                             <td>
                                 <span class="badge <?= $statusBadgeClass ?>">

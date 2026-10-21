@@ -136,7 +136,7 @@ require_once __DIR__ . '/../models/Model.php';
                 s.middle_name LIKE ? OR
                 s.last_name LIKE ?)
                 {$extraConditions}
-                ORDER BY s.first_name ASC, s.last_name ASC
+                ORDER BY s.last_name ASC, s.first_name ASC
             ";
 
             $stmt = null;
@@ -197,7 +197,7 @@ require_once __DIR__ . '/../models/Model.php';
                 AND NOT EXISTS (
                     SELECT 1 FROM parents_guardians pg WHERE pg.student_id = s.id
                 )
-                ORDER BY s.first_name ASC, s.last_name ASC
+                ORDER BY s.last_name ASC, s.first_name ASC
                 LIMIT 10
             ";
 

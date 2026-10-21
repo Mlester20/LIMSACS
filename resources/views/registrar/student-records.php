@@ -1,8 +1,11 @@
 <?php
 require_once __DIR__ . '/../../../app/controllers/registrar/StudentsController.php';
+require_once __DIR__ . '/../../../app/models/SchoolSettingsModel.php';
 require_once __DIR__ . '/../../../app/helpers/flashMessage.php';
 require_once __DIR__ . '/../../../app/middleware/Auth.php';
-AuthRole::allowOnly(['registrar']); 
+AuthRole::allowOnly(['registrar']);
+
+$schoolSettings = (new SchoolSettingsModel($con))->getAll();
 ?>
 
 <!DOCTYPE html>
@@ -34,14 +37,28 @@ AuthRole::allowOnly(['registrar']);
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/assets/vendor/libs/apex-charts/apex-charts.css" />
     <script src="<?= BASE_URL ?>/public/assets/vendor/js/helpers.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/js/config.js"></script>
+    <?php if ($printMode): ?>
+    <style>
+      .layout-menu, .layout-navbar, .content-footer, .no-print { display: none !important; }
+      .layout-page { margin-left: 0 !important; }
+    </style>
+    <?php endif; ?>
 </head>
 <body>
 
-    <?php FlashMessage::showFlash(); ?>
+    <?php if (!$printMode): ?>
+        <?php FlashMessage::showFlash(); ?>
+        <?php require_once __DIR__ . '/partials/sidebar.php'; ?>
+        <?php require_once __DIR__ . '/partials/topbar.php'; ?>
+    <?php else: ?>
+        <div class="text-center mb-3">
+            <img src="<?= BASE_URL ?>/public/assets/img/favicon/logo.png" alt="School Logo" style="width:70px;height:70px;">
+            <h5 class="fw-bold mb-0 mt-1">Aurora Central School</h5>
+            <p class="text-muted small mb-0">Aurora, Isabela</p>
+        </div>
+    <?php endif; ?>
 
-    <?php require_once __DIR__ . '/partials/sidebar.php'; ?>
-    <?php require_once __DIR__ . '/partials/topbar.php'; ?>
-
+    <?php if (!$printMode): ?>
     <div class="row mb-3 align-items-center">
       <div class="col-md-6">
         <div class="input-group">
@@ -49,8 +66,13 @@ AuthRole::allowOnly(['registrar']);
         </div>
       </div>
 
-      <div class="col-md-6 text-end mt-2 mt-md-0">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#enrollStudentModal">Add Student Information</button>
+      <div class="col-md-6 mt-2 mt-md-0">
+        <div class="d-flex flex-wrap justify-content-md-end gap-2">
+          <a href="?grade_level=<?= urlencode($gradeLevelFilter) ?>&section_id=<?= urlencode($sectionFilter) ?>&archived=<?= urlencode($archivedFilter) ?>&gender=<?= urlencode($genderFilter) ?>&print=1" target="_blank" class="btn btn-outline-secondary">
+            <i class="bx bx-printer"></i> Print
+          </a>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#enrollStudentModal">Add Student Information</button>
+        </div>
       </div>
     </div>
 
@@ -91,6 +113,7 @@ AuthRole::allowOnly(['registrar']);
         </div>
       <?php endif; ?>
     </div>
+    <?php endif; ?>
 
     <script>
       function applyStudentFilters() {
@@ -229,15 +252,17 @@ AuthRole::allowOnly(['registrar']);
     <div class="card">
         <h5 class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
             <span>Student Information</span>
-            <?php if ($archivedFilter !== '1'): ?>
-                <button type="submit" form="bulkArchiveForm" name="archive_students" class="btn btn-sm btn-outline-warning" id="archiveSelectedBtn" disabled>
-                    <i class="bx bx-archive-in me-1"></i>Archive Selected
-                </button>
-            <?php endif; ?>
-            <?php if ($archivedFilter !== '0'): ?>
-                <button type="submit" form="bulkArchiveForm" name="unarchive_students" class="btn btn-sm btn-outline-success" id="unarchiveSelectedBtn" disabled>
-                    <i class="bx bx-archive-out me-1"></i>Unarchive Selected
-                </button>
+            <?php if (!$printMode): ?>
+                <?php if ($archivedFilter !== '1'): ?>
+                    <button type="submit" form="bulkArchiveForm" name="archive_students" class="btn btn-sm btn-outline-warning" id="archiveSelectedBtn" disabled>
+                        <i class="bx bx-archive-in me-1"></i>Archive Selected
+                    </button>
+                <?php endif; ?>
+                <?php if ($archivedFilter !== '0'): ?>
+                    <button type="submit" form="bulkArchiveForm" name="unarchive_students" class="btn btn-sm btn-outline-success" id="unarchiveSelectedBtn" disabled>
+                        <i class="bx bx-archive-out me-1"></i>Unarchive Selected
+                    </button>
+                <?php endif; ?>
             <?php endif; ?>
         </h5>
         <form id="bulkArchiveForm" method="POST" action="<?= BASE_URL ?>/app/controllers/registrar/StudentsController.php" onsubmit="return confirmBulkArchive(event)">
@@ -247,7 +272,7 @@ AuthRole::allowOnly(['registrar']);
             <table class="table">
                 <thead>
                     <tr>
-                        <th><input type="checkbox" class="form-check-input" id="selectAllStudents"></th>
+                        <?php if (!$printMode): ?><th><input type="checkbox" class="form-check-input" id="selectAllStudents"></th><?php endif; ?>
                         <th>#</th>
                         <th>LRN</th>
                         <th>Full Name</th>
@@ -256,17 +281,17 @@ AuthRole::allowOnly(['registrar']);
                         <th>Grade Level</th>
                         <th>Section</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <?php if (!$printMode): ?><th class="no-print">Actions</th><?php endif; ?>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if(!empty($students)): ?>
                         <?php foreach($students as $index => $student): ?>
                             <tr>
-                                <td><input type="checkbox" class="form-check-input student-row-checkbox" name="student_ids[]" value="<?php echo (int) $student['id']; ?>"></td>
+                                <?php if (!$printMode): ?><td><input type="checkbox" class="form-check-input student-row-checkbox" name="student_ids[]" value="<?php echo (int) $student['id']; ?>"></td><?php endif; ?>
                                 <td><?php echo $pagination['itemsPerPage'] * ($pagination['currentPage'] - 1) + ($index + 1); ?></td>
                                 <td><?php echo htmlspecialchars($student['lrn'] ?? 'N/A'); ?></td>
-                                <td><?php echo htmlspecialchars($student['full_name'] ?? 'N/A'); ?></td>
+                                <td><?php echo htmlspecialchars(isset($student['last_name'], $student['first_name']) ? $student['last_name'] . ', ' . $student['first_name'] : ($student['full_name'] ?? 'N/A')); ?></td>
                                 <td><?php echo htmlspecialchars($student['gender'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($student['age'] ?? 'N/A'); ?></td>
                                 <td><?php echo htmlspecialchars($student['current_grade_level'] ?? 'N/A'); ?></td>
@@ -281,7 +306,8 @@ AuthRole::allowOnly(['registrar']);
                                         <span class="badge bg-label-dark">Archived</span>
                                     <?php endif; ?>
                                 </td>
-                                <td>
+                                <?php if (!$printMode): ?>
+                                <td class="no-print">
                                     <?php
                                         $deleteConfirmName = addslashes(htmlspecialchars($student['full_name'] ?? 'this student', ENT_QUOTES));
                                         $deleteConfirmLrn  = addslashes(htmlspecialchars($student['lrn'] ?? 'N/A', ENT_QUOTES));
@@ -310,11 +336,12 @@ AuthRole::allowOnly(['registrar']);
                                         </ul>
                                     </div>
                                 </td>
+                                <?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="10" class="text-center">No students found</td>
+                            <td colspan="<?= $printMode ? 8 : 10 ?>" class="text-center">No students found</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -322,17 +349,43 @@ AuthRole::allowOnly(['registrar']);
         </div>
         </form>
 
+        <?php if ($printMode): ?>
+            <?php
+                $registrarSigName = trim($schoolSettings['registrar_name'] ?? '');
+                $principalSigName = trim($schoolSettings['principal_name'] ?? '');
+            ?>
+            <div class="row mt-5 mb-3 px-3">
+                <div class="col-6 text-center">
+                    <p class="mb-5 text-start fw-semibold">Prepared by:</p>
+                    <p class="mb-0" style="border-top:1px solid #333; display:inline-block; min-width:220px; padding-top:4px; font-weight:600;">
+                        <?= $registrarSigName !== '' ? htmlspecialchars($registrarSigName) : '&nbsp;' ?>
+                    </p>
+                    <p class="text-muted small mb-0 fst-italic">Signature over Printed Name</p>
+                    <p class="text-muted small mb-0"><?= htmlspecialchars($schoolSettings['registrar_title'] ?? 'Registrar') ?></p>
+                </div>
+                <div class="col-6 text-center">
+                    <p class="mb-5 text-start fw-semibold">Checked by:</p>
+                    <p class="mb-0" style="border-top:1px solid #333; display:inline-block; min-width:220px; padding-top:4px; font-weight:600;">
+                        <?= $principalSigName !== '' ? htmlspecialchars($principalSigName) : '&nbsp;' ?>
+                    </p>
+                    <p class="text-muted small mb-0 fst-italic">Signature over Printed Name</p>
+                    <p class="text-muted small mb-0"><?= htmlspecialchars($schoolSettings['principal_title'] ?? 'School Principal') ?></p>
+                </div>
+            </div>
+        <?php endif; ?>
+
         <!-- Pagination -->
-        <div class="card-footer">
+        <?php if (!$printMode): ?>
+        <div class="card-footer no-print">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <small class="text-muted">
-                        Showing <?php echo (($pagination['currentPage'] - 1) * $pagination['itemsPerPage']) + 1; ?> 
+                        Showing <?php echo (($pagination['currentPage'] - 1) * $pagination['itemsPerPage']) + 1; ?>
                         to <?php echo min($pagination['currentPage'] * $pagination['itemsPerPage'], $pagination['totalRecords']); ?>
                         of <?php echo $pagination['totalRecords']; ?> records
                     </small>
                 </div>
-                
+
                 <nav>
                     <ul class="pagination pagination-sm m-0">
                         <!-- Previous Button -->
@@ -400,6 +453,7 @@ AuthRole::allowOnly(['registrar']);
                 </nav>
             </div>
         </div>
+        <?php endif; ?>
     </div>
 
     <!-- Update Student Modal -->
@@ -767,7 +821,9 @@ AuthRole::allowOnly(['registrar']);
         <input type="hidden" name="delete_student" value="1">
     </form>
 
-    <?php require_once __DIR__ . '/partials/footer.php'; ?>
+    <?php if (!$printMode): ?>
+        <?php require_once __DIR__ . '/partials/footer.php'; ?>
+    <?php endif; ?>
 
     <!-- ── Vendor scripts ── -->
     <script src="<?= BASE_URL ?>/public/assets/vendor/libs/jquery/jquery.js"></script>
@@ -777,5 +833,8 @@ AuthRole::allowOnly(['registrar']);
     <script src="<?= BASE_URL ?>/public/assets/vendor/js/menu.js"></script>
     <script src="<?= BASE_URL ?>/public/assets/js/main.js"></script>
     <script src="<?= BASE_URL ?>/public/js/registrar/students.js"></script>
+    <?php if ($printMode): ?>
+    <script>window.onload = function(){ window.print(); };</script>
+    <?php endif; ?>
 </body>
 </html>

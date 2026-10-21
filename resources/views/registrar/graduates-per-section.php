@@ -84,6 +84,10 @@ $qs = function () use ($filters) {
         </div>
     <?php endif; ?>
 
+    <div class="text-left">
+        <a href="graduates-master-list.php" class="btn btn-md btn-primary">Back to Master List</a>
+    </div>
+
     <div class="card mt-4">
         <h5 class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
             Graduates &mdash; Per Section

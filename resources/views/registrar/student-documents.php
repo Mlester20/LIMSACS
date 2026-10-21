@@ -248,7 +248,7 @@ $totalDocuments = count($documents);
                     <?php if(!empty($documents)): ?>
                         <?php foreach($documents as $index => $document): ?>
                             <?php
-                                $studentFullName = $document['student_first_name'] . ' ' . $document['student_last_name'];
+                                $studentFullName = $document['student_last_name'] . ', ' . $document['student_first_name'];
                                 [$statusBadgeClass, $statusIcon] = $statusMeta($document['status']);
                             ?>
                             <tr

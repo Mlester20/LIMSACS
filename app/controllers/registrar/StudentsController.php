@@ -112,6 +112,20 @@ require_once __DIR__ . '/../../helpers/csrf.php';
         }
 
         /**
+         * Every matching student (unpaginated, alphabetical by last name) for
+         * the printable Student Data roster.
+         * @param string $gradeLevel
+         * @param string|int $sectionId
+         * @param string $archivedFilter
+         * @param string $gender
+         * @return array
+         */
+        public function allForPrint($gradeLevel = '', $sectionId = '', $archivedFilter = '0', $gender = ''){
+            $students = $this->model->getAllForPrint($gradeLevel, $sectionId, $archivedFilter, $gender);
+            return StudentsService::addFullNames($students);
+        }
+
+        /**
          * Filter dropdown options for the Student Data listing.
          * @return array{grade_levels: array, sections: array}
          */
@@ -300,17 +314,33 @@ require_once __DIR__ . '/../../helpers/csrf.php';
         if(!in_array($genderFilter, ['Male', 'Female'], true)){
             $genderFilter = '';
         }
+        $printMode = isset($_GET['print']);
         $filterOptions = $controller->getFilterOptions();
-        $paginationData = $controller->index($currentPage, $gradeLevelFilter, $sectionFilter, $archivedFilter, $genderFilter);
-        $students = $paginationData['students'];
-        $pagination = [
-            'currentPage' => $paginationData['currentPage'],
-            'totalPages' => $paginationData['totalPages'],
-            'totalRecords' => $paginationData['totalRecords'],
-            'itemsPerPage' => $paginationData['itemsPerPage'],
-            'hasNextPage' => $paginationData['hasNextPage'],
-            'hasPrevPage' => $paginationData['hasPrevPage']
-        ];
+
+        if($printMode){
+            // Print shows every matching student, not just one page -- a roster
+            // larger than 10 students shouldn't get silently cut off.
+            $students = $controller->allForPrint($gradeLevelFilter, $sectionFilter, $archivedFilter, $genderFilter);
+            $pagination = [
+                'currentPage' => 1,
+                'totalPages' => 1,
+                'totalRecords' => count($students),
+                'itemsPerPage' => count($students) ?: 1,
+                'hasNextPage' => false,
+                'hasPrevPage' => false,
+            ];
+        }else{
+            $paginationData = $controller->index($currentPage, $gradeLevelFilter, $sectionFilter, $archivedFilter, $genderFilter);
+            $students = $paginationData['students'];
+            $pagination = [
+                'currentPage' => $paginationData['currentPage'],
+                'totalPages' => $paginationData['totalPages'],
+                'totalRecords' => $paginationData['totalRecords'],
+                'itemsPerPage' => $paginationData['itemsPerPage'],
+                'hasNextPage' => $paginationData['hasNextPage'],
+                'hasPrevPage' => $paginationData['hasPrevPage']
+            ];
+        }
 
         if($_SERVER['REQUEST_METHOD'] === 'POST'){
             if(isset($_POST['enroll_student']) || isset($_POST['edit_student']) || isset($_POST['delete_student']) || isset($_POST['archive_students']) || isset($_POST['unarchive_students'])){

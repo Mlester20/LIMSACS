@@ -207,7 +207,7 @@ try {
                             <?php foreach($enrollments as $index => $enrollment): ?>
                                 <tr>
                                     <td><?php echo $pagination['itemsPerPage'] * ($pagination['currentPage'] - 1) + ($index + 1); ?></td>
-                                    <td><?php echo htmlspecialchars($enrollment['first_name'] . ' ' . $enrollment['last_name']); ?></td>
+                                    <td><?php echo htmlspecialchars($enrollment['last_name'] . ', ' . $enrollment['first_name']); ?></td>
                                     <td><?php echo htmlspecialchars($enrollment['lrn']); ?></td>
                                     <td><?php echo htmlspecialchars($enrollment['school_year']); ?></td>
                                     <td><?php echo htmlspecialchars($enrollment['grade_level']); ?></td>

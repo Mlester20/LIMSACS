@@ -610,7 +610,8 @@ function renderSearchResults(results){
 
     const rows = results.map((student, index) => {
         const lrn = student.lrn || 'N/A';
-        const studentName = `${student.first_name || ''} ${student.middle_name || ''} ${student.last_name || ''}`.trim();
+        const studentName = `${student.last_name || ''}, ${student.first_name || ''}`.trim();
+        const studentNameForConfirm = `${student.first_name || ''} ${student.last_name || ''}`.trim();
         const gender = student.gender
         const age = student.age
         const gradeLevel = student.current_grade_level || 'N/A';
@@ -649,7 +650,7 @@ function renderSearchResults(results){
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item text-danger" href="#" onclick="deleteStudentRow(${student.id}, '${escapeForConfirm(studentName || 'this student')}', '${escapeForConfirm(lrn)}')">
+                                <a class="dropdown-item text-danger" href="#" onclick="deleteStudentRow(${student.id}, '${escapeForConfirm(studentNameForConfirm || 'this student')}', '${escapeForConfirm(lrn)}')">
                                     <i class="bx bx-trash me-2"></i>Delete
                                 </a>
                             </li>

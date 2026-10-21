@@ -83,7 +83,7 @@ if (sourceSectionEl) {
                 }
 
                 studentChecklistBodyEl.innerHTML = students.map(function (s) {
-                    const fullName = [s.first_name, s.middle_name, s.last_name].filter(function (n) { return n && n.trim() !== ''; }).join(' ');
+                    const fullName = (s.last_name || '') + ', ' + (s.first_name || '');
                     return '<tr>' +
                         '<td><input type="checkbox" class="form-check-input student-check" value="' + s.student_id + '" checked></td>' +
                         '<td>' + escapeHtml(fullName) + '</td>' +

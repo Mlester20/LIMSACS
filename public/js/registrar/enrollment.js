@@ -34,7 +34,7 @@ const enrollmentController = {
                                 onclick="enrollmentController.selectStudent(${student.id})"
                             >
                                 <div class="d-flex w-100 justify-content-between">
-                                    <strong>${student.first_name} ${student.last_name}</strong>
+                                    <strong>${student.last_name}, ${student.first_name}</strong>
                                     <small class="text-muted">
                                         LRN: ${student.lrn || 'N/A'}
                                     </small>
@@ -317,7 +317,7 @@ const enrollmentController = {
                         html += `
                             <tr>
                                 <td>${rowNum}</td>
-                                <td>${enrollment.first_name} ${enrollment.last_name}</td>
+                                <td>${enrollment.last_name}, ${enrollment.first_name}</td>
                                 <td>${enrollment.lrn || 'N/A'}</td>
                                 <td>${enrollment.school_year || 'N/A'}</td>
                                 <td>${enrollment.grade_level || 'N/A'}</td>

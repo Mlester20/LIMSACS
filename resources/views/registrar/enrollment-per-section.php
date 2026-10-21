@@ -198,7 +198,7 @@ $qs = function () use ($statusFilter, $gradeLevelFilter, $sectionFilter, $gender
                                     <tr>
                                         <td><?= $i + 1 ?></td>
                                         <td><?= $e($st['lrn']) ?></td>
-                                        <td><?= $e($st['first_name'] . ' ' . $st['last_name']) ?></td>
+                                        <td><?= $e($st['last_name'] . ', ' . $st['first_name']) ?></td>
                                         <td><?= $e($st['gender']) ?></td>
                                         <td><?= $e($st['enrollment_status']) ?></td>
                                     </tr>

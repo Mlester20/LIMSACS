@@ -299,7 +299,7 @@ require_once __DIR__ . '/../Model.php';
                         JOIN {$this->sections} sec ON ah.section_id = sec.id
                         JOIN {$this->school_year} sy ON ah.school_year_id = sy.id
                         WHERE ah.enrollment_status IN ('Enrolled', 'Transferred')
-                        ORDER BY sy.school_year DESC, s.first_name ASC
+                        ORDER BY sy.school_year DESC, s.last_name ASC, s.first_name ASC
                         LIMIT ?";
 
                 $stmt = $this->con->prepare($query);
@@ -359,7 +359,7 @@ require_once __DIR__ . '/../Model.php';
                     SELECT
                         ah.id,
                         s.lrn,
-                        CONCAT(s.first_name, ' ', s.last_name) AS student_full_name,
+                        CONCAT(s.last_name, ', ', s.first_name) AS student_full_name,
                         sy.school_year,
                         ah.grade_level,
                         sec.section_name,

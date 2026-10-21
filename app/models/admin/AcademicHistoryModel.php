@@ -22,7 +22,7 @@ require_once __DIR__ . '/../Model.php';
                         sec.grade_level AS section_grade_level,
                         sy.school_year,
 
-                        CONCAT(s.first_name, ' ', s.last_name) AS student_full_name
+                        CONCAT(s.last_name, ', ', s.first_name) AS student_full_name
                         FROM {$this->academic_history} ah
                         LEFT JOIN {$this->students} s ON ah.student_id = s.id
                         LEFT JOIN {$this->users} u ON ah.enrolled_by = u.id

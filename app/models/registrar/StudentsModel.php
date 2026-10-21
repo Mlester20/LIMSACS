@@ -41,11 +41,48 @@ require_once __DIR__ . '/../Model.php';
                     )
                     LEFT JOIN sections sec ON ah.section_id = sec.id
                     {$where}
-                    ORDER BY s.last_name ASC
+                    ORDER BY s.last_name ASC, s.first_name ASC
                     LIMIT ? OFFSET ?
                 ";
                 $stmt = $this->con->prepare($query);
                 $stmt->bind_param($types . 'ii', ...array_merge($params, [$limit, $offset]));
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                return $result->fetch_all(MYSQLI_ASSOC);
+            }catch(Exception $e){
+                return $e->getMessage();
+            }
+        }
+
+        /**
+         * Every matching student, unpaginated and always alphabetical by last
+         * name -- used for Print, so a roster larger than one page doesn't get
+         * silently cut off.
+         * @param string $gradeLevel Exact grade_level match, or '' for all
+         * @param string|int $sectionId Exact section_id match, or '' for all
+         * @param string $archivedFilter '0' = active only (default), '1' = archived only, 'all' = both
+         * @param string $gender 'Male' | 'Female', or '' for all
+         * @return array
+         */
+        public function getAllForPrint($gradeLevel = '', $sectionId = '', $archivedFilter = '0', $gender = ''){
+            try{
+                [$where, $params, $types] = $this->buildStudentFilter($gradeLevel, $sectionId, $archivedFilter, $gender);
+
+                $query = "
+                    SELECT s.*, ah.grade_level AS current_grade_level, sec.section_name AS current_section_name, ah.enrollment_status AS current_enrollment_status
+                    FROM {$this->students} s
+                    LEFT JOIN academic_history ah ON ah.id = (
+                        SELECT ah2.id FROM academic_history ah2 WHERE ah2.student_id = s.id ORDER BY ah2.id DESC LIMIT 1
+                    )
+                    LEFT JOIN sections sec ON ah.section_id = sec.id
+                    {$where}
+                    ORDER BY s.last_name ASC, s.first_name ASC
+                ";
+                $stmt = $this->con->prepare($query);
+                if($types !== ''){
+                    $stmt->bind_param($types, ...$params);
+                }
                 $stmt->execute();
                 $result = $stmt->get_result();
 

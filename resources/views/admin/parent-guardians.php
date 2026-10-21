@@ -62,7 +62,7 @@ AuthRole::allowOnly(['admin']);
                     <?php foreach ($parent_guardians as $pg): ?>
                         <tr>
                             <td><?= $rowNumber++ ?></td>
-                            <td><?= htmlspecialchars(trim(($pg['student_first_name'] ?? '') . ' ' . ($pg['student_last_name'] ?? ''))) ?></td>
+                            <td><?= htmlspecialchars(trim(($pg['student_last_name'] ?? '') . ', ' . ($pg['student_first_name'] ?? ''), ', ')) ?></td>
                             <td><?= htmlspecialchars($pg['father_name'] ?? '') ?></td>
                             <td><?= htmlspecialchars($pg['father_contact'] ?? '') ?></td>
                             <td><?= htmlspecialchars($pg['mother_name'] ?? '') ?></td>

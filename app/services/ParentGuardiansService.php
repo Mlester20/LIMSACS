@@ -41,7 +41,7 @@ require_once __DIR__ . '/../models/Model.php';
                         s.first_name LIKE ? OR
                         s.last_name LIKE ? OR
                         s.lrn LIKE ?
-                    ORDER BY s.first_name ASC, s.last_name ASC";
+                    ORDER BY s.last_name ASC, s.first_name ASC";
 
             $stmt = null;
             $results = [];

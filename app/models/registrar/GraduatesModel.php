@@ -95,7 +95,7 @@ require_once __DIR__ . '/../Model.php';
                         g.remarks,
                         s.lrn,
                         s.gender,
-                        CONCAT(s.first_name, ' ', s.last_name) AS student_full_name,
+                        CONCAT(s.last_name, ', ', s.first_name) AS student_full_name,
                         ah.grade_level,
                         ah.enrollment_status,
                         ah.school_year_id,
@@ -160,7 +160,7 @@ require_once __DIR__ . '/../Model.php';
 
                 $query = "SELECT
                         s.lrn,
-                        CONCAT(s.first_name, ' ', s.last_name) AS student_full_name,
+                        CONCAT(s.last_name, ', ', s.first_name) AS student_full_name,
                         s.gender,
                         ah.grade_level,
                         ah.enrollment_status,
@@ -204,7 +204,7 @@ require_once __DIR__ . '/../Model.php';
 
                 $query = "SELECT
                         s.lrn,
-                        CONCAT(s.first_name, ' ', s.last_name) AS student_full_name,
+                        CONCAT(s.last_name, ', ', s.first_name) AS student_full_name,
                         s.gender,
                         ah.grade_level,
                         ah.enrollment_status,

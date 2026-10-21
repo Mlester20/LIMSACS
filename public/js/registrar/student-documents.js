@@ -181,9 +181,7 @@ const addSearchStudents = debounce(function() {
             if (results.length > 0) {
                 let html = '';
                 results.forEach(student => {
-                    const fullName = [student.first_name, student.middle_name, student.last_name]
-                        .filter(n => n && n.trim() !== '')
-                        .join(' ');
+                    const fullName = student.last_name + ', ' + student.first_name;
                     html += `
                         <a href="#" class="list-group-item list-group-item-action px-2 py-1" 
                            onclick="selectAddStudent({
@@ -217,9 +215,7 @@ document.getElementById('addStudentSearch').addEventListener('keyup', addSearchS
 
 // Select student from add search results
 function selectAddStudent(student) {
-    const fullName = [student.first_name, student.middle_name, student.last_name]
-        .filter(n => n && n.trim() !== '')
-        .join(' ');
+    const fullName = student.last_name + ', ' + student.first_name;
     
     document.getElementById('addStudentSearch').value = fullName + ' (LRN: ' + student.lrn + ')';
     document.getElementById('add_student_id').value = student.id;
@@ -333,9 +329,7 @@ const editSearchStudents = debounce(function() {
             if (results.length > 0) {
                 let html = '';
                 results.forEach(student => {
-                    const fullName = [student.first_name, student.middle_name, student.last_name]
-                        .filter(n => n && n.trim() !== '')
-                        .join(' ');
+                    const fullName = student.last_name + ', ' + student.first_name;
                     html += `
                         <a href="#" class="list-group-item list-group-item-action px-2 py-1" 
                            onclick="selectEditStudent({
@@ -369,9 +363,7 @@ document.getElementById('editStudentSearch').addEventListener('keyup', editSearc
 
 // Select student from edit search results
 function selectEditStudent(student) {
-    const fullName = [student.first_name, student.middle_name, student.last_name]
-        .filter(n => n && n.trim() !== '')
-        .join(' ');
+    const fullName = student.last_name + ', ' + student.first_name;
     
     document.getElementById('editStudentSearch').value = fullName + ' (LRN: ' + student.lrn + ')';
     document.getElementById('edit_student_id').value = student.id;
@@ -515,9 +507,7 @@ function editDocument(documentData) {
     }
 
     // Pre-fill student search box with current student info
-    const fullName = [documentData.student_first_name, documentData.student_last_name]
-        .filter(n => n && n.trim() !== '')
-        .join(' ');
+    const fullName = (documentData.student_last_name || '') + ', ' + (documentData.student_first_name || '');
     document.getElementById('editStudentSearch').value = fullName;
     document.getElementById('editStudentResults').style.display = 'none';
 }
