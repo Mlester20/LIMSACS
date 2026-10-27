@@ -294,34 +294,36 @@ $totalDocuments = count($documents);
                                             ? BASE_URL . '/resources/views/registrar/docx-preview.php?file=' . urlencode(basename((string) $document['file_path']))
                                             : BASE_URL . $fileUrl($document['file_path']);
                                     ?>
-                                    <a
-                                        href="<?php echo htmlspecialchars($viewHref); ?>"
-                                        target="_blank"
-                                        class="btn btn-sm btn-outline-secondary"
-                                        title="View File"
-                                        aria-label="View"
-                                    >
-                                        <i class="bx bx-show"></i>
-                                    </a>
-                                    <button
-                                        class="btn btn-sm btn-outline-primary"
-                                        title="Print Document"
-                                        aria-label="Print Document"
-                                        onclick="printStudentDocument('<?php echo htmlspecialchars(BASE_URL . $fileUrl($document['file_path']), ENT_QUOTES); ?>', '<?php echo htmlspecialchars($docExt, ENT_QUOTES); ?>')"
-                                    >
-                                        <i class="bx bx-printer"></i>
-                                    </button>
-                                    <?php if($document['status'] !== 'Verified'): ?>
-                                        <button class="btn btn-sm btn-success" title="Mark as Verified" aria-label="Mark as Verified" onclick="verifyDocument(<?php echo $document['id']; ?>)">
-                                            <i class="bx bx-check-double"></i>
+                                    <div class="btn-group btn-group-sm" role="group" aria-label="Document actions">
+                                        <a
+                                            href="<?php echo htmlspecialchars($viewHref); ?>"
+                                            target="_blank"
+                                            class="btn btn-outline-secondary"
+                                            title="View File"
+                                            aria-label="View"
+                                        >
+                                            <i class="bx bx-show"></i>
+                                        </a>
+                                        <button
+                                            class="btn btn-outline-primary"
+                                            title="Print Document"
+                                            aria-label="Print Document"
+                                            onclick="printStudentDocument('<?php echo htmlspecialchars(BASE_URL . $fileUrl($document['file_path']), ENT_QUOTES); ?>', '<?php echo htmlspecialchars($docExt, ENT_QUOTES); ?>')"
+                                        >
+                                            <i class="bx bx-printer"></i>
                                         </button>
-                                    <?php endif; ?>
-                                    <button class="btn btn-sm btn-warning" title="Edit" aria-label="Edit" data-bs-toggle="modal" data-bs-target="#editDocumentModal" onclick="editDocument(<?php echo htmlspecialchars(json_encode($document)); ?>)">
-                                        <i class="bx bx-edit"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-danger" title="Delete" aria-label="Delete" onclick="deleteDocument(<?php echo $document['id']; ?>)">
-                                        <i class="bx bx-trash"></i>
-                                    </button>
+                                        <?php if($document['status'] !== 'Verified'): ?>
+                                            <button class="btn btn-success" title="Mark as Verified" aria-label="Mark as Verified" onclick="verifyDocument(<?php echo $document['id']; ?>)">
+                                                <i class="bx bx-check-double"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                        <button class="btn btn-warning" title="Edit" aria-label="Edit" data-bs-toggle="modal" data-bs-target="#editDocumentModal" onclick="editDocument(<?php echo htmlspecialchars(json_encode($document)); ?>)">
+                                            <i class="bx bx-edit"></i>
+                                        </button>
+                                        <button class="btn btn-danger" title="Delete" aria-label="Delete" onclick="deleteDocument(<?php echo $document['id']; ?>)">
+                                            <i class="bx bx-trash"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

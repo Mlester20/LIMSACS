@@ -51,6 +51,11 @@ function applyAdviserAvailability(currentSectionId, currentAdviserId) {
     });
 }
 
+function resetTeacherPasswordModal(id, full_name) {
+    document.getElementById('reset_teacher_id').value = id;
+    document.getElementById('reset_teacher_name').textContent = full_name;
+}
+
 function viewSection(id, section_name, grade_level, adviser_name, school_year, total_students, max_capacity) {
     document.getElementById('view_section_name').textContent = section_name;
     document.getElementById('view_section_grade_level').textContent = grade_level;
@@ -338,3 +343,32 @@ function initializeSearch() {
 }
 
 document.addEventListener('DOMContentLoaded', initializeSearch);
+
+document.addEventListener('DOMContentLoaded', function () {
+    const resetForm = document.getElementById('resetTeacherPasswordForm');
+    const confirmInput = document.getElementById('confirm_teacher_password');
+
+    if (resetForm) {
+        resetForm.addEventListener('submit', function (e) {
+            const newPassword = document.getElementById('new_teacher_password').value;
+            confirmInput.setCustomValidity(
+                newPassword !== confirmInput.value ? 'Passwords do not match.' : ''
+            );
+
+            if (!resetForm.checkValidity()) {
+                e.preventDefault();
+                resetForm.classList.add('was-validated');
+            }
+        });
+
+        confirmInput.addEventListener('input', function () {
+            confirmInput.setCustomValidity('');
+        });
+    }
+
+    document.getElementById('resetTeacherPasswordModal')?.addEventListener('hidden.bs.modal', function () {
+        resetForm.reset();
+        resetForm.classList.remove('was-validated');
+        confirmInput.setCustomValidity('');
+    });
+});
