@@ -54,6 +54,7 @@ $gradeLevels = SectionsController::GRADE_LEVELS;
         </div>
       </div>
       <div class="col-md-6 text-end mt-2 mt-md-0">
+        <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#manageTeacherAccountsModal">Manage Teacher Accounts</button>
         <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addTeacherModal">Add Teacher</button>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSectionModal">Add Section</button>
       </div>
@@ -71,8 +72,8 @@ $gradeLevels = SectionsController::GRADE_LEVELS;
             </div>
             <div class="modal-body">
               <p class="text-muted small">
-                Adds a teacher so they can be selected as a section adviser. This does
-                <strong>not</strong> create a login account — teachers don't sign in to the system.
+                Adds a teacher and their login account. They'll use this email and password
+                to sign in to their own Teacher Portal once assigned as a section adviser.
               </p>
               <div class="mb-3">
                 <label for="teacher_full_name" class="form-label">Full Name</label>
@@ -96,10 +97,122 @@ $gradeLevels = SectionsController::GRADE_LEVELS;
                   required
                 >
               </div>
+              <div class="mb-3">
+                <label for="teacher_password" class="form-label">Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="teacher_password"
+                  name="password"
+                  placeholder="At least 8 characters"
+                  minlength="8"
+                  required
+                >
+              </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
               <button type="submit" class="btn btn-primary" name="create_teacher">Add Teacher</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- manage teacher accounts modal -->
+    <div class="modal fade" id="manageTeacherAccountsModal" tabindex="-1" aria-labelledby="manageTeacherAccountsModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="manageTeacherAccountsModalLabel">Manage Teacher Accounts</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th class="text-end">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php if(!empty($allTeachers)): ?>
+                    <?php foreach($allTeachers as $teacher): ?>
+                      <tr>
+                        <td><?php echo htmlspecialchars($teacher['full_name']); ?></td>
+                        <td><?php echo htmlspecialchars($teacher['email']); ?></td>
+                        <td class="text-end">
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-outline-warning"
+                            data-bs-toggle="modal"
+                            data-bs-target="#resetTeacherPasswordModal"
+                            onclick="resetTeacherPasswordModal(<?php echo (int) $teacher['id']; ?>, '<?php echo htmlspecialchars($teacher['full_name'], ENT_QUOTES); ?>')"
+                          >
+                            Reset Password
+                          </button>
+                        </td>
+                      </tr>
+                    <?php endforeach; ?>
+                  <?php else: ?>
+                    <tr>
+                      <td colspan="3" class="text-center text-muted py-3">No teacher accounts yet.</td>
+                    </tr>
+                  <?php endif; ?>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- reset teacher password modal -->
+    <div class="modal fade" id="resetTeacherPasswordModal" tabindex="-1" aria-labelledby="resetTeacherPasswordModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form id="resetTeacherPasswordForm" action="<?= BASE_URL ?>/app/controllers/registrar/TeachersController.php" method="post">
+            <?php echo Csrf::field(); ?>
+            <input type="hidden" id="reset_teacher_id" name="id">
+            <div class="modal-header">
+              <h5 class="modal-title" id="resetTeacherPasswordModalLabel">Reset Password</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p class="text-muted small">
+                Set a new password for <strong id="reset_teacher_name"></strong>.
+                They will need to use this new password the next time they log in.
+              </p>
+              <div class="mb-3">
+                <label for="new_teacher_password" class="form-label">New Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="new_teacher_password"
+                  name="new_password"
+                  placeholder="At least 8 characters"
+                  minlength="8"
+                  required
+                >
+              </div>
+              <div class="mb-3">
+                <label for="confirm_teacher_password" class="form-label">Confirm Password</label>
+                <input
+                  type="password"
+                  class="form-control"
+                  id="confirm_teacher_password"
+                  placeholder="Re-enter new password"
+                  minlength="8"
+                  required
+                >
+                <div class="invalid-feedback" id="confirm_teacher_password_feedback">Passwords do not match.</div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary" name="reset_teacher_password">Reset Password</button>
             </div>
           </form>
         </div>

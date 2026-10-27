@@ -13,6 +13,51 @@
             </div>
           </div>
           <ul class="navbar-nav flex-row align-items-center ms-auto">
+            <?php
+              require_once __DIR__ . '/../../../../app/models/NotificationsModel.php';
+              require_once __DIR__ . '/../../../../app/helpers/timeAgo.php';
+              require_once __DIR__ . '/../../../../app/helpers/csrf.php';
+              $notificationsModel = new NotificationsModel($con);
+              $recentNotifications = $notificationsModel->getRecentForUser($_SESSION['id'] ?? 0, 10);
+              $unreadNotificationCount = $notificationsModel->countUnread($_SESSION['id'] ?? 0);
+            ?>
+            <li class="nav-item dropdown" id="notificationBell" data-csrf="<?php echo htmlspecialchars(Csrf::token()); ?>">
+              <a class="nav-link dropdown-toggle hide-arrow position-relative" href="javascript:void(0);" data-bs-toggle="dropdown">
+                <i class="bx bx-bell bx-sm"></i>
+                <span
+                  id="notificationBadge"
+                  class="badge bg-danger rounded-pill position-absolute top-0 end-0 <?php echo $unreadNotificationCount > 0 ? '' : 'd-none'; ?>"
+                  style="font-size: 0.65rem; transform: translate(10%, -10%);"
+                ><?php echo $unreadNotificationCount; ?></span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" style="width: 340px; max-height: 420px; overflow-y: auto;">
+                <li class="dropdown-header d-flex justify-content-between align-items-center">
+                  <h6 class="mb-0">Notifications</h6>
+                </li>
+                <li><div class="dropdown-divider"></div></li>
+                <?php if(empty($recentNotifications)): ?>
+                  <li class="text-center text-muted py-4 small">
+                    <i class="bx bx-bell-off fs-3 d-block mb-1"></i>
+                    No notifications yet.
+                  </li>
+                <?php else: ?>
+                  <?php foreach($recentNotifications as $notif): ?>
+                    <li>
+                      <a class="dropdown-item <?php echo !$notif['is_read'] ? 'bg-light' : ''; ?>" href="<?php echo htmlspecialchars($notif['link'] ?: '#'); ?>">
+                        <div class="d-flex align-items-start">
+                          <i class="bx bx-file-blank text-primary me-2 mt-1"></i>
+                          <div class="flex-grow-1">
+                            <span class="fw-semibold small d-block"><?php echo htmlspecialchars($notif['title']); ?></span>
+                            <span class="text-muted small d-block text-wrap"><?php echo htmlspecialchars($notif['message']); ?></span>
+                            <span class="text-muted" style="font-size: 0.7rem;"><?php echo timeAgo($notif['created_at']); ?></span>
+                          </div>
+                        </div>
+                      </a>
+                    </li>
+                  <?php endforeach; ?>
+                <?php endif; ?>
+              </ul>
+            </li>
             <li class="nav-item navbar-dropdown dropdown-user dropdown">
               <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                 <div class="avatar avatar-online">
@@ -63,6 +108,26 @@
         </div>
       </nav>
       <!-- / Navbar -->
+
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          var bell = document.getElementById('notificationBell');
+          var badge = document.getElementById('notificationBadge');
+          if (!bell || !badge) return;
+
+          bell.addEventListener('shown.bs.dropdown', function () {
+            if (badge.classList.contains('d-none')) return;
+            badge.classList.add('d-none');
+
+            fetch('<?= BASE_URL ?>/app/controllers/NotificationsController.php', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: 'mark_all_read=1&csrf_token=' + encodeURIComponent(bell.dataset.csrf),
+              credentials: 'same-origin'
+            }).catch(function () {});
+          });
+        });
+      </script>
 
       <!-- Content wrapper -->
       <div class="content-wrapper">

@@ -32,6 +32,46 @@ require_once __DIR__ . '/../Model.php';
             }
         }
 
+        /**
+         * All documents belonging to a specific set of students -- used by the
+         * teacher's Documents page, scoped to the students in their advised
+         * section, so a teacher can never see another section's documents.
+         * @param int[] $studentIds
+         * @return array
+         */
+        public function getByStudentIds(array $studentIds){
+            if(empty($studentIds)){
+                return [];
+            }
+            try{
+                $placeholders = implode(',', array_fill(0, count($studentIds), '?'));
+                $query = "SELECT
+                    sd.*,
+                    s.first_name as student_first_name,
+                    s.last_name as student_last_name,
+                    s.lrn,
+                    dt.document_name as document_type_name,
+                    u.full_name as uploaded_by_name,
+                    sd.uploaded_at
+                    FROM {$this->student_documents} sd
+                    LEFT JOIN {$this->students} s ON sd.student_id = s.id
+                    LEFT JOIN {$this->document_types} dt ON sd.document_type_id = dt.id
+                    LEFT JOIN {$this->user} u ON sd.uploaded_by = u.id
+                    WHERE sd.student_id IN ({$placeholders})
+                    ORDER BY s.last_name ASC, s.first_name ASC, sd.uploaded_at DESC
+                ";
+                $stmt = $this->con->prepare($query);
+                $types = str_repeat('i', count($studentIds));
+                $stmt->bind_param($types, ...$studentIds);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                return $result->fetch_all(MYSQLI_ASSOC);
+            }catch(Exception $e){
+                error_log("Error " . $e->getMessage());
+                return [];
+            }
+        }
+
         public function getPaginated($limit, $offset, $status = ''){
             try{
                 $where = $status !== '' ? 'WHERE sd.status = ?' : '';

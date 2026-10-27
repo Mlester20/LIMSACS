@@ -12,9 +12,9 @@ require_once __DIR__ . '/../../models/admin/UsersModel.php';
 
     /**
      * Lets a registrar add a teacher directly from the Sections page, so they don't
-     * need an admin login just to get a new adviser into the system. Teacher records
-     * created here are adviser-only data — never used to log in (same "no password,
-     * role forced server-side" design as the Admin Users module's own teacher path).
+     * need an admin login just to get a new adviser into the system. The registrar
+     * sets the teacher's password directly here (and can reset it later) — teachers
+     * don't get a self-service "forgot password" flow.
      */
     class TeachersController{
         private $con;
@@ -38,6 +38,9 @@ require_once __DIR__ . '/../../models/admin/UsersModel.php';
                 if(empty($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL)){
                     $errors[] = 'A valid email address is required.';
                 }
+                if(strlen($data['password'] ?? '') < 8){
+                    $errors[] = 'Password must be at least 8 characters.';
+                }
                 if(!empty($errors)){
                     FlashMessage::setFlash('error', implode(' ', $errors));
                     header('Location: ' . $redirectTo);
@@ -47,9 +50,7 @@ require_once __DIR__ . '/../../models/admin/UsersModel.php';
                 $payload = [
                     'full_name' => trim($data['full_name']),
                     'email' => trim($data['email']),
-                    // Random, never-disclosed hash: satisfies the NOT NULL column but
-                    // can never be guessed/used to log in — this role is data-only.
-                    'password' => hashPassword(bin2hex(random_bytes(32))),
+                    'password' => hashPassword($data['password']),
                     'role' => 'teacher', // never trust client input for this
                     'profile_picture' => '',
                 ];
@@ -74,6 +75,39 @@ require_once __DIR__ . '/../../models/admin/UsersModel.php';
                 ErrorHandler::redirect($e, $redirectTo, 'Failed to add teacher. Please try again.', 'TeachersController::create');
             }
         }
+
+        public function resetPassword($id, $newPassword){
+            $redirectTo = BASE_URL . '/resources/views/registrar/sections.php';
+
+            try{
+                if(strlen($newPassword ?? '') < 8){
+                    FlashMessage::setFlash('error', 'Password must be at least 8 characters.');
+                    header('Location: ' . $redirectTo);
+                    exit();
+                }
+
+                $hashed = hashPassword($newPassword);
+
+                if($this->model->resetPassword($id, $hashed)){
+                    $this->auditLogs->log(
+                        $_SESSION['id'] ?? null,
+                        $_SESSION['role'] ?? 'unknown',
+                        'RESET TEACHER PASSWORD',
+                        'USERS',
+                        $id,
+                        'users',
+                        ($_SESSION['full_name'] ?? 'Registrar') . ' reset the password for teacher ID: ' . $id,
+                    );
+                    FlashMessage::setFlash('success', 'Teacher password reset successfully.');
+                }else{
+                    FlashMessage::setFlash('error', 'Failed to reset password. Please try again.');
+                }
+                header('Location: ' . $redirectTo);
+                exit();
+            }catch(Exception $e){
+                ErrorHandler::redirect($e, $redirectTo, 'Failed to reset password. Please try again.', 'TeachersController::resetPassword');
+            }
+        }
     }
 
 //=================================== bootstrap ====================================//
@@ -87,7 +121,13 @@ try{
         $controller->create([
             'full_name' => $_POST['full_name'] ?? '',
             'email' => $_POST['email'] ?? '',
+            'password' => $_POST['password'] ?? '',
         ]);
+    }
+
+    if($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reset_teacher_password'])){
+        Csrf::requireValidOnPost(BASE_URL . '/resources/views/registrar/sections.php');
+        $controller->resetPassword($_POST['id'] ?? null, $_POST['new_password'] ?? '');
     }
 }catch(Exception $e){
     ErrorHandler::log($e, 'TeachersController (bootstrap)');

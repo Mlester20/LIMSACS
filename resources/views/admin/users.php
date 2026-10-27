@@ -163,9 +163,6 @@ AuthRole::allowOnly(['admin']);
                                         <i class="bx bx-hide"></i>
                                     </button>
                                 </div>
-                                <small class="text-muted d-none" id="passwordNotNeededNote">
-                                    Not needed — teacher accounts are only used as section advisers and don't log in.
-                                </small>
                             </div>
 
                             <!-- Role -->

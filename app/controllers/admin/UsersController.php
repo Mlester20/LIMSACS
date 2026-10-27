@@ -68,23 +68,14 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher'];
 
         public function create($data){
             try{
-                // Teacher records are adviser-only data now — they're never used to log in,
-                // so no password is collected or required for them.
-                $isTeacher = ($data['role'] ?? '') === 'teacher';
-
-                $errors = $this->validate($data, !$isTeacher);
+                $errors = $this->validate($data, true);
                 if(!empty($errors)){
                     FlashMessage::setFlash('error', implode(' ', $errors));
                     header('Location: ' . BASE_URL . '/resources/views/admin/users.php');
                     exit();
                 }
 
-                // For teachers: a random, never-disclosed hash satisfies the NOT NULL column
-                // but can never be guessed/used to actually log in. Everyone else gets their
-                // chosen password, hashed as usual.
-                $data['password'] = $isTeacher
-                    ? hashPassword(bin2hex(random_bytes(32)))
-                    : hashPassword($data['password']);
+                $data['password'] = hashPassword($data['password']);
 
                 if($this->model->create($data)){
                     $this->auditLogs->log(
@@ -219,7 +210,7 @@ const VALID_USER_ROLES = ['admin', 'registrar', 'teacher'];
                     [
                         'full_name' => $_POST['full_name'],
                         'email' => $_POST['email'],
-                        'password' => $_POST['password'] ?? '', // omitted when role=teacher (field disabled client-side)
+                        'password' => $_POST['password'] ?? '',
                         'role' => $_POST['role'],
                         'profile_picture' => $_POST['profile_picture'] ?? ''
                     ]

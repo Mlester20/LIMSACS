@@ -65,6 +65,7 @@ require_once __DIR__ . '/../helpers/auditLogs.php';
             $routes = [
                 "admin" => BASE_URL . "/resources/views/admin/dashboard.php",
                 "registrar" => BASE_URL . "/resources/views/registrar/home.php",
+                "teacher" => BASE_URL . "/resources/views/teacher/home.php",
                 //if role is not found (or has no dashboard, e.g. teacher), redirect to index
                 "default" => BASE_URL . "/index.php"
             ];
